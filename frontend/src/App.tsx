@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth } from './lib/context/AuthContext';
 import SplashScreen from './screens/splash';
 import AuthNavigator from './screens/authentication/AuthNavigator';
 import ProfileNavigator from './screens/drawer/ProfileNavigator';
 
 function AppContent() {
-  const { isLoggedIn, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return <SplashScreen />;
@@ -16,7 +16,7 @@ function AppContent() {
   return (
     <NavigationContainer>
       <StatusBar style="auto" />
-      {isLoggedIn ? <ProfileNavigator /> : <AuthNavigator />}
+      {user ? <ProfileNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

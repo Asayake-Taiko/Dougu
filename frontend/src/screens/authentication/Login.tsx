@@ -1,53 +1,42 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useAuth } from '../../context/AuthContext';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { useAuth } from '../../lib/context/AuthContext';
+import { AuthStyles } from '../../styles/AuthStyles';
+import PasswordInput from '../../components/PasswordInput';
 
 export default function LoginScreen({ navigation }: any) {
-    const { login } = useAuth();
+    const { login, error } = useAuth();
+    const [username, onChangeUsername] = React.useState("");
+    const [password, onChangePassword] = React.useState("");
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Login</Text>
-            <TouchableOpacity style={styles.button} onPress={login}>
-                <Text style={styles.buttonText}>Login</Text>
+        <View style={AuthStyles.container}>
+            <Text style={AuthStyles.header}>Login</Text>
+            <TextInput
+                style={AuthStyles.input}
+                onChangeText={onChangeUsername}
+                value={username}
+                placeholder="email"
+                keyboardType="email-address"
+            />
+            <PasswordInput
+                password={password}
+                setPassword={onChangePassword}
+                placeHolder="password"
+            />
+            <TouchableOpacity
+                style={AuthStyles.button}
+                onPress={() => login({ email: username, password })}
+            >
+                <Text style={AuthStyles.btnText}>Login</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
-                <Text style={styles.link}>Create Account</Text>
+                <Text style={AuthStyles.link}>Create Account</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('ResetPassword')}>
-                <Text style={styles.link}>Reset Password</Text>
+                <Text style={AuthStyles.link}>Forgot Password?</Text>
             </TouchableOpacity>
+            {error && <Text style={AuthStyles.error}>{error}</Text>}
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 30,
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        paddingHorizontal: 40,
-        paddingVertical: 12,
-        borderRadius: 8,
-        marginBottom: 20,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    link: {
-        color: '#007AFF',
-        marginTop: 10,
-    },
-});

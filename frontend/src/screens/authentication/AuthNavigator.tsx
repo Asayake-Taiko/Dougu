@@ -12,7 +12,7 @@ export default function AuthNavigator() {
         <Stack.Navigator
             initialRouteName="Login"
             screenOptions={{
-                headerShown: true,
+                cardStyle: { backgroundColor: '#fff' },
             }}
         >
             <Stack.Screen name="Login" component={LoginScreen} />

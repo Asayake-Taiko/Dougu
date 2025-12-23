@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { AuthStyles } from '../../styles/AuthStyles';
 import { useAuth } from '../../lib/context/AuthContext';
@@ -6,11 +6,24 @@ import PasswordInput from '../../components/PasswordInput';
 
 
 export default function CreateAccountScreen() {
-    const [email, onChangeEmail] = React.useState("");
-    const [first, onChangeFirst] = React.useState("");
-    const [last, onChangeLast] = React.useState("");
-    const [password, onChangePassword] = React.useState("");
-    const { register, error } = useAuth();
+    const [email, onChangeEmail] = useState("");
+    const [first, onChangeFirst] = useState("");
+    const [last, onChangeLast] = useState("");
+    const [password, onChangePassword] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const { register } = useAuth();
+
+    async function handleRegister() {
+        try {
+            await register(email, first + " " + last, password);
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('An unexpected error occurred');
+            }
+        }
+    }
 
     return (
         <View style={AuthStyles.container}>
@@ -43,7 +56,7 @@ export default function CreateAccountScreen() {
                 setPassword={onChangePassword}
                 placeHolder="password"
             />
-            <TouchableOpacity style={AuthStyles.button} onPress={() => register({ email, name: first + " " + last, password })}>
+            <TouchableOpacity style={AuthStyles.button} onPress={handleRegister}>
                 <Text style={AuthStyles.btnText}>Create</Text>
             </TouchableOpacity>
             {error && <Text style={AuthStyles.error}>{error}</Text>}

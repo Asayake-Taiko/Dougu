@@ -63,4 +63,9 @@ export const AuthStyles = StyleSheet.create({
         width: "100%",
         marginTop: "15%",
     },
+    subtitle: {
+        fontSize: Typography.fontSize.md,
+        color: Colors.dark,
+        textAlign: "center",
+    }
 });

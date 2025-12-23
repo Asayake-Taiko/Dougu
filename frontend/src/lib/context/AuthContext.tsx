@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { LoginCredentials, RegisterData, UserType } from '../../types/auth';
-import { mockLogin, mockRegister } from '../mocks/auth';
+import { UserType } from '../../types/auth';
+import { mockLogin, mockRegister, mockSendCode, mockResetPassword } from '../mocks/auth';
 
 interface AuthContextType {
-    isLoading: boolean;
-    login: (credentials: LoginCredentials) => Promise<void>;
-    register: (data: RegisterData) => Promise<void>;
-    logout: () => void;
-    error: string | null;
     user: UserType | null;
+    login: (email: string, password: string) => Promise<void>;
+    register: (email: string, name: string, password: string) => Promise<void>;
+    logout: () => void;
+    resetPassword: (email: string, code: string, new_password: string) => Promise<void>;
+    sendCode: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,53 +26,56 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    const [error, setError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
     const [user, setUser] = useState<UserType | null>(null);
     const IS_DEV = process.env.EXPO_PUBLIC_IS_DEV === 'true';
 
-    const login = async (credentials: LoginCredentials) => {
-        try {
-            setIsLoading(true);
-            let res;
-            if (IS_DEV) {
-                res = await mockLogin(credentials);
-            } else {
-                // Here you would call the real login API
-                throw new Error('Real login not implemented');
-            }
-            setUser(res.user);
-            setIsLoading(false);
-        } catch (err) {
-            setIsLoading(false);
-            setError((err as Error).message);
+    const login = async (email: string, password: string) => {
+        let res;
+        if (IS_DEV) {
+            res = await mockLogin(email, password);
+        } else {
+            // Here you would call the real login API
+            throw new Error('Real login not implemented');
         }
+        setUser(res.user);
     };
 
     const logout = () => {
         setUser(null);
     };
 
-    const register = async (data: RegisterData) => {
-        try {
-            setIsLoading(true);
-            let res;
-            if (IS_DEV) {
-                res = await mockRegister(data);
-            } else {
-                // Here you would call the real register API
-                throw new Error('Real register not implemented');
-            }
-            setUser(res.user);
-            setIsLoading(false);
-        } catch (err) {
-            setIsLoading(false);
-            setError((err as Error).message);
+    const register = async (email: string, name: string, password: string) => {
+        let res;
+        if (IS_DEV) {
+            res = await mockRegister(email, name, password);
+        } else {
+            // Here you would call the real register API
+            throw new Error('Real register not implemented');
         }
+        setUser(res.user);
     }
 
+    const sendCode = async (email: string) => {
+        if (IS_DEV) {
+            // Simulate sending code in dev mode
+            await mockSendCode(email);
+        } else {
+            // Here you would call the real send code API
+            throw new Error('Real send code not implemented');
+        }
+    };
+
+    const resetPassword = async (password: string, confirmPassword: string, code: string) => {
+        if (IS_DEV) {
+            await mockResetPassword(password, confirmPassword, code);
+        } else {
+            // Here you would call the real reset password API
+            throw new Error('Real reset password not implemented');
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ isLoading, error, user, login, logout, register }}>
+        <AuthContext.Provider value={{ user, login, logout, register, resetPassword, sendCode }}>
             {children}
         </AuthContext.Provider>
     );

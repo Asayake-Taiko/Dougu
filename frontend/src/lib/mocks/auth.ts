@@ -1,8 +1,9 @@
 import { UserType } from '../../types/auth';
-import { LoginCredentials, RegisterData, AuthResponse } from '../../types/auth';
+import { AuthResponse } from '../../types/auth';
 
 interface FakeUser extends UserType {
-    password: string;
+    password: string;           // we don't store passwords like this in real apps!
+    code: string;               // confirmation code for resetting password
 }
 
 const fakeUsers: Record<string, FakeUser> = {
@@ -11,18 +12,28 @@ const fakeUsers: Record<string, FakeUser> = {
         name: 'John Doe',
         email: 'johndoe@example.com',
         password: 'password123',
+        code: '000000',
     },
     'janesmith@example.com': {
         id: '124',
         name: 'Jane Smith',
         email: 'janesmith@example.com',
         password: 'password456',
+        code: '111111',
+    },
+    'e@gmail.com': {
+        id: '125',
+        name: 'Test User',
+        email: 'e@gmail.com',
+        password: 'password',
+        code: '222222',
     },
 }
 
-export const mockLogin = async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const fakeUser = fakeUsers[credentials.email.toLowerCase()];
-    if (fakeUser && credentials.password === fakeUser.password) {
+export const mockLogin = async (email: string, password: string): Promise<AuthResponse> => {
+    email = email.toLowerCase();
+    const fakeUser = fakeUsers[email.toLowerCase()];
+    if (fakeUser && password === fakeUser.password) {
         const { password, ...user } = fakeUser; // Remove password from response
         return {
             user,
@@ -33,20 +44,39 @@ export const mockLogin = async (credentials: LoginCredentials): Promise<AuthResp
     }
 };
 
-export const mockRegister = async (data: RegisterData): Promise<AuthResponse> => {
-    if (fakeUsers[data.email]) {
+export const mockRegister = async (email: string, name: string, password: string): Promise<AuthResponse> => {
+    email = email.toLowerCase();
+    if (fakeUsers[email]) {
         throw new Error('User already exists');
     }
     const newUser: FakeUser = {
         id: (Object.keys(fakeUsers).length + 123).toString(),
-        name: data.name,
-        email: data.email,
-        password: data.password,
+        name: name,
+        email: email,
+        password: password,
+        code: '333333',
     };
-    fakeUsers[data.email] = newUser;
-    const { password, ...user } = newUser; // Remove password from response
+    fakeUsers[email] = newUser;
+    const { password: _password, ...user } = newUser; // Remove password from response
     return {
         user,
         token: 'fake-jwt-token-' + user.id,
     } as AuthResponse;
+};
+
+export const mockSendCode = async (email: string): Promise<void> => {
+    email = email.toLowerCase();
+    if (!fakeUsers[email]) {
+        throw new Error('Email not found');
+    }
+    return;
+};
+
+export const mockResetPassword = async (email: string, code: string, new_password: string): Promise<void> => {
+    const user = fakeUsers[email];
+    if (!user) {
+        throw new Error('Email not found');
+    }
+    user.password = new_password;
+    return;
 };

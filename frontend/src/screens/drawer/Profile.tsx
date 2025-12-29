@@ -13,6 +13,7 @@ import DeleteOverlay from '../../components/drawer/DeleteOverlay';
 import { PressableOpacity } from '../../components/PressableOpacity';
 import { useModal } from '../../lib/context/ModalContext';
 import { useSpinner } from '../../lib/context/SpinnerContext';
+import { Logger } from '../../lib/Logger';
 
 
 export default function ProfileScreen() {
@@ -31,7 +32,7 @@ export default function ProfileScreen() {
             showSpinner();
             await logout();
         } catch (error) {
-            console.log(error);
+            Logger.error(error);
             setMessage("Logout failed");
         } finally {
             hideSpinner();

@@ -6,36 +6,42 @@ import PasswordInput from '../../components/PasswordInput';
 import { useRoute } from '@react-navigation/native';
 import type { ResetPasswordScreenRouteProp } from '../../types/navigation';
 import { useModal } from '../../lib/context/ModalContext';
+import { useSpinner } from '../../lib/context/SpinnerContext';
+import { Logger } from '../../lib/Logger';
 import { PressableOpacity } from '../../components/PressableOpacity';
 
 export default function ResetPasswordScreen() {
     const [password, onChangePassword] = useState('');
     const [confirmPassword, onChangeConfirmPassword] = useState('');
     const [code, setCode] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const { resetPassword } = useAuth();
     const route = useRoute<ResetPasswordScreenRouteProp>();
     const email = route.params?.email || '';
     const { setMessage } = useModal();
+    const { showSpinner, hideSpinner } = useSpinner();
 
     async function handleResetPassword() {
         if (password !== confirmPassword) {
-            setError("Passwords do not match");
+            setMessage("Passwords do not match");
             return;
         } else if (password.length < 8) {
-            setError("Password must be at least 8 characters long");
+            setMessage("Password must be at least 8 characters long");
             return;
         }
 
         try {
+            showSpinner();
             await resetPassword(email, code, password);
             setMessage('Password has been reset successfully');
         } catch (err) {
+            Logger.error(err);
             if (err instanceof Error) {
-                setError(err.message);
+                setMessage(err.message);
             } else {
-                setError('An unexpected error occurred');
+                setMessage('An unexpected error occurred');
             }
+        } finally {
+            hideSpinner();
         }
     }
 
@@ -43,7 +49,7 @@ export default function ResetPasswordScreen() {
         <View style={AuthStyles.container}>
             <Text style={AuthStyles.header}>Change Password</Text>
             <Text style={AuthStyles.subtitle}>
-                Enter Your Confirmation Code
+                Enter the code sent to your email
             </Text>
             <TextInput
                 style={AuthStyles.input}
@@ -51,7 +57,7 @@ export default function ResetPasswordScreen() {
                 value={code}
                 placeholder="code"
                 keyboardType="numeric"
-                testID="emailInput"
+                testID="codeInput"
             />
             <PasswordInput
                 password={password}
@@ -66,7 +72,6 @@ export default function ResetPasswordScreen() {
             <PressableOpacity style={AuthStyles.button} onPress={handleResetPassword}>
                 <Text style={AuthStyles.btnText}>Verify Code</Text>
             </PressableOpacity>
-            {error && <Text style={AuthStyles.error}>{error}</Text>}
         </View>
     );
 }

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { useAuth } from "../../lib/context/AuthContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
@@ -35,7 +35,11 @@ export default function EmailOverlay({
       await sendCode(email);
     } catch (error) {
       Logger.error(error);
-      setMessage("Failed to send verification code");
+      if (error instanceof Error) {
+        setMessage(error.message);
+      } else {
+        setMessage("Failed to send verification code");
+      }
     } finally {
       hideSpinner();
     }
@@ -52,7 +56,11 @@ export default function EmailOverlay({
       setVisible(false);
     } catch (e) {
       Logger.error(e);
-      setMessage("Failed to verify email");
+      if (e instanceof Error) {
+        setMessage(e.message);
+      } else {
+        setMessage("Failed to verify email");
+      }
     } finally {
       hideSpinner();
     }

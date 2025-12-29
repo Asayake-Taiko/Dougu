@@ -45,7 +45,11 @@ export default function ProfileOverlay({
       setVisible(false);
     } catch (err) {
       Logger.error(err);
-      setMessage("Failed to update profile");
+      if (err instanceof Error) {
+        setMessage(err.message);
+      } else {
+        setMessage("Failed to update profile");
+      }
     } finally {
       hideSpinner();
     }

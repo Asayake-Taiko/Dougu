@@ -4,22 +4,31 @@ import { useAuth } from '../../lib/context/AuthContext';
 import { AuthStyles } from '../../styles/AuthStyles';
 import PasswordInput from '../../components/PasswordInput';
 import { PressableOpacity } from '../../components/PressableOpacity';
+import { useSpinner } from '../../lib/context/SpinnerContext';
+import { useModal } from '../../lib/context/ModalContext';
+import { Logger } from '../../lib/Logger';
+import { LoginScreenNavigationProp } from '../../types/navigation';
 
-export default function LoginScreen({ navigation }: any) {
+export default function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) {
     const { login } = useAuth();
     const [email, onChangeEmail] = useState("");
     const [password, onChangePassword] = useState("");
-    const [error, setError] = useState<string | null>(null);
+    const { showSpinner, hideSpinner } = useSpinner();
+    const { setMessage } = useModal();
 
     async function handleLogin() {
         try {
+            showSpinner();
             await login(email, password);
         } catch (err) {
+            Logger.error(err);
             if (err instanceof Error) {
-                setError(err.message);
+                setMessage(err.message);
             } else {
-                setError('An unexpected error occurred');
+                setMessage('An unexpected error occurred');
             }
+        } finally {
+            hideSpinner();
         }
     }
 
@@ -32,6 +41,7 @@ export default function LoginScreen({ navigation }: any) {
                 value={email}
                 placeholder="email"
                 keyboardType="email-address"
+                autoCapitalize="none"
             />
             <PasswordInput
                 password={password}
@@ -50,7 +60,6 @@ export default function LoginScreen({ navigation }: any) {
             <PressableOpacity onPress={() => navigation.navigate('SendCode')}>
                 <Text style={AuthStyles.link}>Forgot Password?</Text>
             </PressableOpacity>
-            {error && <Text style={AuthStyles.error}>{error}</Text>}
         </View>
     );
 }

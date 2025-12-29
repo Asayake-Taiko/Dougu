@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { Alert, StyleSheet, Text, TextInput } from "react-native";
+import { StyleSheet, Text, TextInput } from "react-native";
 
 import { useAuth } from "../../lib/context/AuthContext";
 import { useModal } from "../../lib/context/ModalContext";
@@ -37,7 +37,11 @@ export default function DeleteOverlay({
       await deleteAccount();
     } catch (e) {
       Logger.error(e);
-      setMessage("Failed to delete account");
+      if (e instanceof Error) {
+        setMessage(e.message);
+      } else {
+        setMessage("Failed to delete account");
+      }
     } finally {
       hideSpinner();
     }

@@ -5,23 +5,31 @@ import { useAuth } from '../../lib/context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import type { SendCodeScreenNavigationProp } from '../../types/navigation';
 import { PressableOpacity } from '../../components/PressableOpacity';
+import { useSpinner } from '../../lib/context/SpinnerContext';
+import { useModal } from '../../lib/context/ModalContext';
+import { Logger } from '../../lib/Logger';
 
 export default function SendCodeScreen() {
     const [email, onChangeEmail] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const { sendCode } = useAuth();
     const navigation = useNavigation<SendCodeScreenNavigationProp>();
+    const { showSpinner, hideSpinner } = useSpinner();
+    const { setMessage } = useModal();
 
     async function handleSendCode() {
         try {
+            showSpinner();
             await sendCode(email);
             navigation.navigate('ResetPassword', { email });
         } catch (err) {
+            Logger.error(err);
             if (err instanceof Error) {
-                setError(err.message);
+                setMessage(err.message);
             } else {
-                setError('An unexpected error occurred');
+                setMessage('An unexpected error occurred');
             }
+        } finally {
+            hideSpinner();
         }
     }
 
@@ -29,7 +37,7 @@ export default function SendCodeScreen() {
         <View style={AuthStyles.container}>
             <Text style={AuthStyles.header}>Change Password</Text>
             <Text style={AuthStyles.subtitle}>
-                Enter Your Confirmation Code
+                Enter your email to receive a code
             </Text>
             <TextInput
                 style={AuthStyles.input}
@@ -37,11 +45,11 @@ export default function SendCodeScreen() {
                 value={email}
                 placeholder="email"
                 keyboardType="email-address"
+                autoCapitalize="none"
             />
             <PressableOpacity style={AuthStyles.button} onPress={handleSendCode}>
                 <Text style={AuthStyles.btnText}>Send Code</Text>
             </PressableOpacity>
-            {error && <Text style={AuthStyles.error}>{error}</Text>}
         </View>
     );
 }

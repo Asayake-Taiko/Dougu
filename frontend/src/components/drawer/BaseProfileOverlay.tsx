@@ -5,8 +5,6 @@ import {
     Text,
     View,
     Pressable,
-    Platform,
-    StatusBar
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors, Spacing } from "../../styles/global";

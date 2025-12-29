@@ -41,7 +41,11 @@ export default function NameOverlay({
       setVisible(false);
     } catch (error) {
       Logger.error(error);
-      setMessage("Failed to update name");
+      if (error instanceof Error) {
+        setMessage(error.message);
+      } else {
+        setMessage("An unexpected error occurred while updating name");
+      }
     } finally {
       hideSpinner();
     }

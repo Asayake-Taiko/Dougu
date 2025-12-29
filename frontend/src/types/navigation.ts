@@ -1,5 +1,6 @@
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RouteProp } from '@react-navigation/native';
+import type { DrawerNavigationProp } from '@react-navigation/drawer';
 
 // Auth Stack Parameter List
 export type AuthStackParamList = {
@@ -9,6 +10,24 @@ export type AuthStackParamList = {
     ResetPassword: { email: string };
 };
 
-// Screen-specific navigation props
+// Drawer Stack Parameter List
+export type DrawerStackParamList = {
+    Profile: undefined;
+    OrgList: undefined;
+    JoinOrg: undefined;
+    CreateOrg: undefined;
+};
+
+// Navigation props for Auth screens
+export type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
+export type CreateAccountScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'CreateAccount'>;
 export type SendCodeScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'SendCode'>;
+
+// Route props for Auth screens
 export type ResetPasswordScreenRouteProp = RouteProp<AuthStackParamList, 'ResetPassword'>;
+
+// Navigation props for Drawer screens
+export type ProfileScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'Profile'>;
+export type OrgListScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'OrgList'>;
+export type JoinOrgScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'JoinOrg'>;
+export type CreateOrgScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'CreateOrg'>;

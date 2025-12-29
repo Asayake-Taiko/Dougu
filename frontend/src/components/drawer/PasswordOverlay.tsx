@@ -1,7 +1,6 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { Alert, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
-// import { loginCreateStyles } from "../../styles/LoginCreate"; // Removed unused import
 import PasswordInput from "../PasswordInput";
 import { useAuth } from "../../lib/context/AuthContext";
 import { useModal } from "../../lib/context/ModalContext";
@@ -36,15 +35,12 @@ export default function PasswordOverlay({
     try {
       // ensure new password and confirm password match
       if (newPassword !== confirmPassword) {
-        Alert.alert("Passwords do not match", "Please try again");
+        setMessage("Passwords do not match");
         return;
       }
       // check password length
       if (newPassword.length < 8) {
-        Alert.alert(
-          "Form Error",
-          "Password must be at least 8 characters long.",
-        );
+        setMessage("Password must be at least 8 characters long.");
         return;
       }
       showSpinner();
@@ -54,10 +50,13 @@ export default function PasswordOverlay({
       setNewPassword("");
       setConfirmPassword("");
       setVisible(false);
-      Alert.alert("Password Updated", "Your password has been updated");
     } catch (e) {
       Logger.error(e);
-      setMessage("Failed to update password. Check current password.");
+      if (e instanceof Error) {
+        setMessage(e.message);
+      } else {
+        setMessage("Failed to update password. Check current password.");
+      }
     } finally {
       hideSpinner();
     }

@@ -4,25 +4,34 @@ import { AuthStyles } from '../../styles/AuthStyles';
 import { useAuth } from '../../lib/context/AuthContext';
 import PasswordInput from '../../components/PasswordInput';
 import { PressableOpacity } from '../../components/PressableOpacity';
+import { useSpinner } from '../../lib/context/SpinnerContext';
+import { useModal } from '../../lib/context/ModalContext';
+import { Logger } from '../../lib/Logger';
+import { CreateAccountScreenNavigationProp } from '../../types/navigation';
 
 
-export default function CreateAccountScreen() {
+export default function CreateAccountScreen({ navigation }: { navigation: CreateAccountScreenNavigationProp }) {
     const [email, onChangeEmail] = useState("");
     const [first, onChangeFirst] = useState("");
     const [last, onChangeLast] = useState("");
     const [password, onChangePassword] = useState("");
-    const [error, setError] = useState<string | null>(null);
     const { register } = useAuth();
+    const { showSpinner, hideSpinner } = useSpinner();
+    const { setMessage } = useModal();
 
     async function handleRegister() {
         try {
+            showSpinner();
             await register(email, first + " " + last, password);
         } catch (err) {
+            Logger.error(err);
             if (err instanceof Error) {
-                setError(err.message);
+                setMessage(err.message);
             } else {
-                setError('An unexpected error occurred');
+                setMessage('An unexpected error occurred');
             }
+        } finally {
+            hideSpinner();
         }
     }
 
@@ -51,6 +60,7 @@ export default function CreateAccountScreen() {
                 value={email}
                 placeholder="email"
                 keyboardType="email-address"
+                autoCapitalize="none"
             />
             <PasswordInput
                 password={password}
@@ -60,7 +70,6 @@ export default function CreateAccountScreen() {
             <PressableOpacity style={AuthStyles.button} onPress={handleRegister}>
                 <Text style={AuthStyles.btnText}>Create</Text>
             </PressableOpacity>
-            {error && <Text style={AuthStyles.error}>{error}</Text>}
         </View>
     );
 }

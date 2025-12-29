@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Pressable, View, Text } from "react-native";
-import { profileMapping } from "../../lib/helper/ImageMapping";
+import { profileMapping } from "../../lib/ImageMapping";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -14,6 +14,8 @@ import { ContainerOverlayStyles } from "../../styles/ContainerOverlay";
 import { Colors, Spacing } from "../../styles/global";
 import { useAuth } from "../../lib/context/AuthContext";
 import { useModal } from "../../lib/context/ModalContext";
+import { useSpinner } from "../../lib/context/SpinnerContext";
+import { Logger } from "../../lib/Logger";
 import { PressableOpacity } from "../PressableOpacity";
 
 /* 
@@ -33,18 +35,19 @@ export default function ProfileOverlay({
 }) {
   const { updateProfile } = useAuth();
   const { setMessage } = useModal();
+  const { showSpinner, hideSpinner } = useSpinner();
 
   // update user profile attributes in Cognito
   async function handleUpdateProfile() {
     try {
+      showSpinner();
       await updateProfile(profileKey);
       setVisible(false);
     } catch (err) {
-      if (err instanceof Error) {
-        setMessage(err.message);
-      } else {
-        setMessage('An unexpected error occurred');
-      }
+      Logger.error(err);
+      setMessage("Failed to update profile");
+    } finally {
+      hideSpinner();
     }
   }
 

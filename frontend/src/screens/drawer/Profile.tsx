@@ -1,12 +1,18 @@
 import { useState } from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text } from 'react-native';
 import { useAuth } from '../../lib/context/AuthContext';
 import { ProfileStyles } from '../../styles/ProfileStyles';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import ProfileDisplay from '../../components/ProfileDisplay';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import ProfileOverlay from '../../components/drawer/ProfileOverlay';
+import NameOverlay from '../../components/drawer/NameOverlay';
+import EmailOverlay from '../../components/drawer/EmailOverlay';
+import PasswordOverlay from '../../components/drawer/PasswordOverlay';
+import DeleteOverlay from '../../components/drawer/DeleteOverlay';
 import { PressableOpacity } from '../../components/PressableOpacity';
+import { useModal } from '../../lib/context/ModalContext';
+import { useSpinner } from '../../lib/context/SpinnerContext';
 
 
 export default function ProfileScreen() {
@@ -17,6 +23,20 @@ export default function ProfileScreen() {
     const [emailVisible, setEmailVisible] = useState(false);
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [deleteVisible, setDeleteVisible] = useState(false);
+    const { setMessage } = useModal();
+    const { showSpinner, hideSpinner } = useSpinner();
+
+    async function handleLogout() {
+        try {
+            showSpinner();
+            await logout();
+        } catch (error) {
+            console.log(error);
+            setMessage("Logout failed");
+        } finally {
+            hideSpinner();
+        }
+    };
 
     return (
         <View style={ProfileStyles.container}>
@@ -70,8 +90,14 @@ export default function ProfileScreen() {
                     <MaterialCommunityIcons name="chevron-right" size={30} />
                 </View>
             </PressableOpacity>
-            <PressableOpacity style={ProfileStyles.buttonContainer} onPress={logout}>
-                <Text style={ProfileStyles.buttonText}>Logout</Text>
+            <PressableOpacity
+                style={ProfileStyles.row}
+                onPress={handleLogout}
+            >
+                <Text style={ProfileStyles.text}>Logout</Text>
+                <View style={ProfileStyles.changeBtn}>
+                    <MaterialCommunityIcons name="chevron-right" size={30} />
+                </View>
             </PressableOpacity>
             <ProfileOverlay
                 visible={profileVisible}
@@ -79,17 +105,16 @@ export default function ProfileScreen() {
                 profileKey={profileKey}
                 setProfileKey={setProfileKey}
             />
-            {/* <NameOverlay visible={nameVisible} setVisible={setNameVisible} /> */}
-            {/* <PasswordOverlay
+            <NameOverlay visible={nameVisible} setVisible={setNameVisible} />
+            <PasswordOverlay
                 visible={passwordVisible}
                 setVisible={setPasswordVisible}
-            /> */}
-            {/* <EmailOverlay visible={emailVisible} setVisible={setEmailVisible} /> */}
-            {/* <DeleteOverlay
+            />
+            <EmailOverlay visible={emailVisible} setVisible={setEmailVisible} />
+            <DeleteOverlay
                 visible={deleteVisible}
                 setVisible={setDeleteVisible}
-                navigation={navigation}
-            /> */}
+            />
         </View>
     );
 }

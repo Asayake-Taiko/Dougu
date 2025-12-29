@@ -1,13 +1,15 @@
-import { Overlay, Button } from "@rneui/themed";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
-import { deleteUser } from "aws-amplify/auth";
+import { Alert, StyleSheet, Text, TextInput } from "react-native";
 
-import { useUser } from "../../helper/context/UserContext";
-import { editOrgUserStorages } from "../../helper/drawer/ModifyProfileUtils";
-import { ProfileScreenProps } from "../../types/ScreenTypes";
-import { handleError } from "../../helper/Utils";
-import { useLoad } from "../../helper/context/LoadingContext";
+import { useAuth } from "../../lib/context/AuthContext";
+import { useModal } from "../../lib/context/ModalContext";
+import { useSpinner } from "../../lib/context/SpinnerContext";
+import { Logger } from "../../lib/Logger";
+import BaseProfileOverlay from "./BaseProfileOverlay";
+import { PressableOpacity } from "../PressableOpacity";
+import { ProfileStyles } from "../../styles/ProfileStyles";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Colors } from "../../styles/global";
 
 /*
     A component that allows the user to delete their account
@@ -16,55 +18,37 @@ import { useLoad } from "../../helper/context/LoadingContext";
 export default function DeleteOverlay({
   visible,
   setVisible,
-  navigation,
 }: {
   visible: boolean;
   setVisible: Dispatch<SetStateAction<boolean>>;
-  navigation: ProfileScreenProps;
 }) {
   const [email, setEmail] = useState("");
-  const { user, resetContext } = useUser();
-  const { setIsLoading } = useLoad();
+  const { user, deleteAccount } = useAuth();
+  const { setMessage } = useModal();
+  const { showSpinner, hideSpinner } = useSpinner();
 
   const handleDelete = async () => {
     try {
-      setIsLoading(true);
-      // verify that the email matches the user's email
+      showSpinner();
       if (email !== user?.email) {
-        Alert.alert("Email does not match", "Please try again");
+        setMessage("Email does not match");
         return;
       }
-      // mark user's orguserstorages as deleted
-      const deletedName = user.name + " (deleted)";
-      await editOrgUserStorages(user!.id, "name", deletedName);
-      // delete the user
-      await deleteUser();
-      resetContext();
-      setIsLoading(false);
-      navigation.navigate("Home");
+      await deleteAccount();
     } catch (e) {
-      handleError("handleDelete", e as Error, setIsLoading);
+      Logger.error(e);
+      setMessage("Failed to delete account");
+    } finally {
+      hideSpinner();
     }
   };
 
   return (
-    <Overlay
-      isVisible={visible}
-      fullScreen
-      animationType="slide"
-      overlayStyle={{ alignItems: "center" }}
+    <BaseProfileOverlay
+      visible={visible}
+      setVisible={setVisible}
+      title="Delete Account"
     >
-      <View style={styles.row}>
-        <Button
-          icon={{ name: "arrow-left", type: "font-awesome", color: "black" }}
-          title="Profile"
-          titleStyle={{ color: "black" }}
-          type="clear"
-          onPress={() => setVisible(false)}
-          buttonStyle={{ alignSelf: "flex-start" }}
-        />
-      </View>
-      <Text style={styles.header}>Delete Account</Text>
       <Text style={{ marginHorizontal: "20%", textAlign: "center" }}>
         To confirm, please type your email address below.
       </Text>
@@ -73,29 +57,35 @@ export default function DeleteOverlay({
         value={email}
         placeholder="email"
         style={styles.email}
+        autoCapitalize="none"
+        keyboardType="email-address"
       />
-      <Button
-        radius={"md"}
-        type="solid"
-        icon={{ name: "trash", type: "font-awesome", color: "white" }}
-        title="Delete"
-        buttonStyle={styles.button}
-        containerStyle={{ width: "80%" }}
+
+      <PressableOpacity
+        style={styles.deleteButton}
         onPress={handleDelete}
-      />
-    </Overlay>
+      >
+        <FontAwesome name="trash" size={20} color={Colors.white} style={{ marginRight: 10 }} />
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </PressableOpacity>
+    </BaseProfileOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  deleteButton: {
+    ...ProfileStyles.button,
     backgroundColor: "red",
-    marginTop: "5%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    width: "80%",
   },
-  header: {
-    fontSize: 20,
+  deleteButtonText: {
+    ...ProfileStyles.buttonText,
+    color: Colors.white,
     fontWeight: "bold",
-    marginTop: "10%",
   },
   email: {
     width: "80%",
@@ -104,10 +94,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginTop: "5%",
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
   },
 });

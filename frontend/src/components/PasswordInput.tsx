@@ -24,6 +24,7 @@ export default function PasswordInput({
         value={password}
         placeholder={placeHolder}
         keyboardType="default"
+        autoCapitalize="none"
         {...props}
       />
       <MaterialCommunityIcons

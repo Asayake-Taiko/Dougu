@@ -119,7 +119,7 @@ export const mockUpdateName = async (email: string, name: string): Promise<void>
     return;
 };
 
-export const mockUpdateEmail = async (oldEmail: string, newEmail: string): Promise<void> => {
+export const mockUpdateEmail = async (oldEmail: string, newEmail: string, code: string): Promise<void> => {
     oldEmail = oldEmail.toLowerCase();
     newEmail = newEmail.toLowerCase();
     const user = fakeUsers[oldEmail];
@@ -128,6 +128,9 @@ export const mockUpdateEmail = async (oldEmail: string, newEmail: string): Promi
     }
     if (fakeUsers[newEmail]) {
         throw new Error('New email already in use');
+    }
+    if (user.code !== code) {
+        throw new Error('Invalid code');
     }
     delete fakeUsers[oldEmail];
     user.email = newEmail;

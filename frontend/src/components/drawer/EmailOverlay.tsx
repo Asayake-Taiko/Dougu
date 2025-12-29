@@ -1,13 +1,14 @@
-import { Overlay, Button } from "@rneui/themed";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
-import {
-  modifyUserAttribute,
-  updateUserContext,
-} from "../../helper/drawer/ModifyProfileUtils";
-import { useUser } from "../../helper/context/UserContext";
-import { handleError } from "../../helper/Utils";
-import { confirmUserAttribute } from "aws-amplify/auth";
+import { useAuth } from "../../lib/context/AuthContext";
+import { useModal } from "../../lib/context/ModalContext";
+import { useSpinner } from "../../lib/context/SpinnerContext";
+import { Logger } from "../../lib/Logger";
+import BaseProfileOverlay from "./BaseProfileOverlay";
+import { PressableOpacity } from "../PressableOpacity";
+import { ProfileStyles } from "../../styles/ProfileStyles";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Colors } from "../../styles/global";
 
 /*
     A component that allows the user to change their email
@@ -23,73 +24,61 @@ export default function EmailOverlay({
 }) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const { user, setUser } = useUser();
+  const { updateEmail, sendCode } = useAuth(); // Assuming updateEmail initiates the change
+  const { setMessage } = useModal();
+  const { showSpinner, hideSpinner } = useSpinner();
 
   // update user profile attributes in Cognito
-  const sendCode = async () => {
+  const handleSendCode = async () => {
     try {
-      await modifyUserAttribute("email", email);
-      Alert.alert("Verification Code Sent", "Please check your email");
+      showSpinner();
+      await sendCode(email);
     } catch (error) {
-      handleError("modifyUserAttribute", error as Error, null);
-      console.log(error);
+      Logger.error(error);
+      setMessage("Failed to send verification code");
+    } finally {
+      hideSpinner();
     }
   };
 
-  const verifyEmail = async () => {
+  const handleVerifyEmail = async () => {
     try {
       if (!code) {
-        Alert.alert("Error", "Please enter a code");
+        setMessage("Please enter a code");
         return;
       }
-      await confirmUserAttribute({
-        userAttributeKey: "email",
-        confirmationCode: code,
-      });
-      // update user context (local)
-      updateUserContext(user!, setUser, "email", email);
+      showSpinner();
+      await updateEmail(email, code);
       setVisible(false);
-      Alert.alert("Email Updated", "Your email has been updated");
     } catch (e) {
-      handleError("verifyEmail", e as Error, null);
+      Logger.error(e);
+      setMessage("Failed to verify email");
+    } finally {
+      hideSpinner();
     }
   };
 
   return (
-    <Overlay
-      isVisible={visible}
-      fullScreen
-      animationType="slide"
-      overlayStyle={{ alignItems: "center" }}
+    <BaseProfileOverlay
+      visible={visible}
+      setVisible={setVisible}
+      title="Change Email"
     >
-      <View style={styles.row}>
-        <Button
-          icon={{ name: "arrow-left", type: "font-awesome", color: "black" }}
-          title="Profile"
-          titleStyle={{ color: "black" }}
-          type="clear"
-          onPress={() => setVisible(false)}
-          buttonStyle={{ alignSelf: "flex-start" }}
-        />
-      </View>
-      <Text style={styles.header}>Change Email</Text>
-      <View style={[styles.row, { marginTop: "5%" }]}>
+      <View style={[styles.row, { marginTop: "5%", justifyContent: "center" }]}>
         <TextInput
           onChangeText={setEmail}
           value={email}
           placeholder="new email"
           style={styles.email}
           keyboardType="email-address"
+          autoCapitalize="none"
         />
-        <Button
-          radius={"md"}
-          type="solid"
-          title={"Send"}
-          buttonStyle={styles.button}
-          containerStyle={{ width: "15%", marginLeft: "5%" }}
-          titleStyle={{ fontSize: 12 }}
-          onPress={sendCode}
-        />
+        <PressableOpacity
+          style={styles.sendButton}
+          onPress={handleSendCode}
+        >
+          <Text style={styles.sendButtonText}>Send</Text>
+        </PressableOpacity>
       </View>
       <TextInput
         onChangeText={setCode}
@@ -98,24 +87,48 @@ export default function EmailOverlay({
         style={styles.code}
         keyboardType="numeric"
       />
-      <Button
-        radius={"md"}
-        type="solid"
-        icon={{ name: "save", type: "font-awesome", color: "white" }}
-        title="Save"
-        buttonStyle={styles.button}
-        containerStyle={{ width: "80%" }}
-        onPress={verifyEmail}
-      />
-    </Overlay>
+
+      <PressableOpacity
+        style={styles.saveButton}
+        onPress={handleVerifyEmail}
+      >
+        <FontAwesome name="save" size={20} color={Colors.white} style={{ marginRight: 10 }} />
+        <Text style={styles.saveButtonText}>Save</Text>
+      </PressableOpacity>
+    </BaseProfileOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  saveButton: {
+    ...ProfileStyles.button,
     backgroundColor: "#333333",
-    marginTop: "5%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    width: "80%",
+  },
+  saveButtonText: {
+    ...ProfileStyles.buttonText,
+    color: Colors.white,
+    fontWeight: "bold",
+  },
+  sendButton: {
+    ...ProfileStyles.button,
+    backgroundColor: "#333333",
+    marginTop: 0, // Override profile styles margin
+    marginLeft: "5%",
+    width: "15%",
     height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+  },
+  sendButtonText: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: "bold",
   },
   code: {
     width: "80%",
@@ -131,12 +144,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
-    marginLeft: "10%",
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: "10%",
+    // marginLeft handled by flex layout now, or keeping logic close to original
   },
   row: {
     flexDirection: "row",

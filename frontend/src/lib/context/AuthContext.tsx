@@ -10,12 +10,12 @@ interface AuthContextType {
     user: UserType | null;
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, name: string, password: string) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
     resetPassword: (email: string, code: string, new_password: string) => Promise<void>;
     sendCode: (email: string) => Promise<void>;
     updateProfile: (profileKey: string) => Promise<void>;
     updateName: (name: string) => Promise<void>;
-    updateEmail: (email: string) => Promise<void>;
+    updateEmail: (email: string, code: string) => Promise<void>;
     updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
     deleteAccount: () => Promise<void>;
 }
@@ -108,31 +108,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const updateProfile = async (profileKey: string) => {
         if (IS_DEV) {
             await mockUpdateProfile(user!.email, profileKey);
-            setUser({ ...user!, profile: profileKey });
         } else {
             // Here you would call the real update profile API
             throw new Error('Real update profile not implemented');
         }
+        setUser({ ...user!, profile: profileKey });
     };
 
     const updateName = async (name: string) => {
         if (IS_DEV) {
             await mockUpdateName(user!.email, name);
-            setUser({ ...user!, name });
         } else {
             // Here you would call the real update name API
             throw new Error('Real update name not implemented');
         }
+        setUser({ ...user!, name });
     };
 
-    const updateEmail = async (email: string) => {
+    const updateEmail = async (email: string, code: string) => {
         if (IS_DEV) {
-            await mockUpdateEmail(user!.email, email);
-            setUser({ ...user!, email });
+            await mockUpdateEmail(user!.email, email, code);
         } else {
             // Here you would call the real update email API
             throw new Error('Real update email not implemented');
         }
+        setUser({ ...user!, email });
     };
 
     const updatePassword = async (currentPassword: string, newPassword: string) => {
@@ -147,11 +147,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const deleteAccount = async () => {
         if (IS_DEV) {
             await mockDeleteAccount(user!.email);
-            setUser(null);
         } else {
             // Here you would call the real delete account API
             throw new Error('Real delete account not implemented');
         }
+        setUser(null);
     };
 
     return (

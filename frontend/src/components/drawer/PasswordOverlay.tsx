@@ -1,11 +1,17 @@
-import { Overlay, Button } from "@rneui/themed";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
-import { updatePassword } from "aws-amplify/auth";
+import { Alert, StyleSheet, Text } from "react-native";
 
-import { handleError } from "../../helper/Utils";
-import { loginCreateStyles } from "../../styles/LoginCreate";
+// import { loginCreateStyles } from "../../styles/LoginCreate"; // Removed unused import
 import PasswordInput from "../PasswordInput";
+import { useAuth } from "../../lib/context/AuthContext";
+import { useModal } from "../../lib/context/ModalContext";
+import { useSpinner } from "../../lib/context/SpinnerContext";
+import { Logger } from "../../lib/Logger";
+import BaseProfileOverlay from "./BaseProfileOverlay";
+import { PressableOpacity } from "../PressableOpacity";
+import { ProfileStyles } from "../../styles/ProfileStyles";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Colors } from "../../styles/global";
 
 /*
     A component that allows the user to change their password
@@ -21,9 +27,12 @@ export default function PasswordOverlay({
   const [currPassword, setCurrPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { updatePassword } = useAuth();
+  const { setMessage } = useModal();
+  const { showSpinner, hideSpinner } = useSpinner();
 
   // update user profile attributes in Cognito
-  const handleSet = async () => {
+  const handleUpdatePassword = async () => {
     try {
       // ensure new password and confirm password match
       if (newPassword !== confirmPassword) {
@@ -38,36 +47,28 @@ export default function PasswordOverlay({
         );
         return;
       }
+      showSpinner();
       // set user password in cognito
-      await updatePassword({ oldPassword: currPassword, newPassword });
+      await updatePassword(currPassword, newPassword);
       setCurrPassword("");
       setNewPassword("");
       setConfirmPassword("");
       setVisible(false);
       Alert.alert("Password Updated", "Your password has been updated");
     } catch (e) {
-      handleError("handleSet", e as Error, null);
+      Logger.error(e);
+      setMessage("Failed to update password. Check current password.");
+    } finally {
+      hideSpinner();
     }
   };
 
   return (
-    <Overlay
-      isVisible={visible}
-      fullScreen
-      animationType="slide"
-      overlayStyle={{ alignItems: "center" }}
+    <BaseProfileOverlay
+      visible={visible}
+      setVisible={setVisible}
+      title="Change Password"
     >
-      <View style={styles.row}>
-        <Button
-          icon={{ name: "arrow-left", type: "font-awesome", color: "black" }}
-          title="Profile"
-          titleStyle={{ color: "black" }}
-          type="clear"
-          onPress={() => setVisible(false)}
-          buttonStyle={{ alignSelf: "flex-start" }}
-        />
-      </View>
-      <Text style={loginCreateStyles.header}>Change Password</Text>
       <PasswordInput
         password={currPassword}
         setPassword={setCurrPassword}
@@ -83,23 +84,32 @@ export default function PasswordOverlay({
         setPassword={setConfirmPassword}
         placeHolder="confirm password"
       />
-      <Button
-        radius={"md"}
-        type="solid"
-        icon={{ name: "save", type: "font-awesome", color: "white" }}
-        title="Save"
-        buttonStyle={styles.button}
-        containerStyle={{ width: "80%" }}
-        onPress={handleSet}
-      />
-    </Overlay>
+
+      <PressableOpacity
+        style={styles.saveButton}
+        onPress={handleUpdatePassword}
+      >
+        <FontAwesome name="save" size={20} color={Colors.white} style={{ marginRight: 10 }} />
+        <Text style={styles.saveButtonText}>Save</Text>
+      </PressableOpacity>
+    </BaseProfileOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  saveButton: {
+    ...ProfileStyles.button,
     backgroundColor: "#333333",
-    marginTop: "5%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    width: "80%",
+  },
+  saveButtonText: {
+    ...ProfileStyles.buttonText,
+    color: Colors.white,
+    fontWeight: "bold",
   },
   row: {
     flexDirection: "row",

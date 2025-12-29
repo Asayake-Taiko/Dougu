@@ -1,14 +1,14 @@
-import { Overlay, Button } from "@rneui/themed";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
-
-import { handleError } from "../../helper/Utils";
-import {
-  editOrgUserStorages,
-  modifyUserAttribute,
-  updateUserContext,
-} from "../../helper/drawer/ModifyProfileUtils";
-import { useUser } from "../../helper/context/UserContext";
+import { StyleSheet, Text, TextInput, View } from "react-native";
+import { useAuth } from '../../lib/context/AuthContext';
+import { useModal } from "../../lib/context/ModalContext";
+import { useSpinner } from "../../lib/context/SpinnerContext";
+import { Logger } from "../../lib/Logger";
+import BaseProfileOverlay from "./BaseProfileOverlay";
+import { PressableOpacity } from "../PressableOpacity";
+import { ProfileStyles } from "../../styles/ProfileStyles";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Colors } from "../../styles/global";
 
 /* 
     A component that allows the user to change their name
@@ -21,7 +21,9 @@ export default function NameOverlay({
   visible: boolean;
   setVisible: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { user, setUser } = useUser();
+  const { updateName } = useAuth();
+  const { setMessage } = useModal();
+  const { showSpinner, hideSpinner } = useSpinner();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, onChangeUsername] = useState("");
@@ -32,41 +34,25 @@ export default function NameOverlay({
   }, [firstName, lastName]);
 
   // update user profile attributes in Cognito
-  const handleSet = async () => {
+  async function handleUpdateName() {
     try {
-      // set user name in cognito
-      await modifyUserAttribute("name", username);
-      // modify orgUserStorages to match user name
-      await editOrgUserStorages(user!.id, "name", username);
-      // update user context (local)
-      updateUserContext(user!, setUser, "name", username);
-      setFirstName("");
-      setLastName("");
+      showSpinner();
+      await updateName(username);
       setVisible(false);
-      Alert.alert("Name Updated", "Your name has been updated");
-    } catch (e) {
-      handleError("handleSet", e as Error, null);
+    } catch (error) {
+      Logger.error(error);
+      setMessage("Failed to update name");
+    } finally {
+      hideSpinner();
     }
   };
 
   return (
-    <Overlay
-      isVisible={visible}
-      fullScreen
-      animationType="slide"
-      overlayStyle={{ alignItems: "center" }}
+    <BaseProfileOverlay
+      visible={visible}
+      setVisible={setVisible}
+      title="Change Name"
     >
-      <View style={styles.row}>
-        <Button
-          icon={{ name: "arrow-left", type: "font-awesome", color: "black" }}
-          title="Profile"
-          titleStyle={{ color: "black" }}
-          type="clear"
-          onPress={() => setVisible(false)}
-          buttonStyle={{ alignSelf: "flex-start" }}
-        />
-      </View>
-      <Text style={styles.header}>Change Name</Text>
       <View style={styles.nameContainer}>
         <TextInput
           onChangeText={setFirstName}
@@ -81,28 +67,32 @@ export default function NameOverlay({
           style={styles.name}
         />
       </View>
-      <Button
-        radius={"md"}
-        type="solid"
-        icon={{ name: "save", type: "font-awesome", color: "white" }}
-        title="Save"
-        buttonStyle={styles.button}
-        containerStyle={{ width: "80%" }}
-        onPress={handleSet}
-      />
-    </Overlay>
+
+      <PressableOpacity
+        style={styles.saveButton}
+        onPress={handleUpdateName}
+      >
+        <FontAwesome name="save" size={20} color={Colors.white} style={{ marginRight: 10 }} />
+        <Text style={styles.saveButtonText}>Save</Text>
+      </PressableOpacity>
+    </BaseProfileOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  saveButton: {
+    ...ProfileStyles.button,
     backgroundColor: "#333333",
-    marginTop: "5%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    width: "80%",
   },
-  header: {
-    fontSize: 20,
+  saveButtonText: {
+    ...ProfileStyles.buttonText,
+    color: Colors.white,
     fontWeight: "bold",
-    marginTop: "10%",
   },
   name: {
     width: "45%",
@@ -117,10 +107,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "80%",
     marginTop: "5%",
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
+    marginBottom: "5%",
   },
 });

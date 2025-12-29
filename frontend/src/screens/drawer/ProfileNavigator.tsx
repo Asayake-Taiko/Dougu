@@ -16,9 +16,21 @@ export default function ProfileNavigator() {
             }}
         >
             <Drawer.Screen name="Profile" component={ProfileScreen} />
-            <Drawer.Screen name="CreateOrg" component={CreateOrgScreen} />
-            <Drawer.Screen name="JoinOrg" component={JoinOrgScreen} />
-            <Drawer.Screen name="OrgList" component={OrgListScreen} />
+            <Drawer.Screen
+                name="OrgList"
+                component={OrgListScreen}
+                options={{ drawerLabel: "My Orgs", title: "My Orgs" }}
+            />
+            <Drawer.Screen
+                name="JoinOrg"
+                component={JoinOrgScreen}
+                options={{ drawerLabel: "Join Org", title: "Join Org" }}
+            />
+            <Drawer.Screen
+                name="CreateOrg"
+                component={CreateOrgScreen}
+                options={{ drawerLabel: "Create Org", title: "Create Org" }}
+            />
         </Drawer.Navigator>
     );
 }

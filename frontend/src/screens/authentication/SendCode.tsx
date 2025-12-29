@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { AuthStyles } from '../../styles/AuthStyles';
 import { useAuth } from '../../lib/context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import type { SendCodeScreenNavigationProp } from '../../types/navigation';
+import { PressableOpacity } from '../../components/PressableOpacity';
 
 export default function SendCodeScreen() {
     const [email, onChangeEmail] = useState('');
@@ -37,9 +38,9 @@ export default function SendCodeScreen() {
                 placeholder="email"
                 keyboardType="email-address"
             />
-            <TouchableOpacity style={AuthStyles.button} onPress={handleSendCode}>
+            <PressableOpacity style={AuthStyles.button} onPress={handleSendCode}>
                 <Text style={AuthStyles.btnText}>Send Code</Text>
-            </TouchableOpacity>
+            </PressableOpacity>
             {error && <Text style={AuthStyles.error}>{error}</Text>}
         </View>
     );

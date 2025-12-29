@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { AuthStyles } from '../../styles/AuthStyles';
 import { useAuth } from '../../lib/context/AuthContext';
 import PasswordInput from '../../components/PasswordInput';
+import { PressableOpacity } from '../../components/PressableOpacity';
 
 
 export default function CreateAccountScreen() {
@@ -30,18 +31,18 @@ export default function CreateAccountScreen() {
             <Text style={AuthStyles.header}>Create Account</Text>
             <View style={AuthStyles.nameContainer}>
                 <TextInput
-                style={AuthStyles.name}
-                onChangeText={onChangeFirst}
-                value={first}
-                placeholder="first"
-                keyboardType="default"
+                    style={AuthStyles.name}
+                    onChangeText={onChangeFirst}
+                    value={first}
+                    placeholder="first"
+                    keyboardType="default"
                 />
                 <TextInput
-                style={AuthStyles.name}
-                onChangeText={onChangeLast}
-                value={last}
-                placeholder="last"
-                keyboardType="default"
+                    style={AuthStyles.name}
+                    onChangeText={onChangeLast}
+                    value={last}
+                    placeholder="last"
+                    keyboardType="default"
                 />
             </View>
             <TextInput
@@ -56,9 +57,9 @@ export default function CreateAccountScreen() {
                 setPassword={onChangePassword}
                 placeHolder="password"
             />
-            <TouchableOpacity style={AuthStyles.button} onPress={handleRegister}>
+            <PressableOpacity style={AuthStyles.button} onPress={handleRegister}>
                 <Text style={AuthStyles.btnText}>Create</Text>
-            </TouchableOpacity>
+            </PressableOpacity>
             {error && <Text style={AuthStyles.error}>{error}</Text>}
         </View>
     );

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { useAuth } from '../../lib/context/AuthContext';
 import { AuthStyles } from '../../styles/AuthStyles';
 import PasswordInput from '../../components/PasswordInput';
+import { PressableOpacity } from '../../components/PressableOpacity';
 
 export default function LoginScreen({ navigation }: any) {
     const { login } = useAuth();
@@ -37,18 +38,18 @@ export default function LoginScreen({ navigation }: any) {
                 setPassword={onChangePassword}
                 placeHolder="password"
             />
-            <TouchableOpacity
+            <PressableOpacity
                 style={AuthStyles.button}
                 onPress={handleLogin}
             >
                 <Text style={AuthStyles.btnText}>Login</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
+            </PressableOpacity>
+            <PressableOpacity onPress={() => navigation.navigate('CreateAccount')}>
                 <Text style={AuthStyles.link}>Create Account</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('SendCode')}>
+            </PressableOpacity>
+            <PressableOpacity onPress={() => navigation.navigate('SendCode')}>
                 <Text style={AuthStyles.link}>Forgot Password?</Text>
-            </TouchableOpacity>
+            </PressableOpacity>
             {error && <Text style={AuthStyles.error}>{error}</Text>}
         </View>
     );

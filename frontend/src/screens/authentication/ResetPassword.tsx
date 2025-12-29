@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { AuthStyles } from '../../styles/AuthStyles';
 import { useAuth } from '../../lib/context/AuthContext';
 import PasswordInput from '../../components/PasswordInput';
 import { useRoute } from '@react-navigation/native';
 import type { ResetPasswordScreenRouteProp } from '../../types/navigation';
+import { useModal } from '../../lib/context/ModalContext';
+import { PressableOpacity } from '../../components/PressableOpacity';
 
 export default function ResetPasswordScreen() {
     const [password, onChangePassword] = useState('');
@@ -14,6 +16,7 @@ export default function ResetPasswordScreen() {
     const { resetPassword } = useAuth();
     const route = useRoute<ResetPasswordScreenRouteProp>();
     const email = route.params?.email || '';
+    const { setMessage } = useModal();
 
     async function handleResetPassword() {
         if (password !== confirmPassword) {
@@ -23,8 +26,10 @@ export default function ResetPasswordScreen() {
             setError("Password must be at least 8 characters long");
             return;
         }
+
         try {
             await resetPassword(email, code, password);
+            setMessage('Password has been reset successfully');
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -58,9 +63,9 @@ export default function ResetPasswordScreen() {
                 setPassword={onChangeConfirmPassword}
                 placeHolder="confirm password"
             />
-                <TouchableOpacity style={AuthStyles.button} onPress={handleResetPassword}>
+            <PressableOpacity style={AuthStyles.button} onPress={handleResetPassword}>
                 <Text style={AuthStyles.btnText}>Verify Code</Text>
-            </TouchableOpacity>
+            </PressableOpacity>
             {error && <Text style={AuthStyles.error}>{error}</Text>}
         </View>
     );

@@ -70,8 +70,8 @@ export default function CreateOrgScreen({ navigation }: { navigation: CreateOrgS
             const code = await generateUniqueCode();
 
             // 3. Create the organization and membership in a transaction (atomic)
+            const orgId = Math.random().toString(36).substring(2, 15);
             await db.writeTransaction(async (tx) => {
-                const orgId = Math.random().toString(36).substring(2, 15);
                 const membershipId = Math.random().toString(36).substring(2, 15);
 
                 // Insert the organization
@@ -88,7 +88,7 @@ export default function CreateOrgScreen({ navigation }: { navigation: CreateOrgS
             });
 
             setMessage(`Successfully created ${name}! Your access code is: ${code}`);
-            navigation.navigate('MyOrgs');
+            navigation.navigate('MemberTabs', { organizationId: orgId, organizationName: name });
         } catch (error) {
             Logger.error("Error creating organization:", error);
             setMessage("An error occurred while trying to create the organization.");

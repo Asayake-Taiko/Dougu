@@ -79,7 +79,7 @@ export default function DeleteOverlay({
 const styles = StyleSheet.create({
   deleteButton: {
     ...ProfileStyles.button,
-    backgroundColor: "red",
+    backgroundColor: Colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

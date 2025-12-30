@@ -5,6 +5,8 @@ import { useAuth } from "../../lib/context/AuthContext";
 import { useQuery } from "@powersync/react-native";
 import { OrganizationRecord } from "../../types/db";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Logger } from "../../lib/Logger";
+import { Colors } from "../../styles/global/colors";
 
 /*
   This screen will display the organizations that the user is a part of.
@@ -27,9 +29,7 @@ export default function MyOrgsScreen({ navigation }: { navigation: MyOrgsScreenN
 
     // set the current organization and navigate to the MemberTabs
     const setAndNavigate = async (orgId: string, orgName: string) => {
-        // TODO: Update some global state or context with the selected org
-        console.log(`Navigating to organization: ${orgName} (${orgId})`);
-        // For now, we'll just log it until MemberTabs is implemented
+        navigation.navigate('MemberTabs', { organizationId: orgId, organizationName: orgName });
     };
 
     const renderOrgItem = ({ item }: { item: OrganizationRecord }) => (
@@ -39,7 +39,7 @@ export default function MyOrgsScreen({ navigation }: { navigation: MyOrgsScreenN
             activeOpacity={0.7}
         >
             <View style={styles.orgIconContainer}>
-                <MaterialCommunityIcons name="office-building" size={28} color="#6200EE" />
+                <MaterialCommunityIcons name="office-building" size={28} color={Colors.primary} />
             </View>
             <View style={styles.orgInfo}>
                 <Text style={styles.orgName}>{item.name}</Text>
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: "#F3E5F5",
+        backgroundColor: Colors.gray100,
         justifyContent: "center",
         alignItems: "center",
         marginRight: 16,

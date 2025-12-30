@@ -57,7 +57,7 @@ export default function JoinOrgScreen({ navigation }: { navigation: JoinOrgScree
                 ]
             );
             setMessage(`Successfully joined ${org.name}!`);
-            navigation.navigate('MyOrgs');
+            navigation.navigate('MemberTabs', { organizationId: org.id, organizationName: org.name });
         } catch (error) {
             Logger.error("Error joining organization:", error);
             setMessage("An error occurred while trying to join the organization.");

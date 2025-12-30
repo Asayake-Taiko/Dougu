@@ -17,14 +17,14 @@ export const MOCK_USERS: UserRecord[] = [{
     id: '124',
     email: 'janesmith@example.com',
     full_name: 'Jane Smith',
-    profile: 'default',
+    profile: 'jiji',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
 }, {
     id: '125',
     email: 'e@gmail.com',
     full_name: 'Test User',
-    profile: 'default',
+    profile: 'saitama',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
 }];

@@ -111,7 +111,6 @@ export default function ContainerOverlay() {
 
 const styles = StyleSheet.create({
   contentWrapper: {
-    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     zIndex: 10,
   }

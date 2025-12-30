@@ -24,7 +24,7 @@ export const ContainerOverlayStyles = StyleSheet.create({
     alignItems: "center",
   },
   itemContainer: {
-    marginTop: Spacing.xl,
+    marginTop: Spacing.xs,
     justifyContent: "flex-start", // Align items to top
     alignItems: "center",
     width: "85%",
@@ -36,9 +36,9 @@ export const ContainerOverlayStyles = StyleSheet.create({
     flexDirection: "column",
     width: windowWidth * 0.85,
     height: "100%",
-    padding: Spacing.md,
+    padding: Spacing.sm,
     justifyContent: "flex-start", // Align rows to top
-    gap: Spacing.md,
+    gap: Spacing.sm,
   },
   title: {
     fontSize: 32,

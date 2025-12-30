@@ -10,6 +10,16 @@ interface EquipmentContextType {
     ownerships: Map<string, OrgOwnership>; // Key: membership.id, Value: OrgOwnership, Sorted by Name
     isLoading: boolean;
     refresh: () => Promise<void>;
+
+    // Overlay state
+    equipmentOverlayVisible: boolean;
+    setEquipmentOverlayVisible: (visible: boolean) => void;
+    containerOverlayVisible: boolean;
+    setContainerOverlayVisible: (visible: boolean) => void;
+    selectedEquipment: Equipment | null;
+    setSelectedEquipment: (equipment: Equipment | null) => void;
+    selectedContainer: Container | null;
+    setSelectedContainer: (container: Container | null) => void;
 }
 
 const EquipmentContext = createContext<EquipmentContextType | undefined>(undefined);
@@ -32,6 +42,12 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
     const [currentMember, setCurrentMember] = useState<OrgMembershipRecord | null>(null);
     const [ownerships, setOwnerships] = useState<Map<string, OrgOwnership>>(new Map());
     const [isLoading, setIsLoading] = useState(true);
+
+    // Overlay state
+    const [equipmentOverlayVisible, setEquipmentOverlayVisible] = useState(false);
+    const [containerOverlayVisible, setContainerOverlayVisible] = useState(false);
+    const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+    const [selectedContainer, setSelectedContainer] = useState<Container | null>(null);
 
     const refresh = async () => {
         setIsLoading(true);
@@ -58,7 +74,7 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
             const organizationId = activeMember.organization_id;
             setCurrentMember(activeMember);
 
-            // 2. Fetch all Memberships (with names for sorting), Containers, and Equipment
+            // 2. Fetch all Memberships, Containers, and Equipment for this Org
             // JOIN with users to get full_name for sorting USER type memberships
             const membershipsWithNames = await db.getAll<OrgMembershipRecord & { full_name?: string }>(`
                 SELECT m.*, u.full_name 
@@ -100,18 +116,38 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
                 }
             });
 
-            // Create Equipment instances and assign to Containers or Owners
-            equipment.forEach(e => {
-                const equipmentInstance = new Equipment(e);
+            // Help with grouping
+            const topLevelEquipmentMap = new Map<string, Equipment>(); // Key: ownerId + name
+            const containerEquipmentMap = new Map<string, Map<string, Equipment>>(); // Key: containerId -> (name -> Equipment)
 
+            // Create Equipment instances and assign to Containers or Owners (with grouping)
+            equipment.forEach(e => {
                 if (e.container_id && containerMap.has(e.container_id)) {
-                    // Nested in a container
-                    containerMap.get(e.container_id)!.equipment.push(equipmentInstance);
+                    // Grouped inside a container
+                    const cId = e.container_id;
+                    if (!containerEquipmentMap.has(cId)) {
+                        containerEquipmentMap.set(cId, new Map());
+                    }
+                    const cMap = containerEquipmentMap.get(cId)!;
+                    if (cMap.has(e.name)) {
+                        cMap.get(e.name)!.addRecord(e);
+                    } else {
+                        const equipmentInstance = new Equipment(e);
+                        cMap.set(e.name, equipmentInstance);
+                        containerMap.get(cId)!.equipment.push(equipmentInstance);
+                    }
                 } else {
-                    // Top-level item
+                    // Top-level item grouping
                     const ownerId = e.assigned_to;
-                    if (tempMap.has(ownerId)) {
-                        tempMap.get(ownerId)!.items.push(equipmentInstance);
+                    const groupKey = `${ownerId}_${e.name}`;
+                    if (topLevelEquipmentMap.has(groupKey)) {
+                        topLevelEquipmentMap.get(groupKey)!.addRecord(e);
+                    } else {
+                        const equipmentInstance = new Equipment(e);
+                        topLevelEquipmentMap.set(groupKey, equipmentInstance);
+                        if (tempMap.has(ownerId)) {
+                            tempMap.get(ownerId)!.items.push(equipmentInstance);
+                        }
                     }
                 }
             });
@@ -139,6 +175,8 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
             // Insert into a new Map in sorted order
             const finalMap = new Map<string, OrgOwnership>();
             sortedItems.forEach(item => {
+                // Also sort items within each ownership
+                item.items.sort((a, b) => a.name.localeCompare(b.name));
                 finalMap.set(item.membership.id, item);
             });
 
@@ -155,8 +193,23 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
         refresh();
     }, [membershipId, user]);
 
+    const contextValue: EquipmentContextType = {
+        currentMember,
+        ownerships,
+        isLoading,
+        refresh,
+        equipmentOverlayVisible,
+        setEquipmentOverlayVisible,
+        containerOverlayVisible,
+        setContainerOverlayVisible,
+        selectedEquipment,
+        setSelectedEquipment,
+        selectedContainer,
+        setSelectedContainer,
+    };
+
     return (
-        <EquipmentContext.Provider value={{ currentMember, ownerships, isLoading, refresh }}>
+        <EquipmentContext.Provider value={contextValue}>
             {children}
         </EquipmentContext.Provider>
     );

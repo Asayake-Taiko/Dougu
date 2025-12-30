@@ -5,6 +5,7 @@ import { Container, Equipment } from "../../types/models";
 import { chunkArray } from "../../lib/helper/EquipmentUtils";
 import { ItemStyles } from "../../styles/ItemStyles";
 import EquipmentDisplay from "./EquipmentDisplay";
+import { useEquipment } from "../../lib/context/EquipmentContext";
 
 /*
   ContainerItem is a component that displays a container object with its name and
@@ -24,11 +25,12 @@ export default function ContainerItem({
     const firstNine = equipmentItems.slice(0, 9);
     const chunkedData = chunkArray(firstNine, 3);
 
+    const { setSelectedContainer, setContainerOverlayVisible } = useEquipment();
+
     const tapGesture = Gesture.Tap()
         .onEnd(() => {
-            // In the new model, we might want to navigate or open an overlay
-            // For now, let's keep it simple or implement the corresponding logic if available
-            console.log("Container tapped:", containerData.name);
+            setSelectedContainer(item);
+            setContainerOverlayVisible(true);
         })
         .runOnJS(true);
 
@@ -49,13 +51,13 @@ export default function ContainerItem({
                             <View key={index} style={ItemStyles.equipmentRow}>
                                 {row.map((equip) => (
                                     <View
-                                        key={equip.equipment.id}
+                                        key={equip.id}
                                         style={ItemStyles.equipmentItemContainer}
                                     >
                                         <EquipmentDisplay
-                                            imageKey={equip.equipment.image}
+                                            imageKey={equip.image}
                                             isMini={true}
-                                            color={equip.equipment.color}
+                                            color={equip.color}
                                         />
                                     </View>
                                 ))}

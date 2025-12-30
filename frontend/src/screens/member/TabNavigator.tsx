@@ -13,6 +13,8 @@ import EquipmentScreen from './Equipment';
 import SwapScreen from './Swap';
 import TeamScreen from './Team';
 import { EquipmentProvider, useEquipment } from '../../lib/context/EquipmentContext';
+import EquipmentOverlay from '../../components/member/EquipmentOverlay';
+import ContainerOverlay from '../../components/member/ContainerOverlay';
 import { useAuth } from '../../lib/context/AuthContext';
 import { db } from '../../lib/powersync/PowerSync';
 import { OrgMembershipRecord } from '../../types/db';
@@ -175,6 +177,8 @@ export default function MemberTabs({ route, navigation }: DrawerScreenProps<Draw
     return (
         <EquipmentProvider membershipId={membershipId}>
             <TabNavigatorContent organizationId={organizationId} />
+            <EquipmentOverlay />
+            <ContainerOverlay />
         </EquipmentProvider>
     );
 }

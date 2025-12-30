@@ -33,23 +33,33 @@ export class Container {
 
 export class Equipment {
     readonly type = 'equipment';
-    equipment: EquipmentRecord;
+    records: EquipmentRecord[];
+    selectedRecordIndex: number = 0;
 
-    constructor(equipment: EquipmentRecord) {
-        this.equipment = equipment;
+    constructor(record: EquipmentRecord) {
+        this.records = [record];
     }
 
-    get id() { return this.equipment.id; }
-    get name() { return this.equipment.name; }
-    get color() { return this.equipment.color; }
-    get image() { return this.equipment.image; }
-    get organizationId() { return this.equipment.organization_id; }
+    addRecord(record: EquipmentRecord) {
+        this.records.push(record);
+    }
+
+    get selectedRecord() {
+        return this.records[this.selectedRecordIndex] || this.records[0];
+    }
+
+    get count() { return this.records.length; }
+    get id() { return this.selectedRecord.id; }
+    get name() { return this.selectedRecord.name; }
+    get color() { return this.selectedRecord.color; }
+    get image() { return this.selectedRecord.image; }
+    get organizationId() { return this.selectedRecord.organization_id; }
 
     getEquipment() {
-        return this.equipment;
+        return this.selectedRecord;
     }
 
     inContainer() {
-        return this.equipment.container_id !== null;
+        return this.selectedRecord.container_id !== null;
     }
 }

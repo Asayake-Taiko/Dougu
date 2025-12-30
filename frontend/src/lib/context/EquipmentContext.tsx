@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { db } from '../powersync/PowerSync';
 import { useAuth } from './AuthContext';
 import { Logger } from '../Logger';
-import { OrgOwnership } from '../../types/models';
+import { Container, Equipment, OrgOwnership } from '../../types/models';
 import { OrgMembershipRecord, ContainerRecord, EquipmentRecord } from '../../types/db';
 
 interface EquipmentContextType {
@@ -24,10 +24,10 @@ export const useEquipment = () => {
 
 interface EquipmentProviderProps {
     children: ReactNode;
-    organizationId: string;
+    membershipId: string;
 }
 
-export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, organizationId }) => {
+export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, membershipId }) => {
     const { user } = useAuth();
     const [currentMember, setCurrentMember] = useState<OrgMembershipRecord | null>(null);
     const [ownerships, setOwnerships] = useState<Map<string, OrgOwnership>>(new Map());
@@ -41,20 +41,22 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
                 return;
             }
 
-            // 1. Get current member to verify access
-            const currentMemberResult = await db.getAll<OrgMembershipRecord>(
-                'SELECT * FROM org_memberships WHERE organization_id = ? AND user_id = ?',
-                [organizationId, user.id]
+            // 1. Resolve Membership and Organization
+            const membershipResult = await db.getAll<OrgMembershipRecord>(
+                'SELECT * FROM org_memberships WHERE id = ?',
+                [membershipId]
             );
 
-            if (currentMemberResult.length === 0) {
-                Logger.warn(`Access Denied: User ${user.id} is not a member of org ${organizationId}`);
+            if (membershipResult.length === 0) {
+                Logger.error(`Membership not found: ${membershipId}`);
                 setCurrentMember(null);
                 setOwnerships(new Map());
-                // Ideally trigger navigation back or show error
                 return;
             }
-            setCurrentMember(currentMemberResult[0]);
+
+            const activeMember = membershipResult[0];
+            const organizationId = activeMember.organization_id;
+            setCurrentMember(activeMember);
 
             // 2. Fetch all Memberships (with names for sorting), Containers, and Equipment
             // JOIN with users to get full_name for sorting USER type memberships
@@ -77,33 +79,40 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
 
             // 3. Aggregate Data
             const tempMap = new Map<string, OrgOwnership>();
+            const containerMap = new Map<string, Container>();
 
             // Initialize all memberships as ownership roots
-            // We use a temporary map by ID to easy lookup for linking children
             membershipsWithNames.forEach(m => {
                 tempMap.set(m.id, {
                     membership: m,
-                    containers: [],
-                    equipment: []
+                    items: []
                 });
             });
 
-            // Assign Containers to their attributes owners
+            // Create Container instances and assign to owners
             containers.forEach(c => {
+                const containerInstance = new Container(c);
+                containerMap.set(c.id, containerInstance);
+
                 const ownerId = c.assigned_to;
                 if (tempMap.has(ownerId)) {
-                    tempMap.get(ownerId)!.containers.push(c);
-                } else {
-                    // Logic for unassigned/orphaned containers could go here
+                    tempMap.get(ownerId)!.items.push(containerInstance);
                 }
             });
 
-            // Assign Equipment to their owners
+            // Create Equipment instances and assign to Containers or Owners
             equipment.forEach(e => {
-                const ownerId = e.assigned_to;
-                // Only include equipment NOT in a container (top level items)
-                if (!e.container_id && tempMap.has(ownerId)) {
-                    tempMap.get(ownerId)!.equipment.push(e);
+                const equipmentInstance = new Equipment(e);
+
+                if (e.container_id && containerMap.has(e.container_id)) {
+                    // Nested in a container
+                    containerMap.get(e.container_id)!.equipment.push(equipmentInstance);
+                } else {
+                    // Top-level item
+                    const ownerId = e.assigned_to;
+                    if (tempMap.has(ownerId)) {
+                        tempMap.get(ownerId)!.items.push(equipmentInstance);
+                    }
                 }
             });
 
@@ -144,7 +153,7 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
 
     useEffect(() => {
         refresh();
-    }, [organizationId, user]);
+    }, [membershipId, user]);
 
     return (
         <EquipmentContext.Provider value={{ currentMember, ownerships, isLoading, refresh }}>

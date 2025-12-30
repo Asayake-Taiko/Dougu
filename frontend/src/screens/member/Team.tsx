@@ -1,32 +1,43 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { MemberTabScreenProps } from '../../types/navigation';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { useEquipment } from '../../lib/context/EquipmentContext';
+import ScrollRow from '../../components/member/ScrollRow';
 
-export default function TeamScreen({ route }: MemberTabScreenProps<'Team'>) {
-    const { organizationId } = route.params;
+export default function TeamScreen() {
+    const { ownerships } = useEquipment();
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Team Screen</Text>
-            <Text style={styles.subText}>Org ID: {organizationId}</Text>
+        <View style={{ backgroundColor: "white", minHeight: "100%" }}>
+            <FlatList
+                data={Array.from(ownerships.values())}
+                keyExtractor={(ownership) => ownership.membership.id}
+                renderItem={({ item: ownership }) => {
+                    const { membership, items } = ownership;
+                    const displayName = membership.type === 'USER'
+                        ? ((membership as any).full_name || 'Unknown User')
+                        : (membership.storage_name || 'Storage');
+
+                    return (
+                        <View style={styles.userContainer}>
+                            <Text style={styles.scrollText}>{displayName}</Text>
+                            <ScrollRow listData={items} isSwap={false} />
+                        </View>
+                    );
+                }}
+            />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
+    scrollText: {
+        height: 40,
+        fontSize: 20,
+        fontWeight: "bold",
+        marginLeft: 20,
     },
-    text: {
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
-    subText: {
-        fontSize: 14,
-        color: '#666',
-        marginTop: 8,
+    userContainer: {
+        minHeight: 200,
+        backgroundColor: "white",
     },
 });

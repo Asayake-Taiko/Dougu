@@ -1,32 +1,40 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { MemberTabScreenProps } from '../../types/navigation';
+import React from "react";
+import { Text, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
-export default function EquipmentScreen({ route }: MemberTabScreenProps<'Equipment'>) {
-    const { organizationId } = route.params;
+// Project imports
+import { useEquipment } from "../../lib/context/EquipmentContext";
+import { chunkArray } from "../../lib/helper/EquipmentUtils";
+import { EquipmentStyles } from "../../styles/EquipmentStyles";
+import Item from "../../components/member/Item";
+
+/*
+  Screen for viewing all equipment assigned to the current user
+*/
+export default function EquipmentScreen() {
+    const { ownerships, currentMember } = useEquipment();
+
+    // Get the items assigned to the current user
+    const userItems = ownerships.get(currentMember!.id);
+    const items = userItems?.items || [];
+    const chunkedData = chunkArray(items, 3);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Equipment Screen</Text>
-            <Text style={styles.subText}>Org ID: {organizationId}</Text>
+        <View style={EquipmentStyles.background}>
+            <ScrollView>
+                <View style={EquipmentStyles.container}>
+                    <Text style={EquipmentStyles.title}>My Equipment</Text>
+                    {chunkedData.map((group, index) => (
+                        <View key={index} style={EquipmentStyles.equipmentRow}>
+                            {group.map((item) => (
+                                <View key={item.id} style={EquipmentStyles.equipmentItemContainer}>
+                                    <Item data={item} swapable={false} />
+                                </View>
+                            ))}
+                        </View>
+                    ))}
+                </View>
+            </ScrollView>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-    },
-    text: {
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
-    subText: {
-        fontSize: 14,
-        color: '#666',
-        marginTop: 8,
-    },
-});

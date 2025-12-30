@@ -13,6 +13,9 @@ import EquipmentScreen from './Equipment';
 import SwapScreen from './Swap';
 import TeamScreen from './Team';
 import { EquipmentProvider, useEquipment } from '../../lib/context/EquipmentContext';
+import { useAuth } from '../../lib/context/AuthContext';
+import { db } from '../../lib/powersync/PowerSync';
+import { OrgMembershipRecord } from '../../types/db';
 
 const Tab = createBottomTabNavigator<MemberTabParamList>();
 
@@ -76,8 +79,10 @@ function TabNavigatorContent({ organizationId }: { organizationId: string }) {
 }
 
 export default function MemberTabs({ route, navigation }: DrawerScreenProps<DrawerStackParamList, 'MemberTabs'>) {
+    const { user } = useAuth();
     const [organizationId, setOrganizationId] = useState<string | undefined>(route.params?.organizationId);
     const [organizationName, setOrganizationName] = useState<string | undefined>(route.params?.organizationName);
+    const [membershipId, setMembershipId] = useState<string | null>(null);
     const [isResolving, setIsResolving] = useState(true);
 
     // Initial load from SecureStore if params are missing
@@ -95,10 +100,41 @@ export default function MemberTabs({ route, navigation }: DrawerScreenProps<Draw
                     console.error("Failed to load persisted org", e);
                 }
             }
-            setIsResolving(false);
+            // isResolving is actually finished after the membership resolution effect runs
         }
         loadPersistedOrg();
     }, []);
+
+    // Resolve membership and handle stale orgs
+    useEffect(() => {
+        async function resolveMembership() {
+            if (!user) return;
+
+            if (organizationId) {
+                const result = await db.getOptional<OrgMembershipRecord>(
+                    'SELECT id FROM org_memberships WHERE organization_id = ? AND user_id = ?',
+                    [organizationId, user.id]
+                );
+
+                if (result) {
+                    setMembershipId(result.id);
+                } else {
+                    // Stale org or user switched to one they aren't in
+                    setMembershipId(null);
+                    setOrganizationId(undefined);
+                    setOrganizationName(undefined);
+
+                    // Clear storage
+                    SecureStore.deleteItemAsync(STORAGE_KEYS.ORG_ID);
+                    SecureStore.deleteItemAsync(STORAGE_KEYS.ORG_NAME);
+                }
+            } else {
+                setMembershipId(null);
+            }
+            setIsResolving(false);
+        }
+        resolveMembership();
+    }, [organizationId, user]);
 
     // Update state and persist when route params change
     useEffect(() => {
@@ -126,7 +162,7 @@ export default function MemberTabs({ route, navigation }: DrawerScreenProps<Draw
         return <SplashScreen />;
     }
 
-    if (!organizationId || !organizationName) {
+    if (!organizationId || !membershipId) {
         return (
             <View style={{ flex: 1, alignItems: 'center', padding: 20, marginTop: "50%" }}>
                 <Text style={{ fontSize: 18, textAlign: 'center' }}>
@@ -137,7 +173,7 @@ export default function MemberTabs({ route, navigation }: DrawerScreenProps<Draw
     }
 
     return (
-        <EquipmentProvider organizationId={organizationId}>
+        <EquipmentProvider membershipId={membershipId}>
             <TabNavigatorContent organizationId={organizationId} />
         </EquipmentProvider>
     );

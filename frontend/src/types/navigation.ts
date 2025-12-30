@@ -13,7 +13,7 @@ export type AuthStackParamList = {
 // Drawer Stack Parameter List
 export type DrawerStackParamList = {
     Profile: undefined;
-    OrgList: undefined;
+    MyOrgs: undefined;
     JoinOrg: undefined;
     CreateOrg: undefined;
 };
@@ -28,6 +28,6 @@ export type ResetPasswordScreenRouteProp = RouteProp<AuthStackParamList, 'ResetP
 
 // Navigation props for Drawer screens
 export type ProfileScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'Profile'>;
-export type OrgListScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'OrgList'>;
+export type MyOrgsScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'MyOrgs'>;
 export type JoinOrgScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'JoinOrg'>;
 export type CreateOrgScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'CreateOrg'>;

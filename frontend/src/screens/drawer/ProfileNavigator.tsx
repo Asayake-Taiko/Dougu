@@ -3,9 +3,10 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import ProfileScreen from './Profile';
 import CreateOrgScreen from './CreateOrg';
 import JoinOrgScreen from './JoinOrg';
-import OrgListScreen from './OrgList';
+import MyOrgsScreen from './MyOrgs';
+import { DrawerStackParamList } from '../../types/navigation';
 
-const Drawer = createDrawerNavigator();
+const Drawer = createDrawerNavigator<DrawerStackParamList>();
 
 export default function ProfileNavigator() {
     return (
@@ -17,8 +18,8 @@ export default function ProfileNavigator() {
         >
             <Drawer.Screen name="Profile" component={ProfileScreen} />
             <Drawer.Screen
-                name="OrgList"
-                component={OrgListScreen}
+                name="MyOrgs"
+                component={MyOrgsScreen}
                 options={{ drawerLabel: "My Orgs", title: "My Orgs" }}
             />
             <Drawer.Screen

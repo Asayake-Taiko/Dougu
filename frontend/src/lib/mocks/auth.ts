@@ -1,149 +1,132 @@
 import { UserType } from '../../types/auth';
 import { AuthResponse } from '../../types/auth';
+import { db } from '../powersync/PowerSync';
+import { v4 as uuidv4 } from 'uuid';
+import { UserRecord } from '../../types/db';
 
-interface FakeUser extends UserType {
-    password: string;           // we don't store passwords like this in real apps!
-    code: string;               // confirmation code for resetting password
-}
-
-const fakeUsers: Record<string, FakeUser> = {
-    'johndoe@example.com': {
-        id: '123',
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        profile: 'default',
-        password: 'password123',
-        code: '000000',
-    },
-    'janesmith@example.com': {
-        id: '124',
-        name: 'Jane Smith',
-        email: 'janesmith@example.com',
-        profile: 'default',
-        password: 'password456',
-        code: '111111',
-    },
-    'e@gmail.com': {
-        id: '125',
-        name: 'Test User',
-        email: 'e@gmail.com',
-        profile: 'default',
-        password: 'password',
-        code: '222222',
-    },
-}
+let HARDCODED_PASSWORD = 'password';
+const HARDCODED_CODE = '22222';
 
 export const mockLogin = async (email: string, password: string): Promise<AuthResponse> => {
     email = email.toLowerCase();
-    const fakeUser = fakeUsers[email.toLowerCase()];
-    if (fakeUser && password === fakeUser.password) {
-        const { password, ...user } = fakeUser; // Remove password from response
+
+    if (password !== HARDCODED_PASSWORD) {
+        throw new Error('Invalid credentials');
+    }
+
+    const start = new Date().getTime();
+    while (new Date().getTime() - start < 1000) {
+        // Wait for 1 second to simulate network delay
+    }
+
+    const result = await db.getAll('SELECT * FROM users WHERE email = ?', [email]);
+    if (result.length > 0) {
+        const userRecord = result[0] as UserRecord;
+        const user: UserType = {
+            id: userRecord.id,
+            name: userRecord.full_name,
+            email: userRecord.email,
+            profile: userRecord.profile,
+        };
+
         return {
             user,
             token: 'fake-jwt-token-' + user.id,
         } as AuthResponse;
     } else {
-        throw new Error('Invalid credentials');
+        throw new Error('User not found');
     }
 };
 
 export const mockRegister = async (email: string, name: string, password: string): Promise<AuthResponse> => {
     email = email.toLowerCase();
-    if (fakeUsers[email]) {
+
+    const existing = await db.getAll('SELECT * FROM users WHERE email = ?', [email]);
+    if (existing.length > 0) {
         throw new Error('User already exists');
     }
-    const newUser: FakeUser = {
-        id: (Object.keys(fakeUsers).length + 123).toString(),
+
+    const newId = uuidv4();
+    const now = new Date().toISOString();
+
+    await db.execute(
+        'INSERT INTO users (id, email, full_name, profile, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+        [newId, email, name, 'default', now, now]
+    );
+
+    const user: UserType = {
+        id: newId,
         name: name,
         email: email,
-        password: password,
         profile: 'default',
-        code: '333333',
     };
-    fakeUsers[email] = newUser;
-    const { password: _password, ...user } = newUser; // Remove password from response
+
     return {
         user,
-        token: 'fake-jwt-token-' + user.id,
+        token: 'fake-jwt-token-' + newId,
     } as AuthResponse;
 };
 
 export const mockSendCode = async (email: string): Promise<void> => {
     email = email.toLowerCase();
-    if (!fakeUsers[email]) {
+    const result = await db.getAll('SELECT * FROM users WHERE email = ?', [email]);
+    if (result.length === 0) {
         throw new Error('Email not found');
     }
-    return;
 };
 
 export const mockResetPassword = async (email: string, code: string, new_password: string): Promise<void> => {
     email = email.toLowerCase();
-    const user = fakeUsers[email];
-    if (!user) {
+
+    const result = await db.getAll('SELECT * FROM users WHERE email = ?', [email]);
+    if (result.length === 0) {
         throw new Error('Email not found');
     }
-    user.password = new_password;
-    return;
+
+    if (code !== HARDCODED_CODE) {
+        throw new Error('Invalid code');
+    }
 };
 
 export const mockUpdateProfile = async (email: string, profileKey: string): Promise<void> => {
     email = email.toLowerCase();
-    const user = fakeUsers[email];
-    if (!user) {
-        throw new Error('Email not found');
-    }
-    user.profile = profileKey;
-    return;
+    const now = new Date().toISOString();
+
+    // We update by email here since the context passes email, but ideally ID is better
+    await db.execute('UPDATE users SET profile = ?, updated_at = ? WHERE email = ?', [profileKey, now, email]);
 };
 
-export const mockUpdatePassword = async (email: string, currentPassword: string, newPassword: string): Promise<void> => {
-    email = email.toLowerCase();
-    const user = fakeUsers[email];
-    if (!user) {
-        throw new Error('Email not found');
-    }
-    if (user.password !== currentPassword) {
+export const mockUpdatePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+    if (currentPassword !== HARDCODED_PASSWORD) {
         throw new Error('Current password is incorrect');
     }
-    user.password = newPassword;
-    return;
+    HARDCODED_PASSWORD = newPassword;
 };
 
 export const mockUpdateName = async (email: string, name: string): Promise<void> => {
     email = email.toLowerCase();
-    const user = fakeUsers[email];
-    if (!user) {
-        throw new Error('Email not found');
-    }
-    user.name = name;
-    return;
+    const now = new Date().toISOString();
+    await db.execute('UPDATE users SET full_name = ?, updated_at = ? WHERE email = ?', [name, now, email]);
 };
 
 export const mockUpdateEmail = async (oldEmail: string, newEmail: string, code: string): Promise<void> => {
     oldEmail = oldEmail.toLowerCase();
     newEmail = newEmail.toLowerCase();
-    const user = fakeUsers[oldEmail];
-    if (!user) {
-        throw new Error('Old email not found');
-    }
-    if (fakeUsers[newEmail]) {
-        throw new Error('New email already in use');
-    }
-    if (user.code !== code) {
+
+    if (code !== HARDCODED_CODE) {
         throw new Error('Invalid code');
     }
-    delete fakeUsers[oldEmail];
-    user.email = newEmail;
-    fakeUsers[newEmail] = user;
-    return;
+
+    const existing = await db.getAll('SELECT * FROM users WHERE email = ?', [newEmail]);
+    if (existing.length > 0) {
+        throw new Error('New email already in use');
+    }
+
+    const now = new Date().toISOString();
+    await db.execute('UPDATE users SET email = ?, updated_at = ? WHERE email = ?', [newEmail, now, oldEmail]);
 };
 
 export const mockDeleteAccount = async (email: string): Promise<void> => {
     email = email.toLowerCase();
-    const user = fakeUsers[email];
-    if (!user) {
-        throw new Error('Email not found');
-    }
-    delete fakeUsers[email];
-    return;
+    await db.execute('DELETE FROM users WHERE email = ?', [email]);
 };

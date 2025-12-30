@@ -4,10 +4,11 @@ import {
     StyleSheet,
     Text,
     View,
-    Pressable,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors, Spacing } from "../../styles/global";
+import { PressableOpacity } from "../PressableOpacity";
 
 interface BaseProfileOverlayProps {
     visible: boolean;
@@ -22,22 +23,24 @@ export default function BaseProfileOverlay({
     title,
     children
 }: BaseProfileOverlayProps) {
+    const insets = useSafeAreaInsets();
+
     return (
         <Modal
             visible={visible}
             animationType="slide"
             onRequestClose={() => setVisible(false)}
         >
-            <View style={styles.safeArea}>
+            <View style={[styles.safeArea, { paddingTop: insets.top }]}>
                 <View style={styles.container}>
                     <View style={styles.headerRow}>
-                        <Pressable
+                        <PressableOpacity
                             onPress={() => setVisible(false)}
                             style={styles.backButton}
                         >
                             <FontAwesome name="arrow-left" size={16} color={Colors.black} />
                             <Text style={styles.backText}>Profile</Text>
-                        </Pressable>
+                        </PressableOpacity>
                     </View>
                     <Text style={styles.title}>{title}</Text>
                     <View style={styles.content}>

@@ -37,7 +37,6 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState<UserType | null>(null);
-    const IS_DEV = process.env.EXPO_PUBLIC_IS_DEV === 'true';
 
     // Load user from secure storage on mount
     useEffect(() => {
@@ -61,10 +60,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const login = async (email: string, password: string) => {
         let res;
-        if (IS_DEV) {
+        if (__DEV__) {
             res = await mockLogin(email, password);
         } else {
-            // Here you would call the real login API
             throw new Error('Real login not implemented');
         }
         setUser(res.user);
@@ -77,78 +75,69 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const register = async (email: string, name: string, password: string) => {
         let res;
-        if (IS_DEV) {
+        if (__DEV__) {
             res = await mockRegister(email, name, password);
         } else {
-            // Here you would call the real register API
             throw new Error('Real register not implemented');
         }
         setUser(res.user);
     }
 
     const sendCode = async (email: string) => {
-        if (IS_DEV) {
-            // Simulate sending code in dev mode
+        if (__DEV__) {
             await mockSendCode(email);
         } else {
-            // Here you would call the real send code API
             throw new Error('Real send code not implemented');
         }
     };
 
     const resetPassword = async (password: string, confirmPassword: string, code: string) => {
-        if (IS_DEV) {
+        if (__DEV__) {
             await mockResetPassword(password, confirmPassword, code);
         } else {
-            // Here you would call the real reset password API
             throw new Error('Real reset password not implemented');
         }
     };
 
     const updateProfile = async (profileKey: string) => {
-        if (IS_DEV) {
+        if (__DEV__) {
             await mockUpdateProfile(user!.email, profileKey);
         } else {
-            // Here you would call the real update profile API
             throw new Error('Real update profile not implemented');
         }
         setUser({ ...user!, profile: profileKey });
     };
 
     const updateName = async (name: string) => {
-        if (IS_DEV) {
+        if (__DEV__) {
             await mockUpdateName(user!.email, name);
         } else {
-            // Here you would call the real update name API
             throw new Error('Real update name not implemented');
         }
         setUser({ ...user!, name });
     };
 
     const updateEmail = async (email: string, code: string) => {
-        if (IS_DEV) {
+        if (__DEV__) {
             await mockUpdateEmail(user!.email, email, code);
         } else {
-            // Here you would call the real update email API
             throw new Error('Real update email not implemented');
         }
         setUser({ ...user!, email });
     };
 
     const updatePassword = async (currentPassword: string, newPassword: string) => {
-        if (IS_DEV) {
-            await mockUpdatePassword(user!.email, currentPassword, newPassword);
+        if (__DEV__) {
+            await mockUpdatePassword(currentPassword, newPassword);
         } else {
-            // Here you would call the real update password API
             throw new Error('Real update password not implemented');
         }
     };
 
     const deleteAccount = async () => {
-        if (IS_DEV) {
+        if (__DEV__) {
             await mockDeleteAccount(user!.email);
         } else {
-            // Here you would call the real delete account API
             throw new Error('Real delete account not implemented');
         }
         setUser(null);

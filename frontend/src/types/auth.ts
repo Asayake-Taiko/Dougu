@@ -1,4 +1,3 @@
-// this context is set whenever the useer logs in
 export type UserType = {
   name: string;
   email: string;

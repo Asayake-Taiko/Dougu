@@ -4,12 +4,15 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
+    "@op-engineering/op-sqlite": "^14.1.4",
+    "@powersync/op-sqlite": "^0.7.17",
+    "@powersync/react-native": "^1.28.0",
     "@react-navigation/drawer": "^7.7.10",
     "@react-navigation/native": "^7.1.26",
     "@react-navigation/stack": "^7.6.13",
@@ -27,6 +30,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "@types/uuid": "^10.0.0",
     "typescript": "~5.9.2"
   },
   "private": true

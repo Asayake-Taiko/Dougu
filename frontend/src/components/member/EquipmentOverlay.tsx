@@ -55,7 +55,7 @@ export default function EquipmentOverlay() {
             >
               <View style={styles.cardHeader}>
                 <Text style={[styles.recordId, isSelected && styles.selectedText]}>
-                  Item #{index + 1} {isSelected ? "(Selected)" : ""}
+                  {item.name} {isSelected ? "(Selected)" : ""}
                 </Text>
                 <View style={[styles.colorBadge, { backgroundColor: record.color }]} />
               </View>

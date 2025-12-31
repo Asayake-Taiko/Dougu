@@ -1,10 +1,9 @@
-import { useRef } from "react";
 import { GestureStateChangeEvent, PanGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { Dimensions } from "react-native";
 import { useEquipment } from "../context/EquipmentContext";
 import { Item } from "../../types/models";
 
-const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
+const { width: windowWidth } = Dimensions.get("window");
 
 export default function useSet({
   halfLine,
@@ -14,6 +13,7 @@ export default function useSet({
   listTwo,
   setDraggingItem,
   headerHeight,
+  containerPage,
 }: {
   halfLine: React.RefObject<number>;
   topPage: number;
@@ -22,8 +22,9 @@ export default function useSet({
   listTwo: Item[];
   setDraggingItem: (item: Item | null) => void;
   headerHeight: number;
+  containerPage: number;
 }) {
-  const { selectedContainer: containerItem, containerPage } = useEquipment();
+  const { selectedContainer: containerItem } = useEquipment();
 
   const handleSetItem = (e: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => {
     const y = e.absoluteY;
@@ -51,15 +52,34 @@ export default function useSet({
     const x = e.absoluteX;
     const y = e.absoluteY;
 
-    const startX = 0.075 * windowWidth;
-    const endX = 0.925 * windowWidth;
-    const startY = 0.2 * windowHeight;
-    const endY = 0.7 * windowHeight + 30;
+    // Based on ContainerOverlayStyles:
+    // titleContainer: marginTop 80 + height 80 = 160
+    // itemContainer: marginTop 5 = 165
+    // itemPage: padding 10
+    const containerTop = 165 + headerHeight;
+    const padding = 10;
+    const gridStartY = containerTop + padding;
 
-    if (x < startX || x > endX || y < startY || y > endY) return;
+    const containerWidth = 0.85 * windowWidth;
+    const containerStartX = (windowWidth - containerWidth) / 2; // 0.075 * windowWidth
+    const gridStartX = containerStartX + padding;
 
-    const row = Math.floor((y - startY) / (0.18 * windowHeight));
-    const col = Math.floor((x - startX) / ((windowWidth * 0.85) / 3));
+    const rowHeight = 130;
+    const rowGap = 10;
+    const colWidth = (containerWidth - 2 * padding) / 3;
+
+    // Check if within grid bounds
+    const gridWidth = containerWidth - 2 * padding;
+    const gridHeight = 3 * rowHeight + 2 * rowGap;
+
+    if (x < gridStartX || x > gridStartX + gridWidth || y < gridStartY || y > gridStartY + gridHeight) return;
+
+    const row = Math.floor((y - gridStartY) / (rowHeight + rowGap));
+    const col = Math.floor((x - gridStartX) / colWidth);
+
+    // Boundary check for row/col (Math.floor can still be in gaps)
+    if (row < 0 || row > 2 || col < 0 || col > 2) return;
+
     const idx = containerPage * 9 + row * 3 + col;
 
     if (idx >= 0 && idx < containerItem.equipment.length) {

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Pressable, Dimensions } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { ScrollView, GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, { ZoomIn, ZoomOut, FadeIn, FadeOut } from "react-native-reanimated";
 import { useEquipment } from "../../lib/context/EquipmentContext";
@@ -10,13 +10,17 @@ import PaginationDots from "./PaginationDots";
 
 const { width: windowWidth } = Dimensions.get("window");
 
-export default function ContainerOverlay() {
+export default function ContainerOverlay({
+  containerPage,
+  setContainerPage,
+}: {
+  containerPage: number;
+  setContainerPage: (page: number) => void;
+}) {
   const {
     containerOverlayVisible: visible,
     setContainerOverlayVisible: setVisible,
     selectedContainer: item,
-    setContainerPage,
-    containerPage,
   } = useEquipment();
 
   if (!visible || !item) return null;

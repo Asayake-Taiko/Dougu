@@ -1,13 +1,21 @@
 import React from "react";
 import { StyleSheet, Dimensions } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
-import { useEquipment } from "../../lib/context/EquipmentContext";
 import ItemComponent from "./Item";
 
 const { width: windowWidth } = Dimensions.get("window");
 
-export default function FloatingDraggingItem() {
-    const { draggingItem, dragValues } = useEquipment();
+export default function FloatingDraggingItem({
+    draggingItem,
+    dragValues,
+}: {
+    draggingItem: any; // Using any for Item or null
+    dragValues: {
+        x: any;
+        y: any;
+        scale: any;
+    };
+}) {
 
     const movingStyles = useAnimatedStyle(() => {
         return {
@@ -31,11 +39,9 @@ export default function FloatingDraggingItem() {
 const styles = StyleSheet.create({
     floatingItem: {
         position: "absolute",
-        justifyContent: "center",
-        alignItems: "center",
         zIndex: 100,
         width: windowWidth / 5,
-        height: windowWidth / 5,
+        height: windowWidth / 5 + 40,
         top: 0,
         left: 0,
     },

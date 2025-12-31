@@ -1,5 +1,5 @@
 import {
-  useSharedValue,
+  SharedValue,
   withSpring,
   withTiming,
   useAnimatedStyle,
@@ -12,7 +12,6 @@ import {
   PanGestureChangeEventPayload,
 } from "react-native-gesture-handler";
 import { Dimensions } from "react-native";
-import { useEquipment } from "../context/EquipmentContext";
 
 import { useHeaderHeight } from '@react-navigation/elements';
 
@@ -26,10 +25,15 @@ const { width: windowWidth } = Dimensions.get("window");
 */
 export default function useAnimateOverlay({
   setDraggingItem,
+  dragValues,
 }: {
   setDraggingItem: (item: any | null) => void;
+  dragValues: {
+    x: SharedValue<number>;
+    y: SharedValue<number>;
+    scale: SharedValue<number>;
+  };
 }) {
-  const { dragValues } = useEquipment();
   const headerHeight = useHeaderHeight();
 
   const movingStyles = useAnimatedStyle(() => {

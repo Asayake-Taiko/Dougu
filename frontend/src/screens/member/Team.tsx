@@ -2,9 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useEquipment } from '../../lib/context/EquipmentContext';
 import ScrollRow from '../../components/member/ScrollRow';
+import EquipmentOverlay from '../../components/member/EquipmentOverlay';
+import ContainerOverlay from '../../components/member/ContainerOverlay';
 
 export default function TeamScreen() {
     const { ownerships } = useEquipment();
+    const [containerPage, setContainerPage] = React.useState(0);
 
     return (
         <View style={{ backgroundColor: "white", minHeight: "100%" }}>
@@ -25,6 +28,8 @@ export default function TeamScreen() {
                     );
                 }}
             />
+            <EquipmentOverlay />
+            <ContainerOverlay containerPage={containerPage} setContainerPage={setContainerPage} />
         </View>
     );
 }

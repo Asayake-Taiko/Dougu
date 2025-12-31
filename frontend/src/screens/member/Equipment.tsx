@@ -7,6 +7,8 @@ import { useEquipment } from "../../lib/context/EquipmentContext";
 import { chunkArray } from "../../lib/helper/EquipmentUtils";
 import { EquipmentStyles } from "../../styles/EquipmentStyles";
 import Item from "../../components/member/Item";
+import EquipmentOverlay from "../../components/member/EquipmentOverlay";
+import ContainerOverlay from "../../components/member/ContainerOverlay";
 
 /*
   Screen for viewing all equipment assigned to the current user
@@ -21,6 +23,8 @@ export default function EquipmentScreen() {
     const userItems = ownerships.get(currentMember.id);
     const items = userItems?.items || [];
     const chunkedData = chunkArray(items, 3);
+
+    const [containerPage, setContainerPage] = React.useState(0);
 
     return (
         <View style={EquipmentStyles.background}>
@@ -38,6 +42,8 @@ export default function EquipmentScreen() {
                     ))}
                 </View>
             </ScrollView>
+            <EquipmentOverlay />
+            <ContainerOverlay containerPage={containerPage} setContainerPage={setContainerPage} />
         </View>
     );
 }

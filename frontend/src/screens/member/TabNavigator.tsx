@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { MemberTabParamList, DrawerStackParamList } from '../../types/navigation';
 import { DrawerScreenProps } from '@react-navigation/drawer';
-import { Text, View, ActivityIndicator } from 'react-native';
+import { Text, View } from 'react-native';
 import { Colors } from '../../styles/global/colors';
 import * as SecureStore from 'expo-secure-store';
 import SplashScreen from '../splash';
@@ -12,10 +12,7 @@ import SplashScreen from '../splash';
 import EquipmentScreen from './Equipment';
 import SwapScreen from './Swap';
 import TeamScreen from './Team';
-import { EquipmentProvider, useEquipment } from '../../lib/context/EquipmentContext';
-import EquipmentOverlay from '../../components/member/EquipmentOverlay';
-import ContainerOverlay from '../../components/member/ContainerOverlay';
-import FloatingDraggingItem from '../../components/member/FloatingDraggingItem';
+import { EquipmentProvider } from '../../lib/context/EquipmentContext';
 import { useAuth } from '../../lib/context/AuthContext';
 import { db } from '../../lib/powersync/PowerSync';
 import { OrgMembershipRecord } from '../../types/db';
@@ -168,9 +165,6 @@ export default function MemberTabs({ route, navigation }: DrawerScreenProps<Draw
     return (
         <EquipmentProvider membershipId={membershipId}>
             <TabNavigatorContent organizationId={organizationId} />
-            <EquipmentOverlay />
-            {/* <ContainerOverlay /> */}
-            <FloatingDraggingItem />
         </EquipmentProvider>
     );
 }

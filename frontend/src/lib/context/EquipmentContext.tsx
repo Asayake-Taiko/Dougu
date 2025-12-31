@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { SharedValue, useSharedValue } from 'react-native-reanimated';
+
 import { db } from '../powersync/PowerSync';
 import { useAuth } from './AuthContext';
 import { Logger } from '../Logger';
@@ -21,18 +21,8 @@ interface EquipmentContextType {
     selectedContainer: Container | null;
     setSelectedContainer: (container: Container | null) => void;
 
-    // Drag state
     draggingItem: Item | null;
     setDraggingItem: (item: Item | null) => void;
-
-    // Shared logic
-    containerPage: number;
-    setContainerPage: (page: number) => void;
-    dragValues: {
-        x: SharedValue<number>;
-        y: SharedValue<number>;
-        scale: SharedValue<number>;
-    };
 }
 
 const EquipmentContext = createContext<EquipmentContextType | undefined>(undefined);
@@ -63,12 +53,6 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
 
     // Drag state
     const [draggingItem, setDraggingItem] = useState<Item | null>(null);
-
-    // Shared logic
-    const [containerPage, setContainerPage] = useState(0);
-    const dragX = useSharedValue(0);
-    const dragY = useSharedValue(0);
-    const dragScale = useSharedValue(1);
 
     const refresh = async () => {
         try {
@@ -225,15 +209,6 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
         setSelectedContainer,
         draggingItem,
         setDraggingItem,
-
-        // Shared logic
-        containerPage,
-        setContainerPage,
-        dragValues: {
-            x: dragX,
-            y: dragY,
-            scale: dragScale,
-        },
     };
 
     return (

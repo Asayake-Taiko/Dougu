@@ -1,36 +1,44 @@
 import { useRef } from "react";
-import { PanGestureChangeEventPayload, GestureUpdateEvent } from "react-native-gesture-handler";
+import {
+  PanGestureHandlerEventPayload,
+  PanGestureChangeEventPayload,
+  GestureUpdateEvent
+} from "react-native-gesture-handler";
 import { Dimensions } from "react-native";
 import { withSpring } from "react-native-reanimated";
 import { Item, Container } from "../../types/models";
 import { useEquipment } from "../context/EquipmentContext";
 
-const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
+const { width: windowWidth } = Dimensions.get("window");
 
 export default function useHover({
   halfLine,
   draggingItem,
   topPage,
   bottomPage,
-  size,
   listOne,
   listTwo,
   handleScroll,
   clearScroll,
   headerHeight,
+  dragValues,
 }: {
   halfLine: React.RefObject<number>;
   draggingItem: Item | null;
   topPage: number;
   bottomPage: number;
-  size: any; // Using SharedValue but type varies
   listOne: Item[];
   listTwo: Item[];
   handleScroll: (isTop: boolean, direction: string) => void;
   clearScroll: () => void;
   headerHeight: number;
+  dragValues: {
+    x: any;
+    y: any;
+    scale: any;
+  };
 }) {
-  const { setContainerOverlayVisible, setSelectedContainer, dragValues } = useEquipment();
+  const { setContainerOverlayVisible, setSelectedContainer } = useEquipment();
   const prevPosition = useRef<string | null>(null);
   const containerTimeout = useRef<NodeJS.Timeout | null>(null);
   const overlayTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -59,7 +67,7 @@ export default function useHover({
     }
   };
 
-  const handleHover = (e: GestureUpdateEvent<PanGestureChangeEventPayload>) => {
+  const handleHover = (e: GestureUpdateEvent<PanGestureChangeEventPayload & PanGestureHandlerEventPayload>) => {
     if (!draggingItem || !halfLine.current) return;
 
     const y = e.absoluteY;
@@ -100,14 +108,14 @@ export default function useHover({
     prevPosition.current = position;
   };
 
-  const containerHover = (e: GestureUpdateEvent<PanGestureChangeEventPayload>) => {
+  const containerHover = (e: GestureUpdateEvent<PanGestureChangeEventPayload & PanGestureHandlerEventPayload>) => {
     const x = e.absoluteX;
     const y = e.absoluteY;
 
     const startX = 0.075 * windowWidth;
     const endX = 0.925 * windowWidth;
-    const startY = 0.2 * windowHeight;
-    const endY = 0.7 * windowHeight + 30;
+    const startY = 165 + headerHeight;
+    const endY = 615 + headerHeight;
 
     if (x < startX || x > endX || y < startY || y > endY) {
       if (!overlayTimeout.current) {

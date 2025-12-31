@@ -7,8 +7,8 @@ import {
   PanGestureHandlerEventPayload,
   GestureStateChangeEvent,
 } from "react-native-gesture-handler";
-import Animated from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
+import { useSharedValue } from "react-native-reanimated";
 
 
 import { useEquipment } from "../../lib/context/EquipmentContext";
@@ -22,12 +22,11 @@ import useScroll from "../../lib/helper/useScroll";
 import useSet from "../../lib/helper/useSet";
 import useHover from "../../lib/helper/useHover";
 import { db } from "../../lib/powersync/PowerSync";
-import ItemComponent from "./Item";
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import ContainerOverlay from "./ContainerOverlay";
-
-const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
+import EquipmentOverlay from "./EquipmentOverlay";
+import FloatingDraggingItem from "./FloatingDraggingItem";
 
 export default function SwapGestures({
   listOne,
@@ -42,8 +41,15 @@ export default function SwapGestures({
 }) {
   // state
   const halfLine = useRef<number>(0);
-  const { currentMember, containerOverlayVisible: swapContainerVisible, refresh, draggingItem, setDraggingItem } = useEquipment();
+  const { currentMember, containerOverlayVisible: swapContainerVisible, equipmentOverlayVisible, refresh, draggingItem, setDraggingItem } = useEquipment();
   const headerHeight = useHeaderHeight();
+
+  // Local drag state
+  const [containerPage, setContainerPage] = React.useState(0);
+  const dragX = useSharedValue(0);
+  const dragY = useSharedValue(0);
+  const dragScale = useSharedValue(1);
+  const dragValues = { x: dragX, y: dragY, scale: dragScale };
 
   // handle scrollRow scrolling
   const {
@@ -69,11 +75,12 @@ export default function SwapGestures({
     listTwo,
     setDraggingItem,
     headerHeight,
+    containerPage,
   });
 
   // handle the overlay animation
   const { size, movingStyles, animateStart, animateMove, animateFinalize } =
-    useAnimateOverlay({ setDraggingItem });
+    useAnimateOverlay({ setDraggingItem, dragValues });
 
   // handle item hovering
   const { handleHover, clearTimeouts, containerHover, hoverContainer } =
@@ -82,12 +89,12 @@ export default function SwapGestures({
       draggingItem,
       topPage,
       bottomPage,
-      size,
       listOne,
       listTwo,
       handleScroll,
       clearScroll,
       headerHeight,
+      dragValues,
     });
 
   // on layout of the top scrollRow, its bottom is the halfline
@@ -129,7 +136,9 @@ export default function SwapGestures({
     .maxPointers(1)
     .onStart((e) => {
       "worklet";
+      if (equipmentOverlayVisible) return;
       animateStart(e);
+
       if (swapContainerVisible) scheduleOnRN(containerSetItem, e);
       else scheduleOnRN(handleSetItem, e);
     })
@@ -181,7 +190,9 @@ export default function SwapGestures({
               nextPage={nextBottomPage}
             />
           </View>
-          <ContainerOverlay />
+          <ContainerOverlay containerPage={containerPage} setContainerPage={setContainerPage} />
+          <EquipmentOverlay />
+          <FloatingDraggingItem draggingItem={draggingItem} dragValues={dragValues} />
         </View>
       </GestureDetector>
 

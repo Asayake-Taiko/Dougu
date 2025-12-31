@@ -15,6 +15,7 @@ import ContainerOverlay from "../../components/member/ContainerOverlay";
 */
 export default function EquipmentScreen() {
     const { ownerships, currentMember } = useEquipment();
+    const [containerPage, setContainerPage] = React.useState(0);
     if (!currentMember) {
         return null;
     }
@@ -23,8 +24,6 @@ export default function EquipmentScreen() {
     const userItems = ownerships.get(currentMember.id);
     const items = userItems?.items || [];
     const chunkedData = chunkArray(items, 3);
-
-    const [containerPage, setContainerPage] = React.useState(0);
 
     return (
         <View style={EquipmentStyles.background}>

@@ -15,9 +15,9 @@ export default function ContainerOverlay() {
     containerOverlayVisible: visible,
     setContainerOverlayVisible: setVisible,
     selectedContainer: item,
+    setContainerPage,
+    containerPage,
   } = useEquipment();
-
-  const [currentPage, setCurrentPage] = useState(0);
 
   if (!visible || !item) return null;
 
@@ -29,7 +29,7 @@ export default function ContainerOverlay() {
     const pageIndex = Math.round(
       event.nativeEvent.contentOffset.x / (windowWidth * 0.85)
     );
-    setCurrentPage(pageIndex);
+    setContainerPage(pageIndex);
   };
 
   const tapGesture = Gesture.Tap()
@@ -101,7 +101,7 @@ export default function ContainerOverlay() {
           </ScrollView>
           <PaginationDots
             length={equipmentChunks3.length}
-            currIdx={currentPage}
+            currIdx={containerPage}
           />
         </Animated.View>
       </View>

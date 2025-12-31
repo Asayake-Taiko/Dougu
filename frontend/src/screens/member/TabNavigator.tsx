@@ -15,6 +15,7 @@ import TeamScreen from './Team';
 import { EquipmentProvider, useEquipment } from '../../lib/context/EquipmentContext';
 import EquipmentOverlay from '../../components/member/EquipmentOverlay';
 import ContainerOverlay from '../../components/member/ContainerOverlay';
+import FloatingDraggingItem from '../../components/member/FloatingDraggingItem';
 import { useAuth } from '../../lib/context/AuthContext';
 import { db } from '../../lib/powersync/PowerSync';
 import { OrgMembershipRecord } from '../../types/db';
@@ -30,16 +31,6 @@ const STORAGE_KEYS = {
  * Sub-component to access EquipmentProvider context and handle its loading state
  */
 function TabNavigatorContent({ organizationId }: { organizationId: string }) {
-    const { isLoading } = useEquipment();
-
-    if (isLoading) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color={Colors.primary} />
-                <Text style={{ marginTop: 10, color: Colors.gray500 }}>Loading data...</Text>
-            </View>
-        );
-    }
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -178,7 +169,8 @@ export default function MemberTabs({ route, navigation }: DrawerScreenProps<Draw
         <EquipmentProvider membershipId={membershipId}>
             <TabNavigatorContent organizationId={organizationId} />
             <EquipmentOverlay />
-            <ContainerOverlay />
+            {/* <ContainerOverlay /> */}
+            <FloatingDraggingItem />
         </EquipmentProvider>
     );
 }

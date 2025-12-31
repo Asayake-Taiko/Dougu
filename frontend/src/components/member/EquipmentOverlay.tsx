@@ -4,6 +4,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useEquipment } from "../../lib/context/EquipmentContext";
 import { Colors } from "../../styles/global/colors";
+import { Spacing } from "../../styles/global";
 
 export default function EquipmentOverlay() {
   const {
@@ -11,21 +12,18 @@ export default function EquipmentOverlay() {
     setEquipmentOverlayVisible: setVisible,
     selectedEquipment: item
   } = useEquipment();
-
-  const [selectedIndex, setSelectedIndex] = React.useState(item?.selectedRecordIndex || 0);
-
-  // Sync index if item changes
-  React.useEffect(() => {
-    if (item) {
-      setSelectedIndex(item.selectedRecordIndex);
-    }
-  }, [item]);
+  const [localUpdate, setLocalUpdate] = React.useState(0);
 
   if (!visible || !item) return null;
 
-  const handleSelect = (index: number) => {
-    setSelectedIndex(index);
-    item.selectedRecordIndex = index;
+  const handleToggle = (index: number) => {
+    item.toggleSelection(index);
+    setLocalUpdate(prev => prev + 1);
+  };
+
+  const handleSelectAll = () => {
+    item.selectAll();
+    setLocalUpdate(prev => prev + 1);
   };
 
   return (
@@ -36,14 +34,19 @@ export default function EquipmentOverlay() {
     >
       <View style={styles.header}>
         <Text style={styles.title}>{item.name}</Text>
-        <Pressable onPress={() => setVisible(false)} style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>Close</Text>
-        </Pressable>
+        <View style={styles.headerButtons}>
+          <Pressable onPress={handleSelectAll} style={styles.selectAllButton}>
+            <Text style={styles.selectAllText}>Select All</Text>
+          </Pressable>
+          <Pressable onPress={() => setVisible(false)} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {item.records.map((record, index) => {
-          const isSelected = selectedIndex === index;
+          const isSelected = item.selectedIndices.has(index);
           return (
             <Pressable
               key={record.id}
@@ -51,11 +54,11 @@ export default function EquipmentOverlay() {
                 styles.card,
                 isSelected && styles.selectedCard
               ]}
-              onPress={() => handleSelect(index)}
+              onPress={() => handleToggle(index)}
             >
               <View style={styles.cardHeader}>
                 <Text style={[styles.recordId, isSelected && styles.selectedText]}>
-                  {item.name} {isSelected ? "(Selected)" : ""}
+                  {item.name} {isSelected ? "✓" : ""}
                 </Text>
                 <View style={[styles.colorBadge, { backgroundColor: record.color }]} />
               </View>
@@ -65,6 +68,12 @@ export default function EquipmentOverlay() {
           );
         })}
       </ScrollView>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
+          {item.selectedCount} of {item.count} selected
+        </Text>
+      </View>
     </Animated.View>
   );
 }
@@ -88,10 +97,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: Colors.dark,
+  },
+  selectAllButton: {
+    padding: 8,
+    backgroundColor: Colors.gray200,
+    borderRadius: 6,
+  },
+  selectAllText: {
+    color: Colors.dark,
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   closeButton: {
     padding: 8,
@@ -115,6 +138,7 @@ const styles = StyleSheet.create({
   selectedCard: {
     borderColor: Colors.primary,
     borderWidth: 2,
+    backgroundColor: '#f0f0ff',
   },
   selectedText: {
     color: Colors.primary,
@@ -145,5 +169,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.gray400,
     textAlign: 'right',
+  },
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#f9f9f9',
+  },
+  footerText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.dark,
+    textAlign: 'center',
   }
 });

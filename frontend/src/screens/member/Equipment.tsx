@@ -13,9 +13,12 @@ import Item from "../../components/member/Item";
 */
 export default function EquipmentScreen() {
     const { ownerships, currentMember } = useEquipment();
+    if (!currentMember) {
+        return null;
+    }
 
     // Get the items assigned to the current user
-    const userItems = ownerships.get(currentMember!.id);
+    const userItems = ownerships.get(currentMember.id);
     const items = userItems?.items || [];
     const chunkedData = chunkArray(items, 3);
 

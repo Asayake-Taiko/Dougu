@@ -9,8 +9,31 @@ import { useEquipment } from "../../lib/context/EquipmentContext";
 /*
   EquipmentItem displays an equipment object with a name and optional count/preview.
 */
-export default function EquipmentItem({ item }: { item: Equipment }) {
-  const { setSelectedEquipment, setEquipmentOverlayVisible } = useEquipment();
+export default function EquipmentItem({
+  item,
+  isFloating = false
+}: {
+  item: Equipment;
+  isFloating?: boolean;
+}) {
+  const { setSelectedEquipment, setEquipmentOverlayVisible, draggingItem } = useEquipment();
+
+  // Calculate display count and representative record based on drag state
+  let displayCount = item.count;
+  let repRecord = item.selectedRecord;
+
+  if (isFloating) {
+    displayCount = item.selectedCount;
+    repRecord = item.selectedRecord;
+  } else if (draggingItem?.type === 'equipment' && draggingItem.id === item.id) {
+    displayCount = item.count - item.selectedCount;
+    repRecord = item.firstUnselectedRecord;
+  }
+
+  // Hide if count is 0
+  if (displayCount === 0) {
+    return null;
+  }
 
   const tapGesture = Gesture.Tap()
     .onEnd(() => {
@@ -24,13 +47,13 @@ export default function EquipmentItem({ item }: { item: Equipment }) {
       <View style={ItemStyles.container}>
         <View>
           <EquipmentDisplay
-            imageKey={item.image}
+            imageKey={repRecord.image}
             isMini={false}
-            color={item.color}
+            color={repRecord.color}
           />
-          {item.count > 1 && (
+          {displayCount > 1 && (
             <View style={ItemStyles.circle}>
-              <Text style={ItemStyles.count}>{item.count}</Text>
+              <Text style={ItemStyles.count}>{displayCount}</Text>
             </View>
           )}
         </View>

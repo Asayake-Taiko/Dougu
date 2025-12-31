@@ -15,6 +15,7 @@ export default function ProfileNavigator() {
         <Drawer.Navigator
             initialRouteName="MemberTabs"
             screenOptions={{
+                swipeEnabled: false,
                 headerShown: true,
                 drawerActiveTintColor: Colors.primary,
             }}

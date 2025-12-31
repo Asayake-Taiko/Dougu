@@ -14,18 +14,25 @@ import { useEquipment } from "../../lib/context/EquipmentContext";
 export default function ContainerItem({
     item,
     swapable,
+    isFloating = false,
 }: {
     item: Container;
     swapable: boolean;
+    isFloating?: boolean;
 }) {
     const containerData = item.container;
     const equipmentItems = item.equipment;
 
+    const { setSelectedContainer, setContainerOverlayVisible, draggingItem } = useEquipment();
+
+    // Hide if this container is being dragged (not floating)
+    if (!isFloating && draggingItem?.type === 'container' && draggingItem.id === item.id) {
+        return null;
+    }
+
     // display the first 9 equipment items in a 3x3 grid
     const firstNine = equipmentItems.slice(0, 9);
     const chunkedData = chunkArray(firstNine, 3);
-
-    const { setSelectedContainer, setContainerOverlayVisible } = useEquipment();
 
     const tapGesture = Gesture.Tap()
         .onEnd(() => {

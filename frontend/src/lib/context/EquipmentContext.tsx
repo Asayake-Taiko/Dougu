@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import { db } from '../powersync/PowerSync';
 import { useAuth } from './AuthContext';
 import { Logger } from '../Logger';
-import { Container, Equipment, OrgOwnership } from '../../types/models';
+import { Container, Equipment, OrgOwnership, Item } from '../../types/models';
 import { OrgMembershipRecord, ContainerRecord, EquipmentRecord } from '../../types/db';
 
 interface EquipmentContextType {
     currentMember: OrgMembershipRecord | null;
     ownerships: Map<string, OrgOwnership>; // Key: membership.id, Value: OrgOwnership, Sorted by Name
-    isLoading: boolean;
     refresh: () => Promise<void>;
 
     // Overlay state
@@ -20,6 +20,19 @@ interface EquipmentContextType {
     setSelectedEquipment: (equipment: Equipment | null) => void;
     selectedContainer: Container | null;
     setSelectedContainer: (container: Container | null) => void;
+
+    // Drag state
+    draggingItem: Item | null;
+    setDraggingItem: (item: Item | null) => void;
+
+    // Shared logic
+    containerPage: number;
+    setContainerPage: (page: number) => void;
+    dragValues: {
+        x: SharedValue<number>;
+        y: SharedValue<number>;
+        scale: SharedValue<number>;
+    };
 }
 
 const EquipmentContext = createContext<EquipmentContextType | undefined>(undefined);
@@ -41,7 +54,6 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
     const { user } = useAuth();
     const [currentMember, setCurrentMember] = useState<OrgMembershipRecord | null>(null);
     const [ownerships, setOwnerships] = useState<Map<string, OrgOwnership>>(new Map());
-    const [isLoading, setIsLoading] = useState(true);
 
     // Overlay state
     const [equipmentOverlayVisible, setEquipmentOverlayVisible] = useState(false);
@@ -49,8 +61,16 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
     const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
     const [selectedContainer, setSelectedContainer] = useState<Container | null>(null);
 
+    // Drag state
+    const [draggingItem, setDraggingItem] = useState<Item | null>(null);
+
+    // Shared logic
+    const [containerPage, setContainerPage] = useState(0);
+    const dragX = useSharedValue(0);
+    const dragY = useSharedValue(0);
+    const dragScale = useSharedValue(1);
+
     const refresh = async () => {
-        setIsLoading(true);
         try {
             if (!user) {
                 Logger.warn("EquipmentProvider: No user found.");
@@ -184,8 +204,6 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
 
         } catch (error) {
             Logger.error('Error refreshing equipment context', error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -196,7 +214,6 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
     const contextValue: EquipmentContextType = {
         currentMember,
         ownerships,
-        isLoading,
         refresh,
         equipmentOverlayVisible,
         setEquipmentOverlayVisible,
@@ -206,6 +223,17 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
         setSelectedEquipment,
         selectedContainer,
         setSelectedContainer,
+        draggingItem,
+        setDraggingItem,
+
+        // Shared logic
+        containerPage,
+        setContainerPage,
+        dragValues: {
+            x: dragX,
+            y: dragY,
+            scale: dragScale,
+        },
     };
 
     return (

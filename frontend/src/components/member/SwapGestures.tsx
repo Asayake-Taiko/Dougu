@@ -1,21 +1,15 @@
 import React, { useRef } from "react";
-import { View, Text, StyleSheet, LayoutChangeEvent, Dimensions } from "react-native";
+import { View, Text, StyleSheet, LayoutChangeEvent } from "react-native";
 import {
   GestureDetector,
   GestureHandlerRootView,
-  Gesture,
-  PanGestureHandlerEventPayload,
-  GestureStateChangeEvent,
 } from "react-native-gesture-handler";
-import { scheduleOnRN } from "react-native-worklets";
+import Animated, { useAnimatedRef, useSharedValue } from "react-native-reanimated";
 
-
-import { useEquipment } from "../../lib/context/EquipmentContext";
 import { Item } from "../../types/models";
 import { OrgMembershipRecord } from "../../types/db";
 import CurrMembersDropdown from "./CurrMembersDropdown";
 import ScrollRow from "./ScrollRow";
-
 import useScroll from "../../lib/helper/useScroll";
 import useSwapDragAndDrop from "../../lib/helper/useSwapDragAndDrop";
 import ContainerOverlay from "./ContainerOverlay";
@@ -36,17 +30,21 @@ export default function SwapGestures({
   // state
   const halfLine = useRef<number>(0);
 
+  // Scroll Refs and Shared Values
+  // We use "any" for the generic because the Animated.FlatList type can be tricky with specific Item types
+  // and we just need scrollToOffset.
+  const topListRef = useAnimatedRef<Animated.FlatList<Item>>();
+  const bottomListRef = useAnimatedRef<Animated.FlatList<Item>>();
+  const topScrollOffset = useSharedValue(0);
+  const bottomScrollOffset = useSharedValue(0);
+
   // handle scrollRow scrolling
-  const {
-    topPage,
-    setTopPage,
-    nextTopPage,
-    bottomPage,
-    setBottomPage,
-    nextBottomPage,
-    clearScroll,
-    handleScroll,
-  } = useScroll();
+  const { startScrolling, stopScrolling } = useScroll(
+    topListRef,
+    bottomListRef,
+    topScrollOffset,
+    bottomScrollOffset
+  );
 
   const {
     panGesture,
@@ -57,11 +55,11 @@ export default function SwapGestures({
   } = useSwapDragAndDrop({
     listOne,
     listTwo,
-    topPage,
-    bottomPage,
+    topScrollOffset,
+    bottomScrollOffset,
     swapUser,
-    handleScroll,
-    clearScroll,
+    startScrolling,
+    stopScrolling,
     halfLine,
   });
 
@@ -86,8 +84,8 @@ export default function SwapGestures({
             <ScrollRow
               listData={listOne}
               isSwap={true}
-              setPage={setTopPage}
-              nextPage={nextTopPage}
+              scrollOffset={topScrollOffset}
+              flatListRef={topListRef}
             />
           </View>
 
@@ -100,8 +98,8 @@ export default function SwapGestures({
             <ScrollRow
               listData={listTwo}
               isSwap={true}
-              setPage={setBottomPage}
-              nextPage={nextBottomPage}
+              scrollOffset={bottomScrollOffset}
+              flatListRef={bottomListRef}
             />
           </View>
           <ContainerOverlay containerPage={containerPage} setContainerPage={setContainerPage} />

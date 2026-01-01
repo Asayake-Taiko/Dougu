@@ -1,9 +1,9 @@
 import { StyleSheet, Dimensions } from "react-native";
 
 const { width: windowWidth } = Dimensions.get("window");
-const itemWidth = windowWidth / 5;
+const itemWidth = windowWidth / 4;
 const borderRadius = windowWidth / 14;
-const miniWidth = windowWidth / 22;
+const miniWidth = windowWidth / 16;
 const miniRadius = windowWidth / 64;
 
 export const ItemStyles = StyleSheet.create({

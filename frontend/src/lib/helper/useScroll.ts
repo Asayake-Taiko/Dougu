@@ -1,57 +1,43 @@
-import { useState, useRef } from "react";
+import { useRef, useCallback } from "react";
+import Animated, { SharedValue, AnimatedRef } from "react-native-reanimated";
 
-/*
-  hook to keep track of the page the user is on when scrolling
-  and allows for scrolling to a specific page
-*/
-export default function useScroll() {
-  const [topPage, setTopPage] = useState(0);
-  const [nextTopPage, setNextTopPage] = useState(0);
-  const [bottomPage, setBottomPage] = useState(0);
-  const [nextBottomPage, setNextBottomPage] = useState(0);
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-  const isScrolling = useRef<boolean>(false);
+export default function useScroll<T>(
+  topListRef: AnimatedRef<Animated.FlatList<T>>,
+  bottomListRef: AnimatedRef<Animated.FlatList<T>>,
+  topScrollOffset: SharedValue<number>,
+  bottomScrollOffset: SharedValue<number>
+) {
+  const scrollInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // determine if the equipment item is hovering over a scroll area
-  // and change the page accordingly
-  const handleScroll = (isTop: boolean, position: string) => {
-    const changePage = isTop ? setNextTopPage : setNextBottomPage;
-    const currPage = isTop ? topPage : bottomPage;
-    const change = position === "left" ? -1 : 1;
-    if (scrollTimeout.current || isScrolling.current) {
-      return;
+  const startScrolling = useCallback((isTop: boolean, direction: "left" | "right") => {
+    if (scrollInterval.current) return;
+
+    const listRef = isTop ? topListRef : bottomListRef;
+    const offset = isTop ? topScrollOffset : bottomScrollOffset;
+    const step = direction === "left" ? -10 : 10;
+
+    scrollInterval.current = setInterval(() => {
+      const nextOffset = offset.value + step;
+      if (nextOffset < 0) {
+        // clamp to 0
+        listRef.current?.scrollToOffset({ offset: 0, animated: false });
+      } else {
+        // We can't easily check max scroll without more state, but FlatList handles overscroll/bounds reasonably well or we can check contentSize if we had it.
+        // For now, just scroll.
+        listRef.current?.scrollToOffset({ offset: nextOffset, animated: false });
+      }
+    }, 16); // ~60fps
+  }, [topListRef, bottomListRef, topScrollOffset, bottomScrollOffset]);
+
+  const stopScrolling = useCallback(() => {
+    if (scrollInterval.current) {
+      clearInterval(scrollInterval.current);
+      scrollInterval.current = null;
     }
-    changePage(currPage + 0.1 * change);
-    scrollTimeout.current = setTimeout(() => {
-      isScrolling.current = true;
-      changePage(currPage + change);
-      scrollTimeout.current = null;
-      // timeout ensures the asynchronous scroll doesn't
-      // overlap with more calls to handleScroll
-      setTimeout(() => {
-        isScrolling.current = false;
-      }, 500);
-    }, 800);
-  };
-
-  const clearScroll = () => {
-    if (scrollTimeout.current) {
-      // set about to scroll indicator back to normal
-      setNextTopPage(Math.round(topPage));
-      setNextBottomPage(Math.round(bottomPage));
-      clearTimeout(scrollTimeout.current);
-      scrollTimeout.current = null;
-    }
-  };
+  }, []);
 
   return {
-    topPage,
-    setTopPage,
-    nextTopPage,
-    bottomPage,
-    setBottomPage,
-    nextBottomPage,
-    clearScroll,
-    handleScroll,
+    startScrolling,
+    stopScrolling,
   };
 }

@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
+import { Dimensions } from "react-native";
 import {
     PanGestureHandlerEventPayload,
     GestureStateChangeEvent,
@@ -6,16 +7,14 @@ import {
     GestureUpdateEvent,
     PanGestureChangeEventPayload
 } from "react-native-gesture-handler";
-import { useSharedValue, withSpring } from "react-native-reanimated";
+import { useSharedValue, withSpring, SharedValue } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { Dimensions } from "react-native";
 
 import { useEquipment } from "../context/EquipmentContext";
 import { Item, Equipment, Container } from "../../types/models";
 import { OrgMembershipRecord } from "../../types/db";
 import { db } from "../powersync/PowerSync";
-
 import useAnimateOverlay from "./useAnimateOverlay";
 
 const { width: windowWidth } = Dimensions.get("window");
@@ -23,22 +22,22 @@ const { width: windowWidth } = Dimensions.get("window");
 interface UseSwapDragAndDropProps {
     listOne: Item[];
     listTwo: Item[];
-    topPage: number;
-    bottomPage: number;
+    topScrollOffset: SharedValue<number>;
+    bottomScrollOffset: SharedValue<number>;
     swapUser: React.RefObject<OrgMembershipRecord | null>;
-    handleScroll: (isTop: boolean, direction: string) => void;
-    clearScroll: () => void;
+    startScrolling: (isTop: boolean, direction: "left" | "right") => void;
+    stopScrolling: () => void;
     halfLine: React.RefObject<number>;
 }
 
 export default function useSwapDragAndDrop({
     listOne,
     listTwo,
-    topPage,
-    bottomPage,
+    topScrollOffset,
+    bottomScrollOffset,
     swapUser,
-    handleScroll,
-    clearScroll,
+    startScrolling,
+    stopScrolling,
     halfLine,
 }: UseSwapDragAndDropProps) {
     const {
@@ -92,14 +91,19 @@ export default function useSwapDragAndDrop({
 
         const isTop = y < halfLine.current + headerHeight;
         const startY = isTop ? 140 + headerHeight : halfLine.current + 60 + headerHeight;
-        const endY = startY + windowWidth / 5;
+        const endY = startY + windowWidth / 3.5;
 
         if (y < startY || y > endY) return;
 
-        const page = isTop ? topPage : bottomPage;
-        const offset = page * windowWidth;
+        // Calculate index based on scroll offset
+        const offset = isTop ? topScrollOffset.value : bottomScrollOffset.value;
         const list = isTop ? listOne : listTwo;
-        const idx = Math.floor((e.absoluteX + offset) / (windowWidth / 4));
+        // Item width is windowWidth / 4 (ItemStyles) + windowWidth / 28 (margin)
+        // = 1/4 + 1/28 = 7/28 + 1/28 = 8/28 = 2/7 of windowWidth
+        // 2/7 = approx 0.2857
+        const itemWidth = windowWidth / 3.5;
+
+        const idx = Math.floor((e.absoluteX + offset) / itemWidth);
 
         if (idx >= 0 && idx < list.length) {
             setDraggingItem(list[idx]);
@@ -115,12 +119,15 @@ export default function useSwapDragAndDrop({
         const x = e.absoluteX;
         const y = e.absoluteY;
 
-        const containerTop = 165 + headerHeight;
-        const padding = 10;
-        const gridStartY = containerTop + padding;
+        const containerTop = 125 + headerHeight;
+        const overlayHeight = 500;
+        const gridHeight = 410; // 3 * 130 + 2 * 10 (gap)
+        const verticalAdjustment = (overlayHeight - gridHeight) / 2;
+        const gridStartY = containerTop + verticalAdjustment;
 
         const containerWidth = 0.85 * windowWidth;
         const containerStartX = (windowWidth - containerWidth) / 2;
+        const padding = 10;
         const gridStartX = containerStartX + padding;
 
         const rowHeight = 130;
@@ -128,7 +135,6 @@ export default function useSwapDragAndDrop({
         const colWidth = (containerWidth - 2 * padding) / 3;
 
         const gridWidth = containerWidth - 2 * padding;
-        const gridHeight = 3 * rowHeight + 2 * rowGap;
 
         if (x < gridStartX || x > gridStartX + gridWidth || y < gridStartY || y > gridStartY + gridHeight) return;
 
@@ -171,31 +177,33 @@ export default function useSwapDragAndDrop({
         const startY = isTop ? 140 + headerHeight : halfLine.current + 60 + headerHeight;
         const endY = startY + windowWidth / 5;
 
+        // Position check
         let position = "";
         if (x < 40) position = "left";
         else if (x > windowWidth - 40) position = "right";
         else if (y < startY || y > endY) position = "out";
         else {
-            const page = isTop ? topPage : bottomPage;
-            const offset = page * windowWidth;
-            const idx = Math.floor((x + offset) / (windowWidth / 4));
+            // Calculate index for container hover
+            const offset = isTop ? topScrollOffset.value : bottomScrollOffset.value;
+            const itemWidth = windowWidth / 3.5;
+            const idx = Math.floor((x + offset) / itemWidth);
             position = `${isTop}-${idx}`;
         }
 
         if (position !== prevPosition.current) {
             clearTimeouts();
-            clearScroll();
+            stopScrolling();
             hoverContainer.current = null;
             dragValues.scale.value = withSpring(1.2);
         }
 
         if (position === "left" || position === "right") {
-            handleScroll(isTop, position);
+            startScrolling(isTop, position);
         } else if (position !== "out" && draggingItem.type === "equipment") {
             const list = isTop ? listOne : listTwo;
-            const page = isTop ? topPage : bottomPage;
-            const offset = page * windowWidth;
-            const idx = Math.floor((x + offset) / (windowWidth / 4));
+            const offset = isTop ? topScrollOffset.value : bottomScrollOffset.value;
+            const itemWidth = windowWidth / 3.5;
+            const idx = Math.floor((x + offset) / itemWidth);
             handleContainerHover(idx, list);
         }
 
@@ -209,10 +217,13 @@ export default function useSwapDragAndDrop({
         const x = e.absoluteX;
         const y = e.absoluteY;
 
+        const containerTop = 125 + headerHeight;
+        const overlayHeight = 500;
+
         const startX = 0.075 * windowWidth;
         const endX = 0.925 * windowWidth;
-        const startY = 165 + headerHeight;
-        const endY = 615 + headerHeight;
+        const startY = containerTop;
+        const endY = containerTop + overlayHeight;
 
         if (x < startX || x > endX || y < startY || y > endY) {
             if (!overlayTimeout.current) {
@@ -261,7 +272,7 @@ export default function useSwapDragAndDrop({
     };
 
     // --- GESTURE DEFINITION ---
-    const panGesture = Gesture.Pan()
+    const panGesture = useMemo(() => Gesture.Pan()
         .maxPointers(1)
         .onStart((e) => {
             "worklet";
@@ -282,9 +293,23 @@ export default function useSwapDragAndDrop({
             animateFinalize();
             scheduleOnRN(handleReassign, e);
             scheduleOnRN(clearTimeouts);
-            scheduleOnRN(clearScroll);
+            scheduleOnRN(stopScrolling);
         })
-        .activateAfterLongPress(500);
+        .activateAfterLongPress(500),
+        [
+            equipmentOverlayVisible,
+            swapContainerVisible,
+            draggingItem,
+            containerPage,
+            currentMember,
+            swapUser.current,
+            containerItem,
+            topScrollOffset,
+            bottomScrollOffset,
+            listOne,
+            listTwo,
+            halfLine.current
+        ]);
 
     return {
         panGesture,

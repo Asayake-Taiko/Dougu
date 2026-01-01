@@ -25,10 +25,8 @@ export const ContainerOverlayStyles = StyleSheet.create({
   },
   itemContainer: {
     marginTop: Spacing.xs,
-    justifyContent: "flex-start", // Align items to top
-    alignItems: "center",
     width: "85%",
-    height: 450,
+    height: 500,
     borderRadius: Spacing.lg,
   },
   itemPage: {
@@ -36,8 +34,10 @@ export const ContainerOverlayStyles = StyleSheet.create({
     flexDirection: "column",
     width: windowWidth * 0.85,
     height: "100%",
-    padding: Spacing.sm,
-    justifyContent: "flex-start", // Align rows to top
+    paddingHorizontal: Spacing.sm,
+    paddingTop: 45, // (500 - 410) / 2
+    paddingBottom: 45,
+    justifyContent: "flex-start",
     gap: Spacing.sm,
   },
   title: {
@@ -48,7 +48,7 @@ export const ContainerOverlayStyles = StyleSheet.create({
   titleContainer: {
     alignItems: "center",
     height: 80, // Static height instead of dynamic
-    marginTop: 80,
+    marginTop: 40,
   },
   pagesContainer: {
     display: "flex",

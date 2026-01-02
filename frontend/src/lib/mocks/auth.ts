@@ -1,8 +1,15 @@
-import { UserType } from '../../types/auth';
 import { AuthResponse } from '../../types/auth';
 import { db } from '../powersync/PowerSync';
-import { v4 as uuidv4 } from 'uuid';
 import { UserRecord } from '../../types/db';
+import { User } from '../../types/models';
+
+const generateUUID = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+    });
+};
 
 let HARDCODED_PASSWORD = 'password';
 const HARDCODED_CODE = '22222';
@@ -21,13 +28,7 @@ export const mockLogin = async (email: string, password: string): Promise<AuthRe
 
     const result = await db.getAll('SELECT * FROM users WHERE email = ?', [email]);
     if (result.length > 0) {
-        const userRecord = result[0] as UserRecord;
-        const user: UserType = {
-            id: userRecord.id,
-            name: userRecord.full_name,
-            email: userRecord.email,
-            profile: userRecord.profile,
-        };
+        const user = result[0] as UserRecord;
 
         return {
             user,
@@ -46,7 +47,7 @@ export const mockRegister = async (email: string, name: string, password: string
         throw new Error('User already exists');
     }
 
-    const newId = uuidv4();
+    const newId = generateUUID();
     const now = new Date().toISOString();
 
     await db.execute(
@@ -54,11 +55,13 @@ export const mockRegister = async (email: string, name: string, password: string
         [newId, email, name, 'default', now, now]
     );
 
-    const user: UserType = {
+    const user: UserRecord = {
         id: newId,
-        name: name,
+        full_name: name,
         email: email,
         profile: 'default',
+        created_at: now,
+        updated_at: now,
     };
 
     return {
@@ -88,29 +91,23 @@ export const mockResetPassword = async (email: string, code: string, new_passwor
     }
 };
 
-export const mockUpdateProfile = async (email: string, profileKey: string): Promise<void> => {
-    email = email.toLowerCase();
-    const now = new Date().toISOString();
-
-    // We update by email here since the context passes email, but ideally ID is better
-    await db.execute('UPDATE users SET profile = ?, updated_at = ? WHERE email = ?', [profileKey, now, email]);
+export const mockUpdateProfile = async (user: User, profileKey: string): Promise<void> => {
+    await user.updateProfile(db, profileKey);
 };
 
-export const mockUpdatePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+export const mockUpdatePassword = async (user: User, currentPassword: string, newPassword: string): Promise<void> => {
     if (currentPassword !== HARDCODED_PASSWORD) {
         throw new Error('Current password is incorrect');
     }
+    await user.updatePassword(db, newPassword);
     HARDCODED_PASSWORD = newPassword;
 };
 
-export const mockUpdateName = async (email: string, name: string): Promise<void> => {
-    email = email.toLowerCase();
-    const now = new Date().toISOString();
-    await db.execute('UPDATE users SET full_name = ?, updated_at = ? WHERE email = ?', [name, now, email]);
+export const mockUpdateName = async (user: User, name: string): Promise<void> => {
+    await user.updateName(db, name);
 };
 
-export const mockUpdateEmail = async (oldEmail: string, newEmail: string, code: string): Promise<void> => {
-    oldEmail = oldEmail.toLowerCase();
+export const mockUpdateEmail = async (user: User, newEmail: string, code: string): Promise<void> => {
     newEmail = newEmail.toLowerCase();
 
     if (code !== HARDCODED_CODE) {
@@ -122,8 +119,7 @@ export const mockUpdateEmail = async (oldEmail: string, newEmail: string, code: 
         throw new Error('New email already in use');
     }
 
-    const now = new Date().toISOString();
-    await db.execute('UPDATE users SET email = ?, updated_at = ? WHERE email = ?', [newEmail, now, oldEmail]);
+    await user.updateEmail(db, newEmail);
 };
 
 export const mockDeleteAccount = async (email: string): Promise<void> => {

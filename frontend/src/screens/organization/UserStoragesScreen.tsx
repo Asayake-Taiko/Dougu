@@ -16,6 +16,8 @@ import { UserStoragesScreenProps } from "../../types/navigation";
 import { OrgMembership } from "../../types/models";
 import MemberRow from "../../components/organization/MemberRow";
 import { useMembership } from "../../lib/context/MembershipContext";
+import { useQuery } from "@powersync/react-native";
+import { OrgMembershipRecord } from "../../types/db";
 
 /*
   Screen for viewing all members and storages in an organization
@@ -26,30 +28,43 @@ export default function UserStoragesScreen({
   route,
   navigation,
 }: UserStoragesScreenProps) {
-  const { organization, members, isManager } = useMembership();
+  const { organization, isManager } = useMembership();
   if (!organization) return null;
 
   const { tabParam } = route.params;
   const [tab, setTab] = useState(tabParam);
+
+  // Reactive members query
+  const { data: membersData } = useQuery<OrgMembershipRecord & { full_name?: string; user_profile?: string }>(
+    `SELECT m.*, u.full_name, u.profile as user_profile 
+     FROM org_memberships m 
+     LEFT JOIN users u ON m.user_id = u.id 
+     WHERE m.organization_id = ?`,
+    [organization?.id]
+  );
+
+  const members = useMemo(() =>
+    membersData
+      .map(m => new OrgMembership(m, m.full_name, m.user_profile))
+      .sort((a, b) => a.name.localeCompare(b.name))
+    , [membersData]);
+
   const [currData, setCurrData] = useState<OrgMembership[]>([]);
-  const orgUserStorages = useMemo(() => {
-    return members;
-  }, [members]);
 
   // update our data everytime the tab or data changes
   useEffect(() => {
     const getData = async () => {
       let data;
       if (tab === "Members") {
-        data = orgUserStorages.filter((item) => item.membershipType === "USER");
+        data = members.filter((item) => item.membershipType === "USER");
       } else {
-        data = orgUserStorages.filter((item) => item.membershipType === "STORAGE");
+        data = members.filter((item) => item.membershipType === "STORAGE");
       }
       setCurrData(data);
     };
 
     getData();
-  }, [orgUserStorages, tab]);
+  }, [members, tab]);
 
   // create a storage, only managers can create storages
   const handleCreate = async () => {

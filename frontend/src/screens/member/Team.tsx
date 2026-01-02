@@ -16,9 +16,7 @@ export default function TeamScreen() {
                 keyExtractor={(ownership) => ownership.membership.id}
                 renderItem={({ item: ownership }) => {
                     const { membership, items } = ownership;
-                    const displayName = membership.type === 'USER'
-                        ? ((membership as any).full_name || 'Unknown User')
-                        : (membership.storage_name || 'Storage');
+                    const displayName = membership.name;
 
                     return (
                         <View style={styles.userContainer}>

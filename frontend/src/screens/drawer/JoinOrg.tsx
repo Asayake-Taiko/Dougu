@@ -5,8 +5,7 @@ import { PressableOpacity } from "../../components/PressableOpacity";
 // project imports
 import { createJoinStyles } from "../../styles/CreateJoinStyles";
 import { JoinOrgScreenNavigationProp } from "../../types/navigation";
-import { db } from "../../lib/powersync/PowerSync";
-import { useAuth } from "../../lib/context/AuthContext";
+import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/Logger";
@@ -16,51 +15,19 @@ import { Logger } from "../../lib/Logger";
 */
 export default function JoinOrgScreen({ navigation }: { navigation: JoinOrgScreenNavigationProp }) {
     const [code, onChangeCode] = useState("");
-    const { user } = useAuth();
+    const { joinOrganization } = useMembership();
     const { showSpinner, hideSpinner } = useSpinner();
     const { setMessage } = useModal();
 
     const handleJoin = async () => {
-        if (!code.trim()) {
-            setMessage("Please enter an access code");
-            return;
-        }
-
         showSpinner();
         try {
-            const org = await db.getOptional<any>('SELECT * FROM organizations WHERE access_code = ?', [code.trim()]);
-
-            if (!org) {
-                setMessage("Organization not found");
-                return;
-            }
-
-            const existingMemberships = await db.getAll(
-                'SELECT * FROM org_memberships WHERE organization_id = ? AND user_id = ?',
-                [org.id, user?.id]
-            );
-
-            if (existingMemberships.length > 0) {
-                setMessage("You are already a member of this organization.");
-                return;
-            }
-
-            // Join the organization
-            await db.execute(
-                'INSERT INTO org_memberships (id, organization_id, user_id, type) VALUES (?, ?, ?, ?)',
-                [
-                    // Simple unique ID generation for the membership record
-                    Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                    org.id,
-                    user?.id,
-                    'member'
-                ]
-            );
-            setMessage(`Successfully joined ${org.name}!`);
-            navigation.navigate('MemberTabs', { organizationId: org.id, organizationName: org.name });
-        } catch (error) {
+            const { id, name } = await joinOrganization(code);
+            setMessage(`Successfully joined ${name}!`);
+            navigation.navigate('MemberTabs', { organizationId: id, organizationName: name });
+        } catch (error: any) {
             Logger.error("Error joining organization:", error);
-            setMessage("An error occurred while trying to join the organization.");
+            setMessage(error.message || "An error occurred while trying to join the organization.");
         } finally {
             onChangeCode("");
             hideSpinner();

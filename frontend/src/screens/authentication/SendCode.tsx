@@ -21,13 +21,9 @@ export default function SendCodeScreen() {
             showSpinner();
             await sendCode(email);
             navigation.navigate('ResetPassword', { email });
-        } catch (err) {
+        } catch (err: any) {
             Logger.error(err);
-            if (err instanceof Error) {
-                setMessage(err.message);
-            } else {
-                setMessage('An unexpected error occurred');
-            }
+            setMessage(err.message || 'An unexpected error occurred');
         } finally {
             hideSpinner();
         }

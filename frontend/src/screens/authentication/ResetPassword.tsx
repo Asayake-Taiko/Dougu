@@ -33,13 +33,9 @@ export default function ResetPasswordScreen() {
             showSpinner();
             await resetPassword(email, code, password);
             setMessage('Password has been reset successfully');
-        } catch (err) {
+        } catch (err: any) {
             Logger.error(err);
-            if (err instanceof Error) {
-                setMessage(err.message);
-            } else {
-                setMessage('An unexpected error occurred');
-            }
+            setMessage(err.message || 'An unexpected error occurred');
         } finally {
             hideSpinner();
         }

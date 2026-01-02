@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { db } from '../powersync/PowerSync';
 import { useAuth } from './AuthContext';
 import { Logger } from '../Logger';
-import { Container, Equipment, OrgOwnership, Item } from '../../types/models';
+import { Container, Equipment, OrgOwnership, Item, OrgMembership } from '../../types/models';
 import { OrgMembershipRecord, ContainerRecord, EquipmentRecord } from '../../types/db';
 
 interface EquipmentContextType {
@@ -73,8 +73,8 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
 
             // 2. Fetch all Memberships, Containers, and Equipment for this Org
             // JOIN with users to get full_name for sorting USER type memberships
-            const membershipsWithNames = await db.getAll<OrgMembershipRecord & { full_name?: string }>(`
-                SELECT m.*, u.full_name 
+            const membershipsWithNames = await db.getAll<OrgMembershipRecord & { full_name?: string; user_profile?: string }>(`
+                SELECT m.*, u.full_name, u.profile as user_profile
                 FROM org_memberships m 
                 LEFT JOIN users u ON m.user_id = u.id
                 WHERE m.organization_id = ?
@@ -97,7 +97,7 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
             // Initialize all memberships as ownership roots
             membershipsWithNames.forEach(m => {
                 tempMap.set(m.id, {
-                    membership: m,
+                    membership: new OrgMembership(m, m.full_name, m.user_profile),
                     items: []
                 });
             });
@@ -150,23 +150,8 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
             });
 
             // 4. Sort alphabetically and Build Final Map
-            // Sorting Logic:
-            // - If type is USER, use full_name (from JOIN)
-            // - If type is STORAGE, use storage_name
             const sortedItems = Array.from(tempMap.values()).sort((a, b) => {
-                // Determine name for A
-                const memA = a.membership as (OrgMembershipRecord & { full_name?: string });
-                const nameA = memA.type === 'USER'
-                    ? (memA.full_name || 'Unknown')
-                    : (memA.storage_name || 'Storage');
-
-                // Determine name for B
-                const memB = b.membership as (OrgMembershipRecord & { full_name?: string });
-                const nameB = memB.type === 'USER'
-                    ? (memB.full_name || 'Unknown')
-                    : (memB.storage_name || 'Storage');
-
-                return nameA.localeCompare(nameB);
+                return a.membership.name.localeCompare(b.membership.name);
             });
 
             // Insert into a new Map in sorted order

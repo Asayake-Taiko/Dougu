@@ -20,13 +20,9 @@ export default function LoginScreen({ navigation }: { navigation: LoginScreenNav
         try {
             showSpinner();
             await login(email, password);
-        } catch (err) {
+        } catch (err: any) {
             Logger.error(err);
-            if (err instanceof Error) {
-                setMessage(err.message);
-            } else {
-                setMessage('An unexpected error occurred');
-            }
+            setMessage(err.message || 'An unexpected error occurred');
         } finally {
             hideSpinner();
         }

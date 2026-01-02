@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { useQuery } from '@powersync/react-native';
 import { db } from '../powersync/PowerSync';
 import { useAuth } from './AuthContext';
 import { OrgMembershipRecord, OrganizationRecord } from '../../types/db';
@@ -8,11 +9,12 @@ import { Logger } from '../Logger';
 
 interface MembershipContextType {
     organization: Organization | null;
-    members: OrgMembership[];
     membershipId: string | null;
     isResolving: boolean;
     isManager: boolean;
     switchOrganization: (orgId: string, orgName: string) => Promise<void>;
+    createOrganization: (name: string) => Promise<{ id: string; name: string; code: string }>;
+    joinOrganization: (code: string) => Promise<{ id: string; name: string }>;
 }
 
 const MembershipContext = createContext<MembershipContextType | undefined>(undefined);
@@ -33,10 +35,7 @@ const STORAGE_KEYS = {
 export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user } = useAuth();
     const [organizationId, setOrganizationId] = useState<string | null>(null);
-    const [organization, setOrganization] = useState<Organization | null>(null);
-    const [members, setMembers] = useState<OrgMembership[]>([]);
-    const [membershipId, setMembershipId] = useState<string | null>(null);
-    const [isResolving, setIsResolving] = useState(true);
+    const [loadingPersistedOrg, setLoadingPersistedOrg] = useState(true);
 
     // Initial load from SecureStore
     useEffect(() => {
@@ -45,108 +44,134 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
                 const id = await SecureStore.getItemAsync(STORAGE_KEYS.ORG_ID);
                 if (id) {
                     setOrganizationId(id);
-                } else {
-                    setIsResolving(false);
                 }
             } catch (e) {
                 Logger.error("Failed to load persisted org", e);
-                setIsResolving(false);
+            } finally {
+                setLoadingPersistedOrg(false);
             }
         }
         loadPersistedOrg();
     }, []);
 
-    // Resolve membership whenever organizationId or user changes
+    // Reactive queries
+    const { data: membershipData, isLoading: loadingMembership } = useQuery<OrgMembershipRecord>(
+        'SELECT id FROM org_memberships WHERE organization_id = ? AND user_id = ?',
+        [organizationId, user?.id]
+    );
+
+    const { data: orgData, isLoading: loadingOrg } = useQuery<OrganizationRecord>(
+        'SELECT * FROM organizations WHERE id = ?',
+        [organizationId]
+    );
+
+    // Derive models and state
+    const membershipId = useMemo(() => membershipData[0]?.id || null, [membershipData]);
+
+    const organization = useMemo(() =>
+        orgData[0] ? new Organization(orgData[0]) : null
+        , [orgData]);
+
+    const isResolving = loadingPersistedOrg || (!!organizationId && (loadingMembership || loadingOrg));
+
+    // Cleanup stale organization selection
     useEffect(() => {
-        async function resolveSession() {
-            if (!user) {
-                setMembershipId(null);
-                setOrganization(null);
-                setIsResolving(false);
-                return;
-            }
-
-            if (organizationId) {
+        if (!isResolving && !organization) {
+            async function clearStaleOrg() {
+                Logger.warn("User is no longer a member of the selected organization. Clearing selection.");
+                setOrganizationId(null);
                 try {
-                    // Fetch Membership
-                    const membershipResult = await db.getOptional<OrgMembershipRecord>(
-                        'SELECT id FROM org_memberships WHERE organization_id = ? AND user_id = ?',
-                        [organizationId, user.id]
-                    );
-
-                    if (membershipResult) {
-                        setMembershipId(membershipResult.id);
-
-                        // Fetch Organization record
-                        const orgResult = await db.getOptional<OrganizationRecord>(
-                            'SELECT * FROM organizations WHERE id = ?',
-                            [organizationId]
-                        );
-
-                        if (orgResult) {
-                            setOrganization(new Organization(orgResult));
-                        } else {
-                            setOrganization(null);
-                        }
-
-                        // Fetch all memberships in this organization with user names
-                        const membersResult = await db.getAll<OrgMembershipRecord & { full_name?: string }>(
-                            `SELECT m.*, u.full_name 
-                             FROM org_memberships m 
-                             LEFT JOIN users u ON m.user_id = u.id 
-                             WHERE m.organization_id = ?`,
-                            [organizationId]
-                        );
-
-                        const memberModels = membersResult
-                            .map(m => new OrgMembership(m, m.full_name))
-                            .sort((a, b) => a.name.localeCompare(b.name));
-
-                        setMembers(memberModels);
-                    } else {
-                        // Stale org or user switched to one they aren't in
-                        setMembershipId(null);
-                        setOrganization(null);
-                        setMembers([]);
-
-                        // Clear storage
-                        await SecureStore.deleteItemAsync(STORAGE_KEYS.ORG_ID);
-                        await SecureStore.deleteItemAsync(STORAGE_KEYS.ORG_NAME);
-                    }
+                    await SecureStore.deleteItemAsync(STORAGE_KEYS.ORG_ID);
+                    await SecureStore.deleteItemAsync(STORAGE_KEYS.ORG_NAME);
                 } catch (e) {
-                    Logger.error("Error resolving membership/org", e);
-                    setMembershipId(null);
-                    setOrganization(null);
+                    Logger.error("Failed to clear stale org from SecureStore", e);
                 }
-            } else {
-                setMembershipId(null);
-                setOrganization(null);
-                setMembers([]);
             }
-            setIsResolving(false);
+            clearStaleOrg();
         }
-        resolveSession();
-    }, [organizationId, user]);
+    }, [isResolving, organization]);
 
     const switchOrganization = async (orgId: string, orgName: string) => {
-        setIsResolving(true);
         setOrganizationId(orgId);
+        await SecureStore.setItemAsync(STORAGE_KEYS.ORG_ID, orgId);
+        await SecureStore.setItemAsync(STORAGE_KEYS.ORG_NAME, orgName);
+    };
 
-        try {
-            await SecureStore.setItemAsync(STORAGE_KEYS.ORG_ID, orgId);
-            await SecureStore.setItemAsync(STORAGE_KEYS.ORG_NAME, orgName);
-        } catch (e) {
-            Logger.error("Failed to persist organization selection", e);
+    const generateRandomString = (length: number) => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
         }
+        return result;
+    };
+
+    const generateUniqueCode = async (): Promise<string> => {
+        while (true) {
+            const code = generateRandomString(7);
+            const existing = await db.getOptional<{ id: string }>('SELECT id FROM organizations WHERE access_code = ?', [code]);
+            if (!existing) return code;
+        }
+    };
+
+    const createOrganization = async (name: string) => {
+        if (!name.trim()) throw new Error("Please enter an organization name.");
+        const nameRegEx = /^[a-zA-Z0-9-_]{1,40}$/;
+        if (!nameRegEx.test(name)) throw new Error("Invalid name! Use 1-40 alphanumeric characters, no spaces (_ and - allowed).");
+
+        const existingOrg = await db.getOptional<{ id: string }>('SELECT id FROM organizations WHERE name = ?', [name]);
+        if (existingOrg) throw new Error("Organization name is already taken!");
+
+        const code = await generateUniqueCode();
+        const orgId = Math.random().toString(36).substring(2, 15);
+        const membershipId = Math.random().toString(36).substring(2, 15);
+
+        await db.writeTransaction(async (tx) => {
+            await tx.execute(
+                'INSERT INTO organizations (id, name, access_code, manager_id, created_at) VALUES (?, ?, ?, ?, ?)',
+                [orgId, name, code, user?.id, new Date().toISOString()]
+            );
+            await tx.execute(
+                'INSERT INTO org_memberships (id, organization_id, user_id, type) VALUES (?, ?, ?, ?)',
+                [membershipId, orgId, user?.id, 'USER']
+            );
+        });
+
+        await switchOrganization(orgId, name);
+        return { id: orgId, name, code };
+    };
+
+    const joinOrganization = async (code: string) => {
+        const trimmedCode = code.trim().toUpperCase();
+        if (!trimmedCode) throw new Error("Please enter an access code");
+
+        const org = await db.getOptional<OrganizationRecord>('SELECT * FROM organizations WHERE access_code = ?', [trimmedCode]);
+        if (!org) throw new Error("Organization not found");
+
+        const existingMemberships = await db.getAll(
+            'SELECT * FROM org_memberships WHERE organization_id = ? AND user_id = ?',
+            [org.id, user?.id]
+        );
+        if (existingMemberships.length > 0) throw new Error("You are already a member of this organization.");
+
+        const membershipId = Math.random().toString(36).substring(2, 15);
+        await db.execute(
+            'INSERT INTO org_memberships (id, organization_id, user_id, type) VALUES (?, ?, ?, ?)',
+            [membershipId, org.id, user?.id, 'USER']
+        );
+
+        await switchOrganization(org.id, org.name);
+        return { id: org.id, name: org.name };
     };
 
     const value: MembershipContextType = {
         organization,
-        members,
         membershipId,
         isResolving,
         isManager: organization?.managerId === user?.id,
         switchOrganization,
+        createOrganization,
+        joinOrganization,
     };
 
     return (

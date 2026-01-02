@@ -5,7 +5,6 @@ import { useAuth } from "../../lib/context/AuthContext";
 import { useQuery } from "@powersync/react-native";
 import { OrganizationRecord } from "../../types/db";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Logger } from "../../lib/Logger";
 import { Colors } from "../../styles/global/colors";
 
 /*

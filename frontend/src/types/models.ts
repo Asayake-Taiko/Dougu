@@ -1,10 +1,10 @@
-import { OrgMembershipRecord, ContainerRecord, EquipmentRecord, OrganizationRecord } from "./db";
+import { OrgMembershipRecord, ContainerRecord, EquipmentRecord, OrganizationRecord, UserRecord } from "./db";
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
 
 export type Item = Equipment | Container;
 
 export interface OrgOwnership {
-    membership: OrgMembershipRecord;
+    membership: OrgMembership;
     items: Item[];
 }
 
@@ -156,10 +156,12 @@ export class OrgMembership {
     readonly type = 'membership';
     membership: OrgMembershipRecord;
     userName?: string;
+    userProfile?: string;
 
-    constructor(membership: OrgMembershipRecord, userName?: string) {
+    constructor(membership: OrgMembershipRecord, userName?: string, userProfile?: string) {
         this.membership = membership;
         this.userName = userName;
+        this.userProfile = userProfile;
     }
 
     get id() { return this.membership.id; }
@@ -171,6 +173,61 @@ export class OrgMembership {
     }
     get membershipType() { return this.membership.type; }
     get userId() { return this.membership.user_id; }
-    get profile() { return this.membership.profile; }
+    get profile() { return this.userProfile || this.membership.profile; }
     get details() { return this.membership.details; }
+}
+
+export class User {
+    readonly type = 'user';
+    private data: UserRecord;
+
+    constructor(data: UserRecord) {
+        this.data = data;
+    }
+
+    get id() { return this.data.id; }
+    get email() { return this.data.email; }
+    get name() { return this.data.full_name; }
+    get profile() { return this.data.profile; }
+
+    getRecord() {
+        return this.data;
+    }
+
+    async updateName(db: AbstractPowerSyncDatabase, newName: string) {
+        const now = new Date().toISOString();
+        await db.execute(
+            'UPDATE users SET full_name = ?, updated_at = ? WHERE id = ?',
+            [newName, now, this.id]
+        );
+        this.data.full_name = newName;
+        this.data.updated_at = now;
+    }
+
+    async updateEmail(db: AbstractPowerSyncDatabase, newEmail: string) {
+        const now = new Date().toISOString();
+        await db.execute(
+            'UPDATE users SET email = ?, updated_at = ? WHERE id = ?',
+            [newEmail, now, this.id]
+        );
+        this.data.email = newEmail;
+        this.data.updated_at = now;
+    }
+
+    async updateProfile(db: AbstractPowerSyncDatabase, newProfile: string) {
+        const now = new Date().toISOString();
+        await db.execute(
+            'UPDATE users SET profile = ?, updated_at = ? WHERE id = ?',
+            [newProfile, now, this.id]
+        );
+        this.data.profile = newProfile;
+        this.data.updated_at = now;
+    }
+
+    async updatePassword(db: AbstractPowerSyncDatabase, newPassword: string) {
+        // TODO: In a real app, this would call Auth.updatePassword (Cognito/Firebase)
+        // For mocks, we'll just log it or simulate success.
+        // We don't store passwords in the PowerSync users table for safety.
+        console.log(`Password updated in model for user ${this.id}`);
+    }
 }

@@ -23,13 +23,9 @@ export default function CreateAccountScreen({ navigation }: { navigation: Create
         try {
             showSpinner();
             await register(email, first + " " + last, password);
-        } catch (err) {
+        } catch (err: any) {
             Logger.error(err);
-            if (err instanceof Error) {
-                setMessage(err.message);
-            } else {
-                setMessage('An unexpected error occurred');
-            }
+            setMessage(err.message || 'An unexpected error occured');
         } finally {
             hideSpinner();
         }

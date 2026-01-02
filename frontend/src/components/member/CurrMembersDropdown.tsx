@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, Pressable, Modal, FlatList } from "react-native
 import { FontAwesome5 } from '@expo/vector-icons';
 import { OrgMembershipRecord } from "../../types/db";
 import { useEquipment } from "../../lib/context/EquipmentContext";
+import { OrgMembership } from "../../types/models";
 import { Colors, Spacing } from "../../styles/global";
 
 /*
@@ -26,12 +27,9 @@ export default function CurrMembersDropdown({
         .map(o => o.membership)
         .filter(m => isCreate || m.id !== currentMember?.id);
 
-    const handleSelect = (membership: OrgMembershipRecord) => {
-        const name = membership.type === 'USER'
-            ? (membership as any).full_name || 'User'
-            : membership.storage_name || 'Storage';
-        setSelectedName(name);
-        setUser(membership);
+    const handleSelect = (membership: OrgMembership) => {
+        setSelectedName(membership.name);
+        setUser(membership.membership); // Keep passing the record for the setter if it expects record
         setModalVisible(false);
     };
 
@@ -60,9 +58,7 @@ export default function CurrMembersDropdown({
                             data={members}
                             keyExtractor={(item) => item.id}
                             renderItem={({ item }) => {
-                                const name = item.type === 'USER'
-                                    ? (item as any).full_name || 'User'
-                                    : item.storage_name || 'Storage';
+                                const name = item.name;
                                 return (
                                     <Pressable
                                         style={styles.memberItem}

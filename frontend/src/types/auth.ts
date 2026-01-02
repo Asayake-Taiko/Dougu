@@ -1,11 +1,6 @@
-export type UserType = {
-  name: string;
-  email: string;
-  id: string;
-  profile: string;
-};
+import { UserRecord } from "./db";
 
 export interface AuthResponse {
-  user: UserType;
+  user: UserRecord;
   token: string;
 }

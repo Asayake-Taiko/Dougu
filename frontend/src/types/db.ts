@@ -32,7 +32,7 @@ export interface OrgMembershipRecord {
     user_id?: string;      // Present if type === 'USER'
     storage_name?: string; // Present if type === 'STORAGE'
     group_name: string;    // used for Authorization
-    profile?: string;
+    profile?: string;       // Present if type === 'STORAGE'
     details?: string;
 }
 

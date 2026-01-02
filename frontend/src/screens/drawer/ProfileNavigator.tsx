@@ -10,6 +10,9 @@ import EditOrgScreen from '../member/EditOrg';
 import { DrawerStackParamList, ProfileStackParamList } from '../../types/navigation';
 import { Colors } from '../../styles/global/colors';
 
+import { MembershipProvider, useMembership } from '../../lib/context/MembershipContext';
+import { EquipmentProvider } from '../../lib/context/EquipmentContext';
+
 const Drawer = createDrawerNavigator<DrawerStackParamList>();
 const RootStack = createStackNavigator<ProfileStackParamList>();
 
@@ -51,19 +54,31 @@ function ProfileDrawer() {
     );
 }
 
+function ProfileNavigatorContent() {
+    const { membershipId } = useMembership();
+
+    return (
+        <EquipmentProvider membershipId={membershipId}>
+            <RootStack.Navigator screenOptions={{ headerShown: false }}>
+                <RootStack.Screen name="DrawerRoot" component={ProfileDrawer} />
+                <RootStack.Screen
+                    name="EditOrg"
+                    component={EditOrgScreen}
+                    options={{
+                        presentation: 'modal',
+                        headerShown: true,
+                        title: 'Edit Organization'
+                    }}
+                />
+            </RootStack.Navigator>
+        </EquipmentProvider>
+    );
+}
+
 export default function ProfileNavigator() {
     return (
-        <RootStack.Navigator screenOptions={{ headerShown: false }}>
-            <RootStack.Screen name="DrawerRoot" component={ProfileDrawer} />
-            <RootStack.Screen
-                name="EditOrg"
-                component={EditOrgScreen}
-                options={{
-                    presentation: 'modal',
-                    headerShown: true,
-                    title: 'Edit Organization'
-                }}
-            />
-        </RootStack.Navigator>
+        <MembershipProvider>
+            <ProfileNavigatorContent />
+        </MembershipProvider>
     );
 }

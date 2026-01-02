@@ -37,7 +37,7 @@ export const useEquipment = () => {
 
 interface EquipmentProviderProps {
     children: ReactNode;
-    membershipId: string;
+    membershipId: string | null;
 }
 
 export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, membershipId }) => {
@@ -56,8 +56,11 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
 
     const refresh = async () => {
         try {
-            if (!user) {
-                Logger.warn("EquipmentProvider: No user found.");
+            if (!user || !membershipId) {
+                if (!membershipId) {
+                    setCurrentMember(null);
+                    setOwnerships(new Map());
+                }
                 return;
             }
 

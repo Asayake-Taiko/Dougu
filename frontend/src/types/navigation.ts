@@ -1,4 +1,4 @@
-import type { StackNavigationProp } from '@react-navigation/stack';
+import type { StackNavigationProp, StackScreenProps } from '@react-navigation/stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { DrawerNavigationProp, DrawerScreenProps } from '@react-navigation/drawer';
 import type { BottomTabNavigationProp, BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -17,6 +17,7 @@ export type MemberTabParamList = {
     Equipment: { organizationId: string };
     Swap: { organizationId: string };
     Team: { organizationId: string };
+    OrgInfo: { organizationId: string };
 };
 
 // Drawer Stack Parameter List
@@ -26,6 +27,12 @@ export type DrawerStackParamList = {
     JoinOrg: undefined;
     CreateOrg: undefined;
     MemberTabs: { organizationId: string; organizationName: string } | undefined;
+};
+
+// Profile Stack Parameter List (Overlays everything)
+export type ProfileStackParamList = {
+    DrawerRoot: undefined;
+    EditOrg: { organizationId: string };
 };
 
 // Navigation props for Auth screens
@@ -42,8 +49,14 @@ export type MyOrgsScreenNavigationProp = DrawerNavigationProp<DrawerStackParamLi
 export type JoinOrgScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'JoinOrg'>;
 export type CreateOrgScreenNavigationProp = DrawerNavigationProp<DrawerStackParamList, 'CreateOrg'>;
 
-// Screen props for Member Tabs (Composed with Drawer)
+// Screen props for Member Tabs (Composed with Drawer and Root Stack)
 export type MemberTabScreenProps<T extends keyof MemberTabParamList> = CompositeScreenProps<
     BottomTabScreenProps<MemberTabParamList, T>,
-    DrawerScreenProps<DrawerStackParamList>
+    CompositeScreenProps<
+        DrawerScreenProps<DrawerStackParamList>,
+        StackScreenProps<ProfileStackParamList>
+    >
 >;
+
+// Screen props for Profile Stack
+export type ProfileStackScreenProps<T extends keyof ProfileStackParamList> = StackScreenProps<ProfileStackParamList, T>;

@@ -4,6 +4,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { MemberTabParamList, DrawerStackParamList } from '../../types/navigation';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { Text, View } from 'react-native';
+// ... (rest remains same)
 import { Colors } from '../../styles/global/colors';
 import * as SecureStore from 'expo-secure-store';
 import SplashScreen from '../splash';
@@ -12,6 +13,7 @@ import SplashScreen from '../splash';
 import EquipmentScreen from './Equipment';
 import SwapScreen from './Swap';
 import TeamScreen from './Team';
+import OrgInfoScreen from './OrgInfo';
 import { EquipmentProvider } from '../../lib/context/EquipmentContext';
 import { useAuth } from '../../lib/context/AuthContext';
 import { db } from '../../lib/powersync/PowerSync';
@@ -41,6 +43,8 @@ function TabNavigatorContent({ organizationId }: { organizationId: string }) {
                         iconName = 'exchange-alt';
                     } else if (route.name === 'Team') {
                         iconName = 'users';
+                    } else if (route.name === 'OrgInfo') {
+                        iconName = 'info-circle';
                     }
 
                     return <FontAwesome5 name={iconName} size={size} color={color} />;
@@ -62,6 +66,11 @@ function TabNavigatorContent({ organizationId }: { organizationId: string }) {
             <Tab.Screen
                 name="Team"
                 component={TeamScreen}
+                initialParams={{ organizationId }}
+            />
+            <Tab.Screen
+                name="OrgInfo"
+                component={OrgInfoScreen}
                 initialParams={{ organizationId }}
             />
         </Tab.Navigator>

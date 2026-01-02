@@ -1,16 +1,19 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createStackNavigator } from '@react-navigation/stack';
 import ProfileScreen from './Profile';
 import CreateOrgScreen from './CreateOrg';
 import JoinOrgScreen from './JoinOrg';
 import MyOrgsScreen from './MyOrgs';
 import MemberTabs from '../member/TabNavigator';
-import { DrawerStackParamList } from '../../types/navigation';
+import EditOrgScreen from '../member/EditOrg';
+import { DrawerStackParamList, ProfileStackParamList } from '../../types/navigation';
 import { Colors } from '../../styles/global/colors';
 
 const Drawer = createDrawerNavigator<DrawerStackParamList>();
+const RootStack = createStackNavigator<ProfileStackParamList>();
 
-export default function ProfileNavigator() {
+function ProfileDrawer() {
     return (
         <Drawer.Navigator
             initialRouteName="MemberTabs"
@@ -45,5 +48,22 @@ export default function ProfileNavigator() {
             />
             <Drawer.Screen name="Profile" component={ProfileScreen} />
         </Drawer.Navigator>
+    );
+}
+
+export default function ProfileNavigator() {
+    return (
+        <RootStack.Navigator screenOptions={{ headerShown: false }}>
+            <RootStack.Screen name="DrawerRoot" component={ProfileDrawer} />
+            <RootStack.Screen
+                name="EditOrg"
+                component={EditOrgScreen}
+                options={{
+                    presentation: 'modal',
+                    headerShown: true,
+                    title: 'Edit Organization'
+                }}
+            />
+        </RootStack.Navigator>
     );
 }

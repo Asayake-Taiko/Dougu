@@ -17,14 +17,14 @@ const windowWidth = Dimensions.get("window").width;
 */
 export default function ScrollRow({
   listData,
-  isSwap,
   scrollOffset,
   flatListRef,
+  draggingItem,
 }: {
   listData: Item[];
-  isSwap: boolean;
   scrollOffset?: SharedValue<number>;
   flatListRef?: AnimatedRef<Animated.FlatList<Item>>;
+  draggingItem?: Item | null;
 }) {
   // If we have a shared value, use the animated scroll handler
   const scrollHandler = useAnimatedScrollHandler({
@@ -43,7 +43,7 @@ export default function ScrollRow({
       data={listData}
       renderItem={({ item }) => (
         <View style={styles.item}>
-          <ItemComponent data={item} swapable={isSwap} />
+          <ItemComponent data={item} draggingItem={draggingItem} />
         </View>
       )}
       keyExtractor={(item) => item.id}

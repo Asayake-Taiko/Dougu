@@ -83,9 +83,9 @@ export default function SwapGestures({
             <Text style={styles.userText}>My Equipment</Text>
             <ScrollRow
               listData={listOne}
-              isSwap={true}
               scrollOffset={topScrollOffset}
               flatListRef={topListRef}
+              draggingItem={draggingItem}
             />
           </View>
 
@@ -97,9 +97,9 @@ export default function SwapGestures({
             </View>
             <ScrollRow
               listData={listTwo}
-              isSwap={true}
               scrollOffset={bottomScrollOffset}
               flatListRef={bottomListRef}
+              draggingItem={draggingItem}
             />
           </View>
           <ContainerOverlay containerPage={containerPage} setContainerPage={setContainerPage} />

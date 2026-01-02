@@ -18,12 +18,11 @@ export default function ContainerOverlay({
   setContainerPage: (page: number) => void;
 }) {
   const {
-    containerOverlayVisible: visible,
-    setContainerOverlayVisible: setVisible,
+    setSelectedContainer,
     selectedContainer: item,
   } = useEquipment();
 
-  if (!visible || !item) return null;
+  if (!item) return null;
 
   // equipment is displayed in a 3x3 grid format (9 items per page)
   const equipmentChunks = chunkArray(item.equipment, 9);
@@ -38,7 +37,7 @@ export default function ContainerOverlay({
 
   const tapGesture = Gesture.Tap()
     .onEnd(() => {
-      setVisible(false);
+      setSelectedContainer(null);
     })
     .runOnJS(true);
 

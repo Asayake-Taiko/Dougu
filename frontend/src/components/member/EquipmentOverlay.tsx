@@ -8,13 +8,12 @@ import { Spacing } from "../../styles/global";
 
 export default function EquipmentOverlay() {
   const {
-    equipmentOverlayVisible: visible,
-    setEquipmentOverlayVisible: setVisible,
+    setSelectedEquipment,
     selectedEquipment: item
   } = useEquipment();
   const [localUpdate, setLocalUpdate] = React.useState(0);
 
-  if (!visible || !item) return null;
+  if (!item) return null;
 
   const handleToggle = (index: number) => {
     item.toggleSelection(index);
@@ -38,7 +37,7 @@ export default function EquipmentOverlay() {
           <Pressable onPress={handleSelectAll} style={styles.selectAllButton}>
             <Text style={styles.selectAllText}>Select All</Text>
           </Pressable>
-          <Pressable onPress={() => setVisible(false)} style={styles.closeButton}>
+          <Pressable onPress={() => setSelectedEquipment(null)} style={styles.closeButton}>
             <Text style={styles.closeButtonText}>Close</Text>
           </Pressable>
         </View>

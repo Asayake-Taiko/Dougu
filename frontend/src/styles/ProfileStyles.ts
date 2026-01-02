@@ -6,12 +6,17 @@ export const ProfileStyles = StyleSheet.create({
     borderRadius: Spacing.sm,
     marginTop: Spacing.lg,
   },
-  buttonContainer: { 
-    width: "80%", 
+  buttonContainer: {
+    width: "80%",
     marginTop: Spacing.lg,
+    backgroundColor: Colors.primary,
+    padding: Spacing.md,
+    borderRadius: Spacing.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
-    color: Colors.primary,
+    color: Colors.white,
   },
   centerRow: {
     width: "100%",

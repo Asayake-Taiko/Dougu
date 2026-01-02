@@ -12,17 +12,11 @@ interface EquipmentContextType {
     refresh: () => Promise<void>;
 
     // Overlay state
-    equipmentOverlayVisible: boolean;
-    setEquipmentOverlayVisible: (visible: boolean) => void;
-    containerOverlayVisible: boolean;
-    setContainerOverlayVisible: (visible: boolean) => void;
     selectedEquipment: Equipment | null;
     setSelectedEquipment: (equipment: Equipment | null) => void;
     selectedContainer: Container | null;
     setSelectedContainer: (container: Container | null) => void;
 
-    draggingItem: Item | null;
-    setDraggingItem: (item: Item | null) => void;
 }
 
 const EquipmentContext = createContext<EquipmentContextType | undefined>(undefined);
@@ -46,13 +40,9 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
     const [ownerships, setOwnerships] = useState<Map<string, OrgOwnership>>(new Map());
 
     // Overlay state
-    const [equipmentOverlayVisible, setEquipmentOverlayVisible] = useState(false);
-    const [containerOverlayVisible, setContainerOverlayVisible] = useState(false);
     const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
     const [selectedContainer, setSelectedContainer] = useState<Container | null>(null);
 
-    // Drag state
-    const [draggingItem, setDraggingItem] = useState<Item | null>(null);
 
     const refresh = async () => {
         try {
@@ -202,16 +192,10 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
         currentMember,
         ownerships,
         refresh,
-        equipmentOverlayVisible,
-        setEquipmentOverlayVisible,
-        containerOverlayVisible,
-        setContainerOverlayVisible,
         selectedEquipment,
         setSelectedEquipment,
         selectedContainer,
         setSelectedContainer,
-        draggingItem,
-        setDraggingItem,
     };
 
     return (

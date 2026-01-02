@@ -68,32 +68,32 @@ function TabNavigatorContent({ organizationId }: { organizationId: string }) {
 }
 
 export default function MemberTabs({ route, navigation }: DrawerScreenProps<DrawerStackParamList, 'MemberTabs'>) {
-    const { organizationId, organizationName, membershipId, isResolving, switchOrganization } = useMembership();
+    const { organization, membershipId, isResolving, switchOrganization } = useMembership();
 
     // Update state and persist when route params change (coming from MyOrgs or other navigation)
     useEffect(() => {
         if (route.params?.organizationId && route.params?.organizationName) {
             const { organizationId: newId, organizationName: newName } = route.params;
-            if (newId !== organizationId) {
+            if (newId !== organization?.id) {
                 switchOrganization(newId, newName);
             }
         }
-    }, [route.params, organizationId, switchOrganization]);
+    }, [route.params, organization?.id, switchOrganization]);
 
     // set the header title
     useLayoutEffect(() => {
-        if (organizationName) {
+        if (organization?.name) {
             navigation.setOptions({
-                headerTitle: organizationName,
+                headerTitle: organization.name,
             });
         }
-    }, [organizationName, navigation]);
+    }, [organization?.name, navigation]);
 
     if (isResolving) {
         return <SplashScreen />;
     }
 
-    if (!organizationId || !membershipId) {
+    if (!organization || !membershipId) {
         return (
             <View style={{ flex: 1, alignItems: 'center', padding: 20, marginTop: "50%" }}>
                 <Text style={{ fontSize: 18, textAlign: 'center' }}>
@@ -103,5 +103,5 @@ export default function MemberTabs({ route, navigation }: DrawerScreenProps<Draw
         );
     }
 
-    return <TabNavigatorContent organizationId={organizationId} />;
+    return <TabNavigatorContent organizationId={organization.id} />;
 }

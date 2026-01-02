@@ -42,15 +42,16 @@ export default function useSwapDragAndDrop({
 }: UseSwapDragAndDropProps) {
     const {
         currentMember,
-        containerOverlayVisible: swapContainerVisible,
-        setContainerOverlayVisible,
         setSelectedContainer,
         selectedContainer: containerItem,
-        equipmentOverlayVisible,
+        selectedEquipment,
         refresh,
-        draggingItem,
-        setDraggingItem
     } = useEquipment();
+
+    const [draggingItem, setDraggingItem] = useState<Item | null>(null);
+
+    const swapContainerVisible = !!containerItem;
+    const isEquipmentOverlayVisible = !!selectedEquipment;
 
     const headerHeight = useHeaderHeight();
 
@@ -98,9 +99,6 @@ export default function useSwapDragAndDrop({
         // Calculate index based on scroll offset
         const offset = isTop ? topScrollOffset.value : bottomScrollOffset.value;
         const list = isTop ? listOne : listTwo;
-        // Item width is windowWidth / 4 (ItemStyles) + windowWidth / 28 (margin)
-        // = 1/4 + 1/28 = 7/28 + 1/28 = 8/28 = 2/7 of windowWidth
-        // 2/7 = approx 0.2857
         const itemWidth = windowWidth / 3.5;
 
         const idx = Math.floor((e.absoluteX + offset) / itemWidth);
@@ -164,9 +162,6 @@ export default function useSwapDragAndDrop({
         }
     };
 
-    /**
-     * Main hover detection for horizontal scrolling and container highlighting
-     */
     const handleHover = (e: GestureUpdateEvent<PanGestureChangeEventPayload & PanGestureHandlerEventPayload>) => {
         if (!draggingItem || !halfLine.current) return;
 
@@ -183,7 +178,6 @@ export default function useSwapDragAndDrop({
         else if (x > windowWidth - 40) position = "right";
         else if (y < startY || y > endY) position = "out";
         else {
-            // Calculate index for container hover
             const offset = isTop ? topScrollOffset.value : bottomScrollOffset.value;
             const itemWidth = windowWidth / 3.5;
             const idx = Math.floor((x + offset) / itemWidth);
@@ -210,9 +204,6 @@ export default function useSwapDragAndDrop({
         prevPosition.current = position;
     };
 
-    /**
-     * Hover logic for closing the container overlay when dragging outside
-     */
     const containerHover = (e: GestureUpdateEvent<PanGestureChangeEventPayload & PanGestureHandlerEventPayload>) => {
         const x = e.absoluteX;
         const y = e.absoluteY;
@@ -228,7 +219,6 @@ export default function useSwapDragAndDrop({
         if (x < startX || x > endX || y < startY || y > endY) {
             if (!overlayTimeout.current) {
                 overlayTimeout.current = setTimeout(() => {
-                    setContainerOverlayVisible(false);
                     setSelectedContainer(null);
                     overlayTimeout.current = null;
                 }, 500);
@@ -276,7 +266,7 @@ export default function useSwapDragAndDrop({
         .maxPointers(1)
         .onStart((e) => {
             "worklet";
-            if (equipmentOverlayVisible) return;
+            if (isEquipmentOverlayVisible) return;
             animateStart(e);
 
             if (swapContainerVisible) scheduleOnRN(containerSetItem, e);
@@ -297,7 +287,7 @@ export default function useSwapDragAndDrop({
         })
         .activateAfterLongPress(500),
         [
-            equipmentOverlayVisible,
+            isEquipmentOverlayVisible,
             swapContainerVisible,
             draggingItem,
             containerPage,
@@ -314,6 +304,7 @@ export default function useSwapDragAndDrop({
     return {
         panGesture,
         draggingItem,
+        setDraggingItem,
         dragValues,
         containerPage,
         setContainerPage,

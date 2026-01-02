@@ -34,7 +34,7 @@ export default function EquipmentScreen() {
                         <View key={index} style={EquipmentStyles.equipmentRow}>
                             {group.map((item) => (
                                 <View key={item.id} style={EquipmentStyles.equipmentItemContainer}>
-                                    <Item data={item} swapable={false} />
+                                    <Item data={item} />
                                 </View>
                             ))}
                         </View>

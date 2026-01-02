@@ -23,7 +23,7 @@ export default function TeamScreen() {
                     return (
                         <View style={styles.userContainer}>
                             <Text style={styles.scrollText}>{displayName}</Text>
-                            <ScrollRow listData={items} isSwap={false} />
+                            <ScrollRow listData={items} />
                         </View>
                     );
                 }}

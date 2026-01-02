@@ -1,8 +1,9 @@
 import type { StackNavigationProp, StackScreenProps } from '@react-navigation/stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { DrawerNavigationProp, DrawerScreenProps } from '@react-navigation/drawer';
-import type { BottomTabNavigationProp, BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps } from '@react-navigation/native';
+import type { OrgMembership } from './models';
 
 // Auth Stack Parameter List
 export type AuthStackParamList = {
@@ -32,7 +33,15 @@ export type DrawerStackParamList = {
 // Profile Stack Parameter List (Overlays everything)
 export type ProfileStackParamList = {
     DrawerRoot: undefined;
-    EditOrg: { organizationId: string };
+    OrgImage: undefined;
+    UserStorages: { tabParam: 'Members' | 'Storages' };
+    Sheet: undefined;
+    ManageEquipment: undefined;
+    DeleteOrg: undefined;
+    CreateEquipment: undefined;
+    CreateStorage: undefined;
+    ItemImage: { index: number };
+    MemberProfile: { member: OrgMembership };
 };
 
 // Navigation props for Auth screens
@@ -60,3 +69,14 @@ export type MemberTabScreenProps<T extends keyof MemberTabParamList> = Composite
 
 // Screen props for Profile Stack
 export type ProfileStackScreenProps<T extends keyof ProfileStackParamList> = StackScreenProps<ProfileStackParamList, T>;
+
+export type InfoScreenProps = MemberTabScreenProps<'OrgInfo'>;
+export type OrgImageScreenProps = ProfileStackScreenProps<'OrgImage'>;
+export type UserStoragesScreenProps = ProfileStackScreenProps<'UserStorages'>;
+export type SheetScreenProps = ProfileStackScreenProps<'Sheet'>;
+export type ManageEquipmentScreenProps = ProfileStackScreenProps<'ManageEquipment'>;
+export type DeleteOrgScreenProps = ProfileStackScreenProps<'DeleteOrg'>;
+export type CreateEquipmentScreenProps = ProfileStackScreenProps<'CreateEquipment'>;
+export type CreateStorageScreenProps = ProfileStackScreenProps<'CreateStorage'>;
+export type ItemImageScreenProps = ProfileStackScreenProps<'ItemImage'>;
+export type MemberProfileScreenProps = ProfileStackScreenProps<'MemberProfile'>;

@@ -1,23 +1,84 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { MemberTabScreenProps } from '../../types/navigation';
-import { PressableOpacity } from '../../components/PressableOpacity';
-import { Colors } from '../../styles/global/colors';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import { InfoScreenProps } from "../../types/navigation";
+import OrgImageDisplay from "../../components/organization/OrgImageDisplay";
+import { useMembership } from "../../lib/context/MembershipContext";
 
-export default function OrgInfoScreen({ navigation, route }: MemberTabScreenProps<'OrgInfo'>) {
-    const { organizationId } = route.params;
+/*
+  InfoScreen displays the organization's name, access code, and offers
+  navigation to view more information about the organization's members,
+  storages, and equipment.
+*/
+export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
+    const { organization } = useMembership();
 
+    const handleOrgImage = () => {
+        navigation.navigate("OrgImage");
+    };
+
+    if (!organization) {
+        return null;
+    }
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Organization Information</Text>
-            <Text style={styles.text}>ID: {organizationId}</Text>
-
-            <PressableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('EditOrg', { organizationId })}
+            <TouchableOpacity onPress={handleOrgImage}>
+                <OrgImageDisplay imageKey={organization.image} />
+            </TouchableOpacity>
+            <View style={styles.row}>
+                <Text style={[styles.rowHeader, { flex: 2 }]}>Name</Text>
+                <Text style={{ flex: 3 }}>{organization.name}</Text>
+            </View>
+            <View style={styles.row}>
+                <Text style={[styles.rowHeader, { flex: 2 }]}>Access Code</Text>
+                <Text style={{ flex: 3 }}>{organization.accessCode}</Text>
+            </View>
+            <View style={styles.row}>
+                <Text style={styles.rowHeader}>Members</Text>
+                <TouchableOpacity
+                    style={styles.rightArrow}
+                    onPress={() =>
+                        navigation.navigate("UserStorages", { tabParam: "Members" })
+                    }
+                >
+                    <Text>View Members</Text>
+                    <AntDesign name="right" size={20} />
+                </TouchableOpacity>
+            </View>
+            <View style={styles.row}>
+                <Text style={styles.rowHeader}>Storages</Text>
+                <TouchableOpacity
+                    style={styles.rightArrow}
+                    onPress={() =>
+                        navigation.navigate("UserStorages", { tabParam: "Storages" })
+                    }
+                >
+                    <Text>View Storages</Text>
+                    <AntDesign name="right" size={20} />
+                </TouchableOpacity>
+            </View>
+            <View style={styles.row}>
+                <Text style={styles.rowHeader}>Equipment</Text>
+                <TouchableOpacity
+                    style={styles.rightArrow}
+                    onPress={() => navigation.navigate("Sheet")}
+                >
+                    <Text>View Sheet</Text>
+                    <AntDesign name="right" size={20} />
+                </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+                style={styles.equipmentBtn}
+                onPress={() => navigation.navigate("ManageEquipment")}
             >
-                <Text style={styles.buttonText}>Edit Organization</Text>
-            </PressableOpacity>
+                <Text style={styles.eBtnText}>Manage Equipment</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.equipmentBtn}
+                onPress={() => navigation.navigate("DeleteOrg")}
+            >
+                <Text style={styles.deleteText}>Delete Org</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -25,31 +86,40 @@ export default function OrgInfoScreen({ navigation, route }: MemberTabScreenProp
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-        padding: 20,
+        alignItems: "center",
+        backgroundColor: "#fff",
     },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: Colors.text,
+    deleteText: {
+        alignSelf: "center",
+        fontWeight: "bold",
+        color: "red",
     },
-    text: {
-        fontSize: 16,
-        marginBottom: 30,
-        color: 'gray',
+    equipmentBtn: {
+        backgroundColor: "#EEEEEE",
+        height: 50,
+        width: "50%",
+        justifyContent: "center",
+        borderRadius: 10,
+        marginTop: 20,
     },
-    button: {
-        backgroundColor: Colors.primary,
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 8,
+    eBtnText: {
+        alignSelf: "center",
+        fontWeight: "bold",
     },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
+    row: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "90%",
+        margin: 15,
+    },
+    rowHeader: {
+        fontWeight: "bold",
+        flex: 2,
+    },
+    rightArrow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "50%",
+        flex: 3,
     },
 });

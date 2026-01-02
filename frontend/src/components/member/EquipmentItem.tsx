@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import { Equipment } from "../../types/models";
+import { Item, Equipment } from "../../types/models";
 import EquipmentDisplay from "./EquipmentDisplay";
 import { ItemStyles } from "../../styles/ItemStyles";
 import { useEquipment } from "../../lib/context/EquipmentContext";
@@ -11,12 +11,14 @@ import { useEquipment } from "../../lib/context/EquipmentContext";
 */
 export default function EquipmentItem({
   item,
-  isFloating = false
+  isFloating = false,
+  draggingItem,
 }: {
   item: Equipment;
   isFloating?: boolean;
+  draggingItem?: Item | null;
 }) {
-  const { setSelectedEquipment, setEquipmentOverlayVisible, draggingItem } = useEquipment();
+  const { setSelectedEquipment } = useEquipment();
 
   // Calculate display count and representative record based on drag state
   let displayCount = item.count;
@@ -38,7 +40,6 @@ export default function EquipmentItem({
   const tapGesture = Gesture.Tap()
     .onEnd(() => {
       setSelectedEquipment(item);
-      setEquipmentOverlayVisible(true);
     })
     .runOnJS(true);
 

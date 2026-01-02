@@ -5,22 +5,22 @@ import EquipmentItem from "./EquipmentItem";
 // Item is a component that displays either an equipment or container object
 export default function ItemComponent({
   data,
-  swapable,
   isFloating = false,
+  draggingItem,
 }: {
   data: Item;
-  swapable: boolean;
   isFloating?: boolean;
+  draggingItem?: Item | null;
 }) {
   return (
     <>
       {data.type === "equipment" ? (
-        <EquipmentItem item={data as Equipment} isFloating={isFloating} />
+        <EquipmentItem item={data as Equipment} isFloating={isFloating} draggingItem={draggingItem} />
       ) : (
         <ContainerItem
           item={data as Container}
-          swapable={swapable}
           isFloating={isFloating}
+          draggingItem={draggingItem}
         />
       )}
     </>

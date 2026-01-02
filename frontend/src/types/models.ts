@@ -1,4 +1,4 @@
-import { OrgMembershipRecord, ContainerRecord, EquipmentRecord } from "./db";
+import { OrgMembershipRecord, ContainerRecord, EquipmentRecord, OrganizationRecord } from "./db";
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
 
 export type Item = Equipment | Container;
@@ -135,4 +135,42 @@ export class Equipment {
             }
         });
     }
+}
+
+export class Organization {
+    readonly type = 'organization';
+    organization: OrganizationRecord;
+
+    constructor(organization: OrganizationRecord) {
+        this.organization = organization;
+    }
+
+    get id() { return this.organization.id; }
+    get name() { return this.organization.name; }
+    get accessCode() { return this.organization.access_code; }
+    get managerId() { return this.organization.manager_id; }
+    get image() { return this.organization.image; }
+}
+
+export class OrgMembership {
+    readonly type = 'membership';
+    membership: OrgMembershipRecord;
+    userName?: string;
+
+    constructor(membership: OrgMembershipRecord, userName?: string) {
+        this.membership = membership;
+        this.userName = userName;
+    }
+
+    get id() { return this.membership.id; }
+    get name() {
+        if (this.membership.type === 'STORAGE') {
+            return this.membership.storage_name || 'Unnamed Storage';
+        }
+        return this.userName || 'Unknown User';
+    }
+    get membershipType() { return this.membership.type; }
+    get userId() { return this.membership.user_id; }
+    get profile() { return this.membership.profile; }
+    get details() { return this.membership.details; }
 }

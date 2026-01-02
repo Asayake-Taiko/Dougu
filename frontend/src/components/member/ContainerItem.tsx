@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import { Container } from "../../types/models";
+import { Item, Container } from "../../types/models";
 import { chunkArray } from "../../lib/helper/EquipmentUtils";
 import { ItemStyles } from "../../styles/ItemStyles";
 import EquipmentDisplay from "./EquipmentDisplay";
@@ -13,17 +13,17 @@ import { useEquipment } from "../../lib/context/EquipmentContext";
 */
 export default function ContainerItem({
     item,
-    swapable,
     isFloating = false,
+    draggingItem,
 }: {
     item: Container;
-    swapable: boolean;
     isFloating?: boolean;
+    draggingItem?: Item | null;
 }) {
     const containerData = item.container;
     const equipmentItems = item.equipment;
 
-    const { setSelectedContainer, setContainerOverlayVisible, draggingItem } = useEquipment();
+    const { setSelectedContainer } = useEquipment();
 
     // Hide if this container is being dragged (not floating)
     if (!isFloating && draggingItem?.type === 'container' && draggingItem.id === item.id) {
@@ -37,7 +37,6 @@ export default function ContainerItem({
     const tapGesture = Gesture.Tap()
         .onEnd(() => {
             setSelectedContainer(item);
-            setContainerOverlayVisible(true);
         })
         .runOnJS(true);
 

@@ -45,7 +45,6 @@ export default function useSwapDragAndDrop({
         setSelectedContainer,
         selectedContainer: containerItem,
         selectedEquipment,
-        refresh,
     } = useEquipment();
     const { membership } = useMembership();
 
@@ -256,7 +255,6 @@ export default function useSwapDragAndDrop({
                 const container = draggingItem as Container;
                 await container.reassign(db, targetMember.id);
             }
-            await refresh();
         } catch (error) {
             console.error("Error reassigning item:", error);
         }

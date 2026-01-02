@@ -102,7 +102,7 @@ export default function SwapGestures({
               draggingItem={draggingItem}
             />
           </View>
-          <ContainerOverlay containerPage={containerPage} setContainerPage={setContainerPage} />
+          <ContainerOverlay containerPage={containerPage} setContainerPage={setContainerPage} draggingItem={draggingItem} />
           <EquipmentOverlay />
           <FloatingDraggingItem draggingItem={draggingItem} dragValues={dragValues} />
         </View>

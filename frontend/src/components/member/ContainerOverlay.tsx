@@ -10,12 +10,16 @@ import PaginationDots from "./PaginationDots";
 
 const { width: windowWidth } = Dimensions.get("window");
 
+import { Item } from "../../types/models";
+
 export default function ContainerOverlay({
   containerPage,
   setContainerPage,
+  draggingItem = null,
 }: {
   containerPage: number;
   setContainerPage: (page: number) => void;
+  draggingItem?: Item | null;
 }) {
   const {
     setSelectedContainer,
@@ -93,6 +97,7 @@ export default function ContainerOverlay({
                         >
                           <EquipmentItem
                             item={equip}
+                            draggingItem={draggingItem}
                           />
                         </View>
                       ))}

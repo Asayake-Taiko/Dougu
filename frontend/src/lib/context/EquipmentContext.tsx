@@ -3,11 +3,11 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { db } from '../powersync/PowerSync';
 import { useAuth } from './AuthContext';
 import { Logger } from '../Logger';
-import { Container, Equipment, OrgOwnership, Item, OrgMembership } from '../../types/models';
+import { useMembership } from './MembershipContext';
+import { Container, Equipment, OrgOwnership, OrgMembership } from '../../types/models';
 import { OrgMembershipRecord, ContainerRecord, EquipmentRecord } from '../../types/db';
 
 interface EquipmentContextType {
-    currentMember: OrgMembershipRecord | null;
     ownerships: Map<string, OrgOwnership>; // Key: membership.id, Value: OrgOwnership, Sorted by Name
     refresh: () => Promise<void>;
 
@@ -29,14 +29,9 @@ export const useEquipment = () => {
     return context;
 };
 
-interface EquipmentProviderProps {
-    children: ReactNode;
-    membershipId: string | null;
-}
-
-export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, membershipId }) => {
+export const EquipmentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user } = useAuth();
-    const [currentMember, setCurrentMember] = useState<OrgMembershipRecord | null>(null);
+    const { membership } = useMembership();
     const [ownerships, setOwnerships] = useState<Map<string, OrgOwnership>>(new Map());
 
     // Overlay state
@@ -46,30 +41,12 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
 
     const refresh = async () => {
         try {
-            if (!user || !membershipId) {
-                if (!membershipId) {
-                    setCurrentMember(null);
-                    setOwnerships(new Map());
-                }
-                return;
-            }
-
-            // 1. Resolve Membership and Organization
-            const membershipResult = await db.getAll<OrgMembershipRecord>(
-                'SELECT * FROM org_memberships WHERE id = ?',
-                [membershipId]
-            );
-
-            if (membershipResult.length === 0) {
-                Logger.error(`Membership not found: ${membershipId}`);
-                setCurrentMember(null);
+            if (!user || !membership) {
                 setOwnerships(new Map());
                 return;
             }
 
-            const activeMember = membershipResult[0];
-            const organizationId = activeMember.organization_id;
-            setCurrentMember(activeMember);
+            const organizationId = membership.organizationId;
 
             // 2. Fetch all Memberships, Containers, and Equipment for this Org
             // JOIN with users to get full_name for sorting USER type memberships
@@ -171,10 +148,9 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({ children, 
 
     useEffect(() => {
         refresh();
-    }, [membershipId, user]);
+    }, [membership, user]);
 
     const contextValue: EquipmentContextType = {
-        currentMember,
         ownerships,
         refresh,
         selectedEquipment,

@@ -68,7 +68,7 @@ function TabNavigatorContent({ organizationId }: { organizationId: string }) {
 }
 
 export default function MemberTabs({ route, navigation }: DrawerScreenProps<DrawerStackParamList, 'MemberTabs'>) {
-    const { organization, membershipId, isResolving, switchOrganization } = useMembership();
+    const { organization, membership, isResolving, switchOrganization } = useMembership();
 
     // Update state and persist when route params change (coming from MyOrgs or other navigation)
     useEffect(() => {
@@ -93,7 +93,7 @@ export default function MemberTabs({ route, navigation }: DrawerScreenProps<Draw
         return <SplashScreen />;
     }
 
-    if (!organization || !membershipId) {
+    if (!organization || !membership) {
         return (
             <View style={{ flex: 1, alignItems: 'center', padding: 20, marginTop: "50%" }}>
                 <Text style={{ fontSize: 18, textAlign: 'center' }}>

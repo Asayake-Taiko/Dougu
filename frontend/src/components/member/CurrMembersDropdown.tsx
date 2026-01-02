@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, Pressable, Modal, FlatList } from "react-native
 import { FontAwesome5 } from '@expo/vector-icons';
 import { OrgMembershipRecord } from "../../types/db";
 import { useEquipment } from "../../lib/context/EquipmentContext";
+import { useMembership } from "../../lib/context/MembershipContext";
 import { OrgMembership } from "../../types/models";
 import { Colors, Spacing } from "../../styles/global";
 
@@ -18,14 +19,15 @@ export default function CurrMembersDropdown({
     isCreate: boolean;
 }) {
     const [modalVisible, setModalVisible] = useState(false);
-    const { ownerships, currentMember } = useEquipment();
+    const { ownerships } = useEquipment();
+    const { membership } = useMembership();
     const [selectedName, setSelectedName] = useState("Select Member");
 
     // Filter members:
     // If not isCreate, don't show current member
     const members = Array.from(ownerships.values())
         .map(o => o.membership)
-        .filter(m => isCreate || m.id !== currentMember?.id);
+        .filter(m => isCreate || m.id !== membership?.id);
 
     const handleSelect = (membership: OrgMembership) => {
         setSelectedName(membership.name);

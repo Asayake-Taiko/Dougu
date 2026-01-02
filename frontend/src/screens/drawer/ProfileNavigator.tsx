@@ -62,67 +62,59 @@ function ProfileDrawer() {
     );
 }
 
-function ProfileNavigatorContent() {
-    const { membershipId } = useMembership();
-
-    return (
-        <EquipmentProvider membershipId={membershipId}>
-            <RootStack.Navigator screenOptions={{ headerShown: false }}>
-                <RootStack.Screen name="DrawerRoot" component={ProfileDrawer} />
-                {/* <RootStack.Screen
-                    name="OrgImage"
-                    component={OrgImageScreen}
-                    options={{ headerShown: true, title: 'Organization Image' }}
-                /> */}
-                <RootStack.Screen
-                    name="UserStorages"
-                    component={UserStoragesScreen}
-                    options={{ headerShown: true, title: 'Users & Storages' }}
-                />
-                {/* <RootStack.Screen
-                    name="Sheet"
-                    component={SheetScreen}
-                    options={{ headerShown: true, title: 'Equipment Sheet' }}
-                />
-                <RootStack.Screen
-                    name="ManageEquipment"
-                    component={ManageEquipmentScreen}
-                    options={{ headerShown: true, title: 'Manage Equipment' }}
-                />
-                <RootStack.Screen
-                    name="DeleteOrg"
-                    component={DeleteOrgScreen}
-                    options={{ headerShown: true, title: 'Delete Organization' }}
-                />
-                <RootStack.Screen
-                    name="CreateEquipment"
-                    component={CreateEquipmentScreen}
-                    options={{ headerShown: true, title: 'Create Equipment' }}
-                />
-                <RootStack.Screen
-                    name="CreateStorage"
-                    component={CreateStorageScreen}
-                    options={{ headerShown: true, title: 'Create Storage' }}
-                />
-                <RootStack.Screen
-                    name="ItemImage"
-                    component={ItemImageScreen}
-                    options={{ headerShown: true, title: 'Item Image' }}
-                /> */}
-                <RootStack.Screen
-                    name="MemberProfile"
-                    component={MemberProfileScreen}
-                    options={{ headerShown: true, title: 'Member Profile' }}
-                />
-            </RootStack.Navigator>
-        </EquipmentProvider>
-    );
-}
-
 export default function ProfileNavigator() {
     return (
         <MembershipProvider>
-            <ProfileNavigatorContent />
+            <EquipmentProvider>
+                <RootStack.Navigator screenOptions={{ headerShown: false }}>
+                    <RootStack.Screen name="DrawerRoot" component={ProfileDrawer} />
+                    {/* <RootStack.Screen
+                        name="OrgImage"
+                        component={OrgImageScreen}
+                        options={{ headerShown: true, title: 'Organization Image' }}
+                    /> */}
+                    <RootStack.Screen
+                        name="UserStorages"
+                        component={UserStoragesScreen}
+                        options={{ headerShown: true, title: 'Users & Storages' }}
+                    />
+                    {/* <RootStack.Screen
+                        name="Sheet"
+                        component={SheetScreen}
+                        options={{ headerShown: true, title: 'Equipment Sheet' }}
+                    />
+                    <RootStack.Screen
+                        name="ManageEquipment"
+                        component={ManageEquipmentScreen}
+                        options={{ headerShown: true, title: 'Manage Equipment' }}
+                    />
+                    <RootStack.Screen
+                        name="DeleteOrg"
+                        component={DeleteOrgScreen}
+                        options={{ headerShown: true, title: 'Delete Organization' }}
+                    />
+                    <RootStack.Screen
+                        name="CreateEquipment"
+                        component={CreateEquipmentScreen}
+                        options={{ headerShown: true, title: 'Create Equipment' }}
+                    />
+                    <RootStack.Screen
+                        name="CreateStorage"
+                        component={CreateStorageScreen}
+                        options={{ headerShown: true, title: 'Create Storage' }}
+                    />
+                    <RootStack.Screen
+                        name="ItemImage"
+                        component={ItemImageScreen}
+                        options={{ headerShown: true, title: 'Item Image' }}
+                    /> */}
+                    <RootStack.Screen
+                        name="MemberProfile"
+                        component={MemberProfileScreen}
+                        options={{ headerShown: true, title: 'Member Profile' }}
+                    />
+                </RootStack.Navigator>
+            </EquipmentProvider>
         </MembershipProvider>
     );
 }

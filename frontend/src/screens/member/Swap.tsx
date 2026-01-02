@@ -3,20 +3,22 @@ import { OrgMembershipRecord } from "../../types/db";
 import { Item } from "../../types/models";
 import SwapGestures from "../../components/member/SwapGestures";
 import { useEquipment } from "../../lib/context/EquipmentContext";
+import { useMembership } from "../../lib/context/MembershipContext";
 
 /*
   Screen for swapping equipment between the current user and another member.
   This section mainly focuses on getting and passing down the equipment info
 */
 export default function SwapScreen() {
-    const { currentMember, ownerships } = useEquipment();
+    const { ownerships } = useEquipment();
+    const { membership } = useMembership();
     const swapUser = useRef<OrgMembershipRecord | null>(null);
     const [listOne, setListOne] = useState<Item[]>([]);
     const [listTwo, setListTwo] = useState<Item[]>([]);
 
     const updateLists = () => {
-        if (currentMember) {
-            const myOwnership = ownerships.get(currentMember.id);
+        if (membership) {
+            const myOwnership = ownerships.get(membership.id);
             setListOne(myOwnership?.items || []);
         } else {
             setListOne([]);
@@ -33,7 +35,7 @@ export default function SwapScreen() {
     // Update lists whenever ownerships or selection changes
     useEffect(() => {
         updateLists();
-    }, [ownerships, currentMember]);
+    }, [ownerships, membership]);
 
     // get selected user equipment
     const handleSet = (targetMembership: OrgMembershipRecord | null) => {

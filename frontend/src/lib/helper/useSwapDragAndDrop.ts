@@ -12,6 +12,7 @@ import { scheduleOnRN } from "react-native-worklets";
 import { useHeaderHeight } from "@react-navigation/elements";
 
 import { useEquipment } from "../context/EquipmentContext";
+import { useMembership } from "../context/MembershipContext";
 import { Item, Equipment, Container } from "../../types/models";
 import { OrgMembershipRecord } from "../../types/db";
 import { db } from "../powersync/PowerSync";
@@ -41,12 +42,12 @@ export default function useSwapDragAndDrop({
     halfLine,
 }: UseSwapDragAndDropProps) {
     const {
-        currentMember,
         setSelectedContainer,
         selectedContainer: containerItem,
         selectedEquipment,
         refresh,
     } = useEquipment();
+    const { membership } = useMembership();
 
     const [draggingItem, setDraggingItem] = useState<Item | null>(null);
 
@@ -241,9 +242,9 @@ export default function useSwapDragAndDrop({
     ) => {
         if (!draggingItem) return;
         if (swapContainerVisible) return;
-        if (!currentMember) return;
+        if (!membership) return;
 
-        const targetMember = gestureEvent.y < halfLine.current ? currentMember : swapUser.current;
+        const targetMember = gestureEvent.y < halfLine.current ? membership : swapUser.current;
         if (!targetMember) return;
 
         try {
@@ -291,7 +292,7 @@ export default function useSwapDragAndDrop({
             swapContainerVisible,
             draggingItem,
             containerPage,
-            currentMember,
+            membership,
             swapUser.current,
             containerItem,
             topScrollOffset,

@@ -165,6 +165,7 @@ export class OrgMembership {
     }
 
     get id() { return this.membership.id; }
+    get organizationId() { return this.membership.organization_id; }
     get name() {
         if (this.membership.type === 'STORAGE') {
             return this.membership.storage_name || 'Unnamed Storage';

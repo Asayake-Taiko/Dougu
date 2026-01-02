@@ -9,7 +9,7 @@ import { Logger } from '../Logger';
 
 interface MembershipContextType {
     organization: Organization | null;
-    membershipId: string | null;
+    membership: OrgMembership | null;
     isResolving: boolean;
     isManager: boolean;
     switchOrganization: (orgId: string, orgName: string) => Promise<void>;
@@ -55,8 +55,11 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
     }, []);
 
     // Reactive queries
-    const { data: membershipData, isLoading: loadingMembership } = useQuery<OrgMembershipRecord>(
-        'SELECT id FROM org_memberships WHERE organization_id = ? AND user_id = ?',
+    const { data: membershipData, isLoading: loadingMembership } = useQuery<OrgMembershipRecord & { full_name?: string; user_profile?: string }>(
+        `SELECT m.*, u.full_name, u.profile as user_profile
+         FROM org_memberships m 
+         LEFT JOIN users u ON m.user_id = u.id 
+         WHERE m.organization_id = ? AND m.user_id = ?`,
         [organizationId, user?.id]
     );
 
@@ -66,7 +69,10 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
     );
 
     // Derive models and state
-    const membershipId = useMemo(() => membershipData[0]?.id || null, [membershipData]);
+    const membership = useMemo(() => {
+        const data = membershipData[0];
+        return data ? new OrgMembership(data, data.full_name, data.user_profile) : null;
+    }, [membershipData]);
 
     const organization = useMemo(() =>
         orgData[0] ? new Organization(orgData[0]) : null
@@ -166,7 +172,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const value: MembershipContextType = {
         organization,
-        membershipId,
+        membership,
         isResolving,
         isManager: organization?.managerId === user?.id,
         switchOrganization,

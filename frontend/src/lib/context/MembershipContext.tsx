@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext';
 import { OrgMembershipRecord, OrganizationRecord } from '../../types/db';
 import { Organization, OrgMembership } from '../../types/models';
 import { Logger } from '../Logger';
+import { generateUUID } from '../utils/UUID';
 
 interface MembershipContextType {
     organization: Organization | null;
@@ -112,8 +113,8 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
         if (existingOrg) throw new Error("Organization name is already taken!");
 
         const code = await generateUniqueCode();
-        const orgId = Math.random().toString(36).substring(2, 15);
-        const membershipId = Math.random().toString(36).substring(2, 15);
+        const orgId = generateUUID();
+        const membershipId = generateUUID();
 
         await db.writeTransaction(async (tx) => {
             await tx.execute(
@@ -143,7 +144,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
         );
         if (existingMemberships.length > 0) throw new Error("You are already a member of this organization.");
 
-        const membershipId = Math.random().toString(36).substring(2, 15);
+        const membershipId = generateUUID();
         await db.execute(
             'INSERT INTO org_memberships (id, organization_id, user_id, type) VALUES (?, ?, ?, ?)',
             [membershipId, org.id, user?.id, 'USER']

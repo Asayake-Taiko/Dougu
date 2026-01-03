@@ -3,93 +3,98 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  Alert,
-  ImageSourcePropType,
   StyleSheet,
 } from "react-native";
 import React from "react";
 import { useState } from "react";
-import { DataStore } from "@aws-amplify/datastore";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-// project imports
-import { useLoad } from "../../helper/context/LoadingContext";
-import { OrgUserStorage, Organization, UserOrStorage } from "../../models";
-import { useUser } from "../../helper/context/UserContext";
-import { handleError } from "../../helper/Utils";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import ProfileOverlay from "../../components/drawer/ProfileOverlay";
+import { ProfileStyles } from "../../styles/ProfileStyles";
 import ProfileDisplay from "../../components/ProfileDisplay";
-import { uploadImage } from "../../helper/AWS";
-import { useDimensions } from "../../helper/context/DimensionsContext";
-import { useProfileStyles } from "../../styles/ProfileStyles";
+import ProfileOverlay from "../../components/drawer/ProfileOverlay";
+import { useMembership } from "../../lib/context/MembershipContext";
+import { useSpinner } from "../../lib/context/SpinnerContext";
+import { useModal } from "../../lib/context/ModalContext";
+import { db } from "../../lib/powersync/PowerSync";
+import { Logger } from "../../lib/Logger";
+import { PressableOpacity } from "../../components/PressableOpacity";
+import { useNavigation } from "@react-navigation/native";
+import { generateUUID } from "../../lib/utils/UUID";
 
 /*
   Create storage screen allows a manager to create storage.
   A storage is a non-user entity where equipment can be assigned.
 */
 export default function CreateStorageScreen() {
-  const [profileSource, setProfileSource] =
-    useState<ImageSourcePropType | null>(null);
+  const navigation = useNavigation();
+  const { organization, isManager } = useMembership();
+  const { showSpinner, hideSpinner } = useSpinner();
+  const { setMessage } = useModal();
+
   const [profileKey, setProfileKey] = useState<string>("default");
   const [profileVisible, setProfileVisible] = useState(false);
   const [name, onChangeName] = useState("");
   const [details, onChangeDetails] = useState("");
-  const { setIsLoading } = useLoad();
-  const { org } = useUser();
-  const { windowWidth } = useDimensions();
-  const profileStyles = useProfileStyles();
 
   // Create a new storage
   const handleCreate = async () => {
+    if (!isManager) {
+      setMessage("You do not have permission to create a storage.");
+      return;
+    }
+    if (!name.trim()) {
+      setMessage("Please enter a name for the storage.");
+      return;
+    }
+
+    if (!organization) {
+      setMessage("No active organization found.");
+      return;
+    }
+
     try {
-      // check that name isn't empty
-      if (name === "") {
-        throw new Error("Name must not be empty.");
-      }
-      setIsLoading(true);
-      // create the storage
-      const dataOrg = await DataStore.query(Organization, org!.id);
-      if (dataOrg == null) throw new Error("Organization not found.");
-      const storage = await DataStore.save(
-        new OrgUserStorage({
-          name: name,
-          organization: dataOrg,
-          type: UserOrStorage.STORAGE,
-          details: details,
-          group: org!.name,
-          profile: profileKey,
-        }),
+      showSpinner();
+
+      await db.execute(
+        'INSERT INTO org_memberships (id, organization_id, type, storage_name, group_name, profile, details) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [
+          generateUUID(),
+          organization.id,
+          'STORAGE',
+          name,
+          organization.name,
+          profileKey,
+          details
+        ]
       );
-      // upload the profile image
-      if (profileSource) {
-        const path = `public/profiles/${storage.id}/profile.jpeg`;
-        await uploadImage(profileSource, path);
-      }
-      setIsLoading(false);
+
+      // Reset form and go back
       onChangeName("");
       onChangeDetails("");
-      Alert.alert("Storage Created Successfully!");
+      navigation.goBack();
+
     } catch (error) {
-      handleError("handleCreate", error as Error, setIsLoading);
+      Logger.error("Error creating storage:", error);
+      setMessage("Failed to create storage. Please try again.");
+    } finally {
+      hideSpinner();
     }
   };
 
   return (
-    <View style={profileStyles.container}>
-      <TouchableOpacity
-        style={profileStyles.profile}
+    <View style={ProfileStyles.container}>
+      <PressableOpacity
+        style={ProfileStyles.profile}
         onPress={() => setProfileVisible(true)}
       >
         <ProfileDisplay
           isMini={false}
           profileKey={profileKey}
-          source={profileSource}
-          userId={null}
         />
-        <View style={profileStyles.editButton}>
-          <MaterialCommunityIcons name="pencil" size={windowWidth / 18} />
+        <View style={ProfileStyles.editButton}>
+          <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
         </View>
-      </TouchableOpacity>
+      </PressableOpacity>
       <View style={styles.rowContainer}>
         <View style={styles.row1}>
           <Text style={styles.rowHeader}>Name</Text>
@@ -119,14 +124,12 @@ export default function CreateStorageScreen() {
           />
         </View>
       </View>
-      <TouchableOpacity style={styles.createBtn} onPress={handleCreate}>
+      <PressableOpacity style={styles.createBtn} onPress={handleCreate}>
         <Text style={styles.createBtnTxt}> Create </Text>
-      </TouchableOpacity>
+      </PressableOpacity>
       <ProfileOverlay
         visible={profileVisible}
         setVisible={setProfileVisible}
-        profileSource={profileSource}
-        setProfileSource={setProfileSource}
         profileKey={profileKey}
         setProfileKey={setProfileKey}
       />
@@ -136,44 +139,59 @@ export default function CreateStorageScreen() {
 
 const styles = StyleSheet.create({
   input: {
-    height: 40,
-    margin: 12,
+    height: 45,
+    marginVertical: 12,
+    marginHorizontal: 15,
     borderWidth: 1,
-    padding: 10,
+    borderColor: "#E0E0E0",
+    borderRadius: 10,
+    padding: 12,
+    backgroundColor: "#F9F9F9",
   },
   details: {
-    height: 80,
-    margin: 12,
+    height: 100,
+    marginVertical: 12,
+    marginHorizontal: 15,
     borderWidth: 1,
-    padding: 10,
+    borderColor: "#E0E0E0",
+    borderRadius: 10,
+    padding: 12,
+    backgroundColor: "#F9F9F9",
   },
   rowContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    marginVertical: 5,
   },
   row1: {
     flex: 1,
-    justifyContent: "center",
   },
   row2: {
     flex: 3,
   },
   rowHeader: {
-    fontSize: 14,
-    fontWeight: "bold",
-    alignSelf: "center",
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+    marginLeft: 10,
   },
   createBtn: {
     backgroundColor: "#791111",
-    width: "50%",
-    padding: 10,
-    height: 50,
+    width: "85%",
+    padding: 15,
+    borderRadius: 12,
     alignSelf: "center",
-    marginTop: 20,
+    marginTop: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   createBtnTxt: {
     color: "#ffffff",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
   },

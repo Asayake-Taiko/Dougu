@@ -4,6 +4,7 @@ import { ProfileStackParamList } from '../../types/navigation';
 import UserStoragesScreen from './UserStoragesScreen';
 import ManageEquipmentScreen from './ManageEquipmentScreen';
 import MemberProfileScreen from './MemberProfileScreen';
+import CreateStorageScreen from './CreateStorageScreen';
 import SheetScreen from './SheetScreen';
 import { ProfileDrawer } from '../drawer/ProfileNavigator';
 import { MembershipProvider } from '../../lib/context/MembershipContext';
@@ -31,6 +32,11 @@ export default function RootStackNavigator() {
                         name="MemberProfile"
                         component={MemberProfileScreen}
                         options={{ headerShown: true, title: 'Member Profile' }}
+                    />
+                    <RootStack.Screen
+                        name="CreateStorage"
+                        component={CreateStorageScreen}
+                        options={{ headerShown: true, title: 'Create Storage' }}
                     />
                     <RootStack.Screen
                         name="Sheet"

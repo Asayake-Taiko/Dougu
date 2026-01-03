@@ -2,14 +2,7 @@ import { AuthResponse } from '../../types/auth';
 import { db } from '../powersync/PowerSync';
 import { UserRecord } from '../../types/db';
 import { User } from '../../types/models';
-
-const generateUUID = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-        const r = (Math.random() * 16) | 0;
-        const v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-    });
-};
+import { generateUUID } from '../utils/UUID';
 
 let HARDCODED_PASSWORD = 'password';
 const HARDCODED_CODE = '22222';

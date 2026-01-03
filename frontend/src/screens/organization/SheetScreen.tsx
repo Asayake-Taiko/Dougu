@@ -1,73 +1,96 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import { CheckBox } from "@rneui/themed";
-import { StyleSheet, View } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, Text, Switch, TouchableOpacity } from "react-native";
+import * as SecureStore from "expo-secure-store";
+import { LinearGradient } from "expo-linear-gradient";
 
-import { useEquipment } from "../../helper/context/EquipmentContext";
-import { getCsvData } from "../../helper/EquipmentUtils";
-import { csvSheet } from "../../types/ModelTypes";
-import Sheet from "../../components/organization/Sheet";
+// project imports
+import { useEquipment } from "../../lib/context/EquipmentContext";
+import { useMembership } from "../../lib/context/MembershipContext";
+import { getSheetData } from "../../lib/utils/EquipmentUtils";
+import Sheet, { csvSheet } from "../../components/organization/Sheet";
 
-// sheetScreen. it obtains the csvData and composes the header and body
+const STORAGE_KEY = "sheet_config";
+
 export default function SheetScreen() {
-  const { itemData } = useEquipment();
-  const [data, setData] = React.useState<csvSheet | null>(null);
+  const { ownerships } = useEquipment();
+  const { organization } = useMembership();
+  const [data, setData] = useState<csvSheet | null>(null);
   const [showEmpty, setShowEmpty] = useState(true);
   const [showContainerEquip, setShowContainerEquip] = useState(true);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(true);
 
-  // on layout, get the user's preferences
-  useLayoutEffect(() => {
-    const getData = async () => {
-      const config = await AsyncStorage.getItem("config");
-      if (config) {
-        const { showEmpty, showContainerEquip } = JSON.parse(config);
-        setShowEmpty(showEmpty);
-        setShowContainerEquip(showContainerEquip);
+  // Load preferences
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const configStr = await SecureStore.getItemAsync(STORAGE_KEY);
+        if (configStr) {
+          const { showEmpty: savedShowEmpty, showContainerEquip: savedShowContainerEquip } = JSON.parse(configStr);
+          setShowEmpty(savedShowEmpty);
+          setShowContainerEquip(savedShowContainerEquip);
+        }
+      } catch (e) {
+        console.error("Failed to load sheet config", e);
+      } finally {
+        setIsLoadingConfig(false);
       }
     };
-
-    getData();
+    loadConfig();
   }, []);
 
-  // keep the data up to date
+  // Sync data with items and preferences
   useEffect(() => {
-    setData(getCsvData(itemData, showEmpty, showContainerEquip));
-  }, [itemData, showContainerEquip, showEmpty]);
+    setData(getSheetData(ownerships, showEmpty, showContainerEquip));
+  }, [ownerships, showEmpty, showContainerEquip]);
 
-  // store the user's preferences and keep them up to date
+  // Persist preferences
   useEffect(() => {
-    const storeData = async () => {
-      await AsyncStorage.setItem(
-        "config",
-        JSON.stringify({
-          showEmpty: showEmpty,
-          showContainerEquip: showContainerEquip,
-        }),
-      );
+    if (isLoadingConfig) return;
+    const saveConfig = async () => {
+      try {
+        await SecureStore.setItemAsync(
+          STORAGE_KEY,
+          JSON.stringify({ showEmpty, showContainerEquip })
+        );
+      } catch (e) {
+        console.error("Failed to save sheet config", e);
+      }
     };
+    saveConfig();
+  }, [showEmpty, showContainerEquip, isLoadingConfig]);
 
-    storeData();
-  }, [showEmpty, showContainerEquip]);
+  if (!organization) return null;
 
   return (
     <View style={styles.container}>
-      <View style={styles.row}>
-        <CheckBox
-          center
-          title="Empty Rows"
-          checked={showEmpty}
-          onPress={() => setShowEmpty(!showEmpty)}
-          textStyle={styles.text}
-        />
-        <CheckBox
-          center
-          title="Container Equipment"
-          checked={showContainerEquip}
-          onPress={() => setShowContainerEquip(!showContainerEquip)}
-          textStyle={styles.text}
-        />
+      <LinearGradient colors={["#791111", "#550c0c"]} style={styles.header}>
+        <Text style={styles.headerText}>{organization.name}</Text>
+      </LinearGradient>
+
+      <View style={styles.configArea}>
+        <View style={styles.toggleRow}>
+          <Text style={styles.label}>Empty Rows</Text>
+          <Switch
+            value={showEmpty}
+            onValueChange={setShowEmpty}
+            trackColor={{ false: "#767577", true: "#791111" }}
+            thumbColor={showEmpty ? "#fff" : "#f4f3f4"}
+          />
+        </View>
+        <View style={styles.toggleRow}>
+          <Text style={styles.label}>Items in Containers</Text>
+          <Switch
+            value={showContainerEquip}
+            onValueChange={setShowContainerEquip}
+            trackColor={{ false: "#767577", true: "#791111" }}
+            thumbColor={showContainerEquip ? "#fff" : "#f4f3f4"}
+          />
+        </View>
       </View>
-      <Sheet data={data} />
+
+      <View style={styles.sheetContainer}>
+        <Sheet data={data} />
+      </View>
     </View>
   );
 }
@@ -77,13 +100,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "center",
+  header: {
+    padding: 20,
+    paddingTop: 40,
     alignItems: "center",
-    borderWidth: 1,
   },
-  text: {
-    fontSize: 10,
+  headerText: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  configArea: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  label: {
+    fontSize: 12,
+    marginRight: 8,
+    color: "#444",
+  },
+  sheetContainer: {
+    flex: 1,
   },
 });

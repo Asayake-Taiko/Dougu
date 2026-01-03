@@ -80,23 +80,6 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const isResolving = loadingPersistedOrg || (!!organizationId && (loadingMembership || loadingOrg));
 
-    // Cleanup stale organization selection
-    useEffect(() => {
-        if (!isResolving && !organization) {
-            async function clearStaleOrg() {
-                Logger.warn("User is no longer a member of the selected organization. Clearing selection.");
-                setOrganizationId(null);
-                try {
-                    await SecureStore.deleteItemAsync(STORAGE_KEYS.ORG_ID);
-                    await SecureStore.deleteItemAsync(STORAGE_KEYS.ORG_NAME);
-                } catch (e) {
-                    Logger.error("Failed to clear stale org from SecureStore", e);
-                }
-            }
-            clearStaleOrg();
-        }
-    }, [isResolving, organization]);
-
     const switchOrganization = async (orgId: string, orgName: string) => {
         setOrganizationId(orgId);
         await SecureStore.setItemAsync(STORAGE_KEYS.ORG_ID, orgId);

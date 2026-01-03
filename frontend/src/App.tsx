@@ -8,7 +8,7 @@ import { ModalProvider } from './lib/context/ModalContext';
 import { PowerSyncProvider } from './lib/context/PowerSyncContext';
 import SplashScreen from './screens/splash';
 import AuthNavigator from './screens/authentication/AuthNavigator';
-import ProfileNavigator from './screens/drawer/ProfileNavigator';
+import RootStackNavigator from './screens/organization/RootStackNavigator';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -20,7 +20,7 @@ function AppContent() {
   return (
     <NavigationContainer>
       <StatusBar style="auto" />
-      {user ? <ProfileNavigator /> : <AuthNavigator />}
+      {user ? <RootStackNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

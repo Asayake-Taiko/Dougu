@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { StyleSheet, View, TouchableOpacity, Alert } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { SearchBar } from "@rneui/themed";
+import { StyleSheet, View, TouchableOpacity, Text, TextInput, Dimensions } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 // project imports
 import EquipmentTable from "../../components/organization/EquipmentTable";
-import { ManageEquipmentScreenProps } from "../../types/ScreenTypes";
-import { useUser } from "../../helper/context/UserContext";
+import { ManageEquipmentScreenProps } from "../../types/navigation";
+import { useMembership } from "../../lib/context/MembershipContext";
 
 /*
   The screen that displays a list of equipment in the organization.
@@ -15,41 +15,36 @@ import { useUser } from "../../helper/context/UserContext";
 export default function ManageEquipmentScreen({
   navigation,
 }: ManageEquipmentScreenProps) {
-  const { isManager } = useUser();
+  const { organization } = useMembership();
   const [search, setSearch] = useState("");
 
-  const updateSearch = (search: string) => {
-    setSearch(search);
+  const handleCreate = () => {
+    navigation.navigate("CreateEquipment");
   };
 
-  const handleCreate = () => {
-    if (isManager) {
-      navigation.navigate("CreateEquipment");
-    } else {
-      Alert.alert(
-        "Authorization Error",
-        "You do not have permission to create equipment",
-        [{ text: "OK" }],
-      );
-    }
-  };
+  if (!organization) return null;
 
   return (
-    <View style={styles.mainContainer}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.searchBar}>
-            <SearchBar
+    <View style={styles.container}>
+      <LinearGradient colors={["#791111", "#550c0c"]} style={styles.header}>
+        <Text style={styles.headerText}>{organization.name}</Text>
+      </LinearGradient>
+
+      <View style={styles.content}>
+        <View style={styles.searchHeader}>
+          <View style={styles.searchBarContainer}>
+            <MaterialCommunityIcons name="magnify" size={24} color="#828282" style={styles.searchIcon} />
+            <TextInput
               placeholder="Search"
-              onChangeText={updateSearch}
+              onChangeText={setSearch}
               value={search}
-              platform="android"
-              containerStyle={{ height: 30 }}
-              inputContainerStyle={{ height: 10 }}
+              style={styles.searchInput}
             />
           </View>
           <TouchableOpacity onPress={handleCreate}>
-            <Ionicons name="add" size={50} style={styles.addIcon} />
+            <View style={styles.addIconContainer}>
+              <MaterialCommunityIcons name="plus" size={40} color="#333" />
+            </View>
           </TouchableOpacity>
         </View>
         <EquipmentTable searchFilter={search} />
@@ -59,34 +54,62 @@ export default function ManageEquipmentScreen({
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#fff",
-  },
   container: {
     flex: 1,
-    flexDirection: "column",
+    alignItems: "center",
     backgroundColor: "#fff",
   },
   header: {
+    width: "90%",
+    height: "20%",
+    marginVertical: "5%",
+    borderRadius: 20,
+    justifyContent: "center",
+    alignContent: "center",
+  },
+  headerText: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+  },
+  content: {
+    flex: 1,
+    width: "100%",
+  },
+  searchHeader: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    paddingTop: 0,
     width: "100%",
   },
-  addIcon: {
+  searchBarContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: "#E0E0E0",
+    backgroundColor: "#F4F4F4",
+    height: 50,
+    paddingHorizontal: 10,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: "100%",
+    fontSize: 16,
+  },
+  addIconContainer: {
     backgroundColor: "#f4f4f4",
     borderRadius: 10,
-    marginLeft: 20,
-  },
-  searchBar: {
-    width: "80%",
-    borderWidth: 4,
-    borderRadius: 10,
-    borderColor: "#f4f4f4",
-    height: 50,
+    marginLeft: 15,
+    padding: 2,
     justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -22,6 +22,7 @@ export class Container {
     get name() { return this.container.name; }
     get color() { return this.container.color; }
     get organizationId() { return this.container.organization_id; }
+    get count() { return 1; }
 
     getContainer() {
         return this.container;
@@ -45,6 +46,15 @@ export class Container {
                 'UPDATE equipment SET assigned_to = ?, last_updated_date = ? WHERE container_id = ?',
                 [targetMemberId, now, this.id]
             );
+        });
+    }
+
+    async delete(db: AbstractPowerSyncDatabase) {
+        await db.writeTransaction(async (tx) => {
+            // Delete all equipment in container
+            await tx.execute('DELETE FROM equipment WHERE container_id = ?', [this.id]);
+            // Delete container
+            await tx.execute('DELETE FROM containers WHERE id = ?', [this.id]);
         });
     }
 }
@@ -132,6 +142,14 @@ export class Equipment {
                     'UPDATE equipment SET assigned_to = ?, container_id = ?, last_updated_date = ? WHERE id = ?',
                     [targetMemberId, targetContainerId, now, record.id]
                 );
+            }
+        });
+    }
+
+    async delete(db: AbstractPowerSyncDatabase) {
+        await db.writeTransaction(async (tx) => {
+            for (const record of this.records) {
+                await tx.execute('DELETE FROM equipment WHERE id = ?', [record.id]);
             }
         });
     }

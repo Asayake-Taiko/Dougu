@@ -3,8 +3,9 @@ import { useQuery } from '@powersync/react-native';
 
 import { useAuth } from './AuthContext';
 import { useMembership } from './MembershipContext';
-import { Container, Equipment, OrgOwnership, OrgMembership } from '../../types/models';
+import { Container, Equipment, OrgOwnership, OrgMembership, Item } from '../../types/models';
 import { OrgMembershipRecord, ContainerRecord, EquipmentRecord } from '../../types/db';
+import { db } from '../powersync/PowerSync';
 
 interface EquipmentContextType {
     ownerships: Map<string, OrgOwnership>; // Key: membership.id, Value: OrgOwnership, Sorted by Name
@@ -14,6 +15,9 @@ interface EquipmentContextType {
     setSelectedEquipment: (equipment: Equipment | null) => void;
     selectedContainer: Container | null;
     setSelectedContainer: (container: Container | null) => void;
+
+    // Actions
+    deleteItem: (item: Item) => Promise<void>;
 }
 
 const EquipmentContext = createContext<EquipmentContextType | undefined>(undefined);
@@ -28,7 +32,7 @@ export const useEquipment = () => {
 
 export const EquipmentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user } = useAuth();
-    const { membership } = useMembership();
+    const { membership, isManager } = useMembership();
     const organizationId = membership?.organizationId;
 
     // Reactive queries
@@ -133,12 +137,21 @@ export const EquipmentProvider: React.FC<{ children: ReactNode }> = ({ children 
         return finalMap;
     }, [user, membership, organizationId, rawMemberships, rawContainers, rawEquipment]);
 
+    const deleteItem = async (item: Item) => {
+        if (!isManager) {
+            throw new Error('You do not have permission to delete this item');
+        } else {
+            await item.delete(db);
+        }
+    };
+
     const contextValue: EquipmentContextType = {
         ownerships,
         selectedEquipment,
         setSelectedEquipment,
         selectedContainer,
         setSelectedContainer,
+        deleteItem,
     };
 
     return (

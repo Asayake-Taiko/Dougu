@@ -2,6 +2,7 @@ import { PowerSyncDatabase } from '@powersync/react-native';
 import { OPSqliteOpenFactory } from '@powersync/op-sqlite';
 import { AppSchema } from './Schema';
 import { seedDatabase } from '../mocks/Seeding';
+import { MOCK_ENABLED } from '../env';
 
 /**
  * Initialize the PowerSync database.
@@ -17,8 +18,7 @@ export const db = new PowerSyncDatabase({
  * Setup the database, seeding it if in dev mode.
  */
 export async function setupDatabase() {
-    // Note: ensure process.env.IS_DEV or similar is defined in your build config
-    if (__DEV__) {
+    if (MOCK_ENABLED) {
         try {
             await seedDatabase(db);
         } catch (error) {

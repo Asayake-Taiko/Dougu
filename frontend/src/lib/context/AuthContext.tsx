@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { User } from '../../types/models';
 import { db } from '../powersync/PowerSync';
 import { mockLogin, mockRegister, mockSendCode, mockResetPassword, mockUpdateProfile, mockUpdateEmail, mockUpdateName, mockUpdatePassword, mockDeleteAccount } from '../mocks/auth';
+import { MOCK_ENABLED } from '../env';
 
 const USER_STORAGE_KEY = 'user_data';
 
@@ -66,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const login = async (email: string, password: string) => {
         let res;
-        if (__DEV__) {
+        if (MOCK_ENABLED) {
             res = await mockLogin(email, password);
         } else {
             throw new Error('Real login not implemented');
@@ -94,7 +95,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const register = async (email: string, name: string, password: string) => {
         let res;
-        if (__DEV__) {
+        if (MOCK_ENABLED) {
             res = await mockRegister(email, name, password);
         } else {
             throw new Error('Real register not implemented');
@@ -115,7 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     const sendCode = async (email: string) => {
-        if (__DEV__) {
+        if (MOCK_ENABLED) {
             await mockSendCode(email);
         } else {
             throw new Error('Real send code not implemented');
@@ -123,7 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     const resetPassword = async (password: string, confirmPassword: string, code: string) => {
-        if (__DEV__) {
+        if (MOCK_ENABLED) {
             await mockResetPassword(password, confirmPassword, code);
         } else {
             throw new Error('Real reset password not implemented');
@@ -132,7 +133,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const updateProfile = async (profileKey: string) => {
         if (!user) return;
-        if (__DEV__) {
+        if (MOCK_ENABLED) {
             await mockUpdateProfile(user, profileKey);
         } else {
             throw new Error('Real update profile not implemented');
@@ -142,7 +143,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const updateName = async (name: string) => {
         if (!user) return;
-        if (__DEV__) {
+        if (MOCK_ENABLED) {
             await mockUpdateName(user, name);
         } else {
             throw new Error('Real update name not implemented');
@@ -152,7 +153,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const updateEmail = async (email: string, code: string) => {
         if (!user) return;
-        if (__DEV__) {
+        if (MOCK_ENABLED) {
             await mockUpdateEmail(user, email, code);
         } else {
             throw new Error('Real update email not implemented');
@@ -162,7 +163,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const updatePassword = async (currentPassword: string, newPassword: string) => {
         if (!user) return;
-        if (__DEV__) {
+        if (MOCK_ENABLED) {
             await mockUpdatePassword(user, currentPassword, newPassword);
         } else {
             throw new Error('Real update password not implemented');
@@ -171,7 +172,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const deleteAccount = async () => {
         if (!user) return;
-        if (__DEV__) {
+        if (MOCK_ENABLED) {
             await mockDeleteAccount(user.email);
         } else {
             throw new Error('Real delete account not implemented');

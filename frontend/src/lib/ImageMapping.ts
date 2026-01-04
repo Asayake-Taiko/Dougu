@@ -83,8 +83,10 @@ const iconMapping: { [key: string]: ImageSourcePropType } = new Proxy(
   }
 );
 
+const orgPath = "../assets/organization/";
 const baseOrgMapping: { [key: string]: ImageSourcePropType } = {
-  default: require("../assets/asayake.png"),
+  default: require(`${orgPath}default.png`),
+  asayake: require(`${orgPath}asayake.png`),
 };
 
 const orgMapping: { [key: string]: ImageSourcePropType } = new Proxy(

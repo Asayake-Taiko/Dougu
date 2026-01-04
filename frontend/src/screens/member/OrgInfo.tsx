@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { AntDesign } from "@expo/vector-icons";
 import { InfoScreenProps } from "../../types/navigation";
-import OrgImageDisplay from "../../components/organization/OrgImageDisplay";
 import { useMembership } from "../../lib/context/MembershipContext";
+import OrgImageOverlay from "../../components/organization/OrgImageOverlay";
+import { orgMapping } from "../../lib/ImageMapping";
+import { DisplayStyles } from "../../styles/Display";
 
 /*
   InfoScreen displays the organization's name, access code, and offers
@@ -12,18 +15,25 @@ import { useMembership } from "../../lib/context/MembershipContext";
 */
 export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
     const { organization } = useMembership();
-
-    const handleOrgImage = () => {
-        navigation.navigate("OrgImage");
-    };
+    const [overlayVisible, setOverlayVisible] = useState(false);
+    const [imageKey, setImageKey] = useState(organization?.image || "default");
 
     if (!organization) {
         return null;
     }
+
+    const handleOrgImage = () => {
+        setImageKey(organization.image);
+        setOverlayVisible(true);
+    };
+
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={handleOrgImage}>
-                <OrgImageDisplay imageKey={organization.image} />
+            <TouchableOpacity onPress={handleOrgImage} style={styles.imageContainer}>
+                <Image
+                    source={orgMapping[imageKey]}
+                    style={DisplayStyles.image}
+                />
             </TouchableOpacity>
             <View style={styles.row}>
                 <Text style={[styles.rowHeader, { flex: 2 }]}>Name</Text>
@@ -79,6 +89,13 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
             >
                 <Text style={styles.deleteText}>Delete Org</Text>
             </TouchableOpacity>
+
+            <OrgImageOverlay
+                visible={overlayVisible}
+                setVisible={setOverlayVisible}
+                imageKey={imageKey}
+                setImageKey={setImageKey}
+            />
         </View>
     );
 }
@@ -88,6 +105,10 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         backgroundColor: "#fff",
+    },
+    imageContainer: {
+        marginTop: 20,
+        marginBottom: 10,
     },
     deleteText: {
         alignSelf: "center",

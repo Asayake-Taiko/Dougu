@@ -32,8 +32,7 @@ export type DrawerStackParamList = {
 
 // Profile Stack Parameter List (Overlays everything)
 export type ProfileStackParamList = {
-    DrawerRoot: undefined;
-    OrgImage: undefined;
+    DrawerRoot: undefined,
     UserStorages: { tabParam: 'Members' | 'Storages' };
     Sheet: undefined;
     ManageEquipment: undefined;
@@ -71,7 +70,6 @@ export type MemberTabScreenProps<T extends keyof MemberTabParamList> = Composite
 export type ProfileStackScreenProps<T extends keyof ProfileStackParamList> = StackScreenProps<ProfileStackParamList, T>;
 
 export type InfoScreenProps = MemberTabScreenProps<'OrgInfo'>;
-export type OrgImageScreenProps = ProfileStackScreenProps<'OrgImage'>;
 export type UserStoragesScreenProps = ProfileStackScreenProps<'UserStorages'>;
 export type SheetScreenProps = ProfileStackScreenProps<'Sheet'>;
 export type ManageEquipmentScreenProps = ProfileStackScreenProps<'ManageEquipment'>;

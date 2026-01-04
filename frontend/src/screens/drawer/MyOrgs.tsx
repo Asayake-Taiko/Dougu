@@ -1,11 +1,13 @@
 import React from "react";
 import { StyleSheet, Text, FlatList, TouchableOpacity, View } from "react-native";
+import { Image } from 'expo-image'
 import { MyOrgsScreenNavigationProp } from "../../types/navigation";
 import { useAuth } from "../../lib/context/AuthContext";
 import { useQuery } from "@powersync/react-native";
 import { OrganizationRecord } from "../../types/db";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "../../styles/global/colors";
+import { orgMapping } from "../../lib/ImageMapping";
 
 /*
   This screen will display the organizations that the user is a part of.
@@ -37,9 +39,10 @@ export default function MyOrgsScreen({ navigation }: { navigation: MyOrgsScreenN
             style={styles.orgContainer}
             activeOpacity={0.7}
         >
-            <View style={styles.orgIconContainer}>
-                <MaterialCommunityIcons name="office-building" size={28} color={Colors.primary} />
-            </View>
+            <Image
+                source={orgMapping[item.image]}
+                style={styles.orgIconContainer}
+            />
             <View style={styles.orgInfo}>
                 <Text style={styles.orgName}>{item.name}</Text>
                 <Text style={styles.orgCode}>Code: {item.access_code}</Text>

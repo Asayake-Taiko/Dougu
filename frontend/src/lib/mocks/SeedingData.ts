@@ -34,7 +34,7 @@ export const MOCK_ORGS: OrganizationRecord[] = [{
     name: 'Asa',
     access_code: 'DEV123',
     manager_id: '123',
-    image: 'default',
+    image: 'asayake',
     created_at: new Date().toISOString(),
 }];
 

@@ -1,10 +1,9 @@
 import {
   FlatList,
-  Image,
-  ImageSourcePropType,
   StyleSheet,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { PressableOpacity } from "./PressableOpacity";
 import { chunkArray } from "../lib/helper/EquipmentUtils";
 
@@ -18,7 +17,7 @@ export default function IconMenu({
   handleSet,
 }: {
   data: {
-    [key: string]: ImageSourcePropType;
+    [key: string]: any;
   };
   handleSet: (imageKey: string) => void;
 }) {
@@ -40,7 +39,7 @@ export default function IconMenu({
                 <Image
                   source={data[key]}
                   style={styles.icon}
-                  resizeMode="contain"
+                  contentFit="contain"
                 />
               </PressableOpacity>
             ))}
@@ -65,8 +64,8 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   icon: {
-    margin: "auto",
     width: "90%",
-    marginHorizontal: "auto",
+    height: "90%",
+    alignSelf: "center",
   },
 });

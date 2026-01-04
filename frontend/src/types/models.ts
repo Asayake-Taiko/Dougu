@@ -168,6 +168,14 @@ export class Organization {
     get accessCode() { return this.organization.access_code; }
     get managerId() { return this.organization.manager_id; }
     get image() { return this.organization.image; }
+
+    async updateImage(db: AbstractPowerSyncDatabase, newImage: string) {
+        await db.execute(
+            'UPDATE organizations SET image = ? WHERE id = ?',
+            [newImage, this.id]
+        );
+        this.organization.image = newImage;
+    }
 }
 
 export class OrgMembership {

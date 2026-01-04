@@ -27,6 +27,12 @@ export default function MemberProfileScreen({
       return;
     }
 
+    // make sure the user is not the current manager
+    if (member.userId === organization!.managerId) {
+      setMessage("You cannot kick the current manager.");
+      return;
+    }
+
     Alert.alert(
       "Kick Member",
       `Are you sure you want to kick ${member.name}? This will delete all equipment and containers assigned to them in this organization.`,
@@ -67,7 +73,7 @@ export default function MemberProfileScreen({
                   );
                 }
               });
-              navigation.goBack();
+              setMessage("Member kicked successfully.");
             } catch (error) {
               Logger.error("Error deleting member:", error);
               setMessage("Failed to kick member. Please try again.");
@@ -89,6 +95,11 @@ export default function MemberProfileScreen({
 
     if (member.membershipType !== 'USER' || !member.userId) {
       setMessage("Ownership can only be transferred to a user.");
+      return;
+    }
+
+    // make sure the user is not the current manager
+    if (member.userId === organization!.managerId) {
       return;
     }
 

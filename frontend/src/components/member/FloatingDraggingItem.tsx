@@ -31,7 +31,7 @@ export default function FloatingDraggingItem({
 
     return (
         <Animated.View pointerEvents="none" style={[styles.floatingItem, movingStyles]}>
-            <ItemComponent data={draggingItem} swapable={false} isFloating={true} />
+            <ItemComponent data={draggingItem} isFloating={true} />
         </Animated.View>
     );
 }

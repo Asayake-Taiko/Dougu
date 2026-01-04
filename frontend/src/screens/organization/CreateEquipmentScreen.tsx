@@ -2,126 +2,170 @@ import {
   Text,
   View,
   StyleSheet,
-  TouchableOpacity,
   TextInput,
 } from "react-native";
-import React from "react";
-import { useState } from "react";
-import { DataStore } from "@aws-amplify/datastore";
-import { Tab } from "@rneui/themed";
+import React, { useState } from "react";
 
 // project imports
-import CurrMembersDropdown from "../../components/CurrMembersDropdown";
-import { OrgUserStorage, Organization } from "../../models";
-import { useLoad } from "../../helper/context/LoadingContext";
-import { useUser } from "../../helper/context/UserContext";
-import { handleError } from "../../helper/Utils";
-import ContainerDisplay from "../../components/member/ContainerDisplay";
-import { CreateContainer, CreateEquipment } from "../../helper/CreateUtils";
-import { CreateEquipmentScreenProps } from "../../types/ScreenTypes";
-import { useItemImage } from "../../helper/context/ItemImageContext";
-import { uploadImage } from "../../helper/AWS";
+import CurrMembersDropdown from "../../components/member/CurrMembersDropdown";
+import { useMembership } from "../../lib/context/MembershipContext";
+import { useSpinner } from "../../lib/context/SpinnerContext";
+import { useModal } from "../../lib/context/ModalContext";
+import { PressableOpacity } from "../../components/PressableOpacity";
 import EquipmentDisplay from "../../components/member/EquipmentDisplay";
+import ContainerDisplay from "../../components/member/ContainerDisplay";
+import { Colors } from "../../styles/global";
+import { OrgMembershipRecord } from "../../types/db";
+import { Hex } from "../../types/other";
+import EquipmentImageOverlay from "../../components/organization/EquipmentImageOverlay";
+import { db } from "../../lib/powersync/PowerSync";
+import { generateUUID } from "../../lib/utils/UUID";
+import { Logger } from "../../lib/Logger";
 
 /*
   Create equipment screen allows a manager to create equipment
   and assign it to a user/storage.
 */
-export default function CreateEquipmentScreen({
-  navigation,
-}: CreateEquipmentScreenProps) {
+export default function CreateEquipmentScreen() {
+  const { isManager, organization } = useMembership();
+  const { showSpinner, hideSpinner } = useSpinner();
+  const { setMessage } = useModal();
+
   const [name, onChangeName] = useState("");
   const [quantity, onChangeQuantity] = useState<string>("");
-  const [assignUser, setAssignUser] = useState<OrgUserStorage | null>(null);
+  const [assignUser, setAssignUser] = useState<OrgMembershipRecord | null>(null);
   const [details, onChangeDetails] = useState("");
-  const { imageSource, imageKey, equipmentColor, containerColor } =
-    useItemImage();
+
+  // Static values for now as requested to skip overlay/image logic details
+  const [imageKey, setImageKey] = useState("default");
+  const [itemColor, setItemColor] = useState<Hex>("#ddd");
+  const [overlayVisible, setOverlayVisible] = useState(false);
+
   // index 0 is equipment, index 1 is container
   const [index, setIndex] = useState(0);
-  const { setIsLoading } = useLoad();
-  const { org } = useUser();
-
-  // ensure all input values are valid
-  const verifyValues = () => {
-    // check that quantity > 1
-    const quantityCount = parseInt(quantity);
-    if (isNaN(quantityCount) || assignUser == null || name === "") {
-      throw new Error("Please fill out all fields.");
-    }
-    if (quantityCount < 1 || quantityCount > 25) {
-      throw new Error("You must make between 1 and 25 items at a time.");
-    }
-    return quantityCount;
-  };
 
   // Create a new equipment and assign it to a user
   const handleCreate = async () => {
+    if (!isManager) {
+      setMessage("You do not have permission to create items.");
+      return;
+    }
+
+    if (!organization) {
+      setMessage("Organization not found.");
+      return;
+    }
+
+    const quantityCount = parseInt(quantity);
+    if (!assignUser || !name || !quantityCount) {
+      setMessage("Please fill out all fields.");
+      return;
+    }
+
+    if (quantityCount < 1 || quantityCount > 25) {
+      setMessage("You must make between 1 and 25 items at a time.");
+      return;
+    }
+
     try {
-      setIsLoading(true);
-      const quantityCount = verifyValues();
-      // find the orgUserStorage to assign to
-      const dataOrg = await DataStore.query(Organization, org!.id);
-      const orgUserStorage = await DataStore.query(
-        OrgUserStorage,
-        assignUser!.id,
-      );
-      if (dataOrg == null || orgUserStorage == null) {
-        throw new Error("Organization or User not found.");
-      }
-      // index 0 is equipment, index 1 is container
-      if (index === 0) {
-        // if imageSource is an uploaded image, upload it to S3
-        // don't promise.all because we don't want to make equipment if image fails
-        const path = `public/${org!.id}/equipment/${imageKey}`;
-        if (imageSource) await uploadImage(imageSource, path);
-        await CreateEquipment(
-          quantityCount,
-          name,
-          dataOrg,
-          orgUserStorage,
-          details,
-          equipmentColor,
-          imageKey,
-        );
-      } else {
-        await CreateContainer(
-          quantityCount,
-          name,
-          dataOrg,
-          orgUserStorage,
-          details,
-          containerColor,
-        );
-      }
+      showSpinner();
+      await db.writeTransaction(async (tx) => {
+        for (let i = 0; i < quantityCount; i++) {
+          const id = generateUUID();
+          const timestamp = new Date().toISOString();
+
+          if (index === 0) {
+            // Create Equipment
+            await tx.execute(
+              `INSERT INTO equipment (id, name, organization_id, assigned_to, image, color, group_name, details, last_updated_date)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                id,
+                name,
+                organization.id,
+                assignUser.id,
+                imageKey,
+                itemColor,
+                organization.name,
+                details,
+                timestamp
+              ]
+            );
+          } else {
+            // Create Container
+            await tx.execute(
+              `INSERT INTO containers (id, name, organization_id, assigned_to, color, group_name, details, last_updated_date)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                id,
+                name,
+                organization.id,
+                assignUser.id,
+                itemColor,
+                organization.name,
+                details,
+                timestamp
+              ]
+            );
+          }
+        }
+      });
+      setMessage("Items created successfully.");
       onChangeName("");
       onChangeQuantity("");
       onChangeDetails("");
-      setIsLoading(false);
     } catch (error) {
-      handleError("CreateEquipment", error as Error, setIsLoading);
+      Logger.error("Failed to create items", error);
+      setMessage("Failed to create items.");
+    } finally {
+      hideSpinner();
     }
   };
 
   return (
     <View style={styles.container}>
+      <EquipmentImageOverlay
+        visible={overlayVisible}
+        setVisible={setOverlayVisible}
+        setImageKey={setImageKey}
+        color={itemColor}
+        setColor={setItemColor}
+        displayComponent={
+          <>
+            {index === 0 ? (
+              <EquipmentDisplay
+                color={itemColor}
+                imageKey={imageKey}
+                isMini={false}
+              />
+            ) : (
+              <ContainerDisplay
+                color={itemColor}
+              />
+            )}
+          </>
+        }
+        isContainer={index === 1}
+      />
       <View style={styles.topRow}>
         {index === 0 ? (
           <EquipmentDisplay
-            color={equipmentColor}
+            color={itemColor}
             imageKey={imageKey}
             isMini={false}
-            source={imageSource}
           />
         ) : (
-          <ContainerDisplay color={containerColor} />
+          <ContainerDisplay
+            color={itemColor}
+          />
         )}
       </View>
-      <View style={styles.rowContainer}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("ItemImage", { index: index })}
+      <View style={styles.centerContainer}>
+        <PressableOpacity
+          onPress={() => setOverlayVisible(true)}
         >
           <Text style={styles.link}>Edit Item Image</Text>
-        </TouchableOpacity>
+        </PressableOpacity>
       </View>
       <View style={styles.rowContainer}>
         <View style={styles.row1}>
@@ -142,22 +186,19 @@ export default function CreateEquipmentScreen({
           <Text style={styles.rowHeader}>Type</Text>
         </View>
         <View style={styles.row2}>
-          <View style={styles.toggleContainer}>
-            <Tab
-              value={index}
-              onChange={setIndex}
-              dense={true}
-              buttonStyle={(active) =>
-                active ? styles.selectedBtn : styles.button
-              }
-              titleStyle={(active) =>
-                active ? styles.selectedText : styles.text
-              }
-              disableIndicator={true}
+          <View style={styles.tabBar}>
+            <PressableOpacity
+              style={[styles.tabItem, index === 0 && styles.activeTab]}
+              onPress={() => setIndex(0)}
             >
-              <Tab.Item>Equipment</Tab.Item>
-              <Tab.Item>Container</Tab.Item>
-            </Tab>
+              <Text style={[styles.tabText, index === 0 && styles.activeTabText]}>Equipment</Text>
+            </PressableOpacity>
+            <PressableOpacity
+              style={[styles.tabItem, index === 1 && styles.activeTab]}
+              onPress={() => setIndex(1)}
+            >
+              <Text style={[styles.tabText, index === 1 && styles.activeTabText]}>Container</Text>
+            </PressableOpacity>
           </View>
         </View>
       </View>
@@ -169,7 +210,7 @@ export default function CreateEquipmentScreen({
           <TextInput
             style={styles.input}
             onChangeText={onChangeQuantity}
-            value={quantity.toString()}
+            value={quantity}
             placeholder="quantity"
             keyboardType="numeric"
           />
@@ -190,32 +231,33 @@ export default function CreateEquipmentScreen({
           />
         </View>
       </View>
-      <CurrMembersDropdown setUser={setAssignUser} isCreate={true} />
-      <TouchableOpacity style={styles.createBtn} onPress={handleCreate}>
+      <View style={styles.centerContainer}>
+        <CurrMembersDropdown setUser={setAssignUser} isCreate={true} />
+      </View>
+      <PressableOpacity style={styles.createBtn} onPress={handleCreate}>
         <Text style={styles.createBtnTxt}> Create </Text>
-      </TouchableOpacity>
-    </View>
+      </PressableOpacity>
+    </View >
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    backgroundColor: "#f6f6f6",
-    borderRadius: 40,
-    padding: 10,
-  },
   createBtn: {
     backgroundColor: "#791111",
-    width: "50%",
-    padding: 10,
-    height: 50,
-    borderRadius: 10,
+    width: "85%",
+    padding: 15,
+    borderRadius: 12,
     alignSelf: "center",
-    marginTop: 30,
+    marginTop: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   createBtnTxt: {
     color: "#ffffff",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -224,64 +266,89 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 10,
-    padding: 10,
-  },
-  details: {
-    height: 80,
+    height: 45,
+    marginVertical: 8,
     marginHorizontal: 12,
     borderWidth: 1,
     borderColor: "#E0E0E0",
     borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
+    padding: 12,
+    backgroundColor: "#F9F9F9",
+  },
+  details: {
+    height: 90,
+    marginVertical: 8,
+    marginHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 10,
+    padding: 12,
+    backgroundColor: "#F9F9F9",
   },
   link: {
-    color: "#0000ff",
+    color: Colors.primary || "#791111",
     fontSize: 14,
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+  centerContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 10,
   },
   rowContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 10,
+    alignItems: "center",
+    marginVertical: 4,
+    paddingHorizontal: 10,
   },
   row1: {
     flex: 1,
-    justifyContent: "center",
   },
   row2: {
     flex: 3,
   },
   rowHeader: {
-    fontSize: 14,
-    fontWeight: "bold",
-    alignSelf: "center",
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+    marginLeft: 10,
   },
-  toggleContainer: {
+  tabBar: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    backgroundColor: "#F0F0F0",
+    borderRadius: 10,
+    marginHorizontal: 12,
+    padding: 4,
+  },
+  tabItem: {
+    flex: 1,
+    paddingVertical: 8,
     alignItems: "center",
-    width: "90%",
-    marginHorizontal: "auto",
+    borderRadius: 8,
+  },
+  activeTab: {
+    backgroundColor: "#FFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  tabText: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
+  },
+  activeTabText: {
+    color: "#333",
+    fontWeight: "700",
   },
   topRow: {
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 30,
-  },
-  selectedBtn: {
-    backgroundColor: "#333333",
-    padding: 10,
-    borderRadius: 40,
-  },
-  selectedText: {
-    color: "#ffffff",
-  },
-  text: {
-    color: "#000000",
+    marginBottom: 10,
   },
 });

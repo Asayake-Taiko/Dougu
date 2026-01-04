@@ -1,4 +1,4 @@
-import { AuthResponse } from '../../types/auth';
+import { AuthResponse } from '../../types/other';
 import { db } from '../powersync/PowerSync';
 import { UserRecord } from '../../types/db';
 import { User } from '../../types/models';
@@ -92,7 +92,6 @@ export const mockUpdatePassword = async (user: User, currentPassword: string, ne
     if (currentPassword !== HARDCODED_PASSWORD) {
         throw new Error('Current password is incorrect');
     }
-    await user.updatePassword(db, newPassword);
     HARDCODED_PASSWORD = newPassword;
 };
 

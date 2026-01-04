@@ -250,11 +250,4 @@ export class User {
         this.data.profile = newProfile;
         this.data.updated_at = now;
     }
-
-    async updatePassword(db: AbstractPowerSyncDatabase, newPassword: string) {
-        // TODO: In a real app, this would call Auth.updatePassword (Cognito/Firebase)
-        // For mocks, we'll just log it or simulate success.
-        // We don't store passwords in the PowerSync users table for safety.
-        console.log(`Password updated in model for user ${this.id}`);
-    }
 }

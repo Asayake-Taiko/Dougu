@@ -1,0 +1,6 @@
+.expo/
+frontend/.expo/
+frontend/ios/
+frontend/android/
+node_modules/
+frontend/node_modules/

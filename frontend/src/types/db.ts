@@ -31,7 +31,7 @@ export interface OrgMembershipRecord {
   type: "USER" | "STORAGE";
   user_id?: string; // Present if type === 'USER'
   storage_name?: string; // Present if type === 'STORAGE'
-  group_name: string; // used for Authorization
+
   profile?: string; // Present if type === 'STORAGE'
   details?: string;
 }
@@ -45,7 +45,7 @@ export interface ContainerRecord {
   organization_id: string;
   assigned_to: string;
   color: string;
-  group_name: string; // used for Authorization
+
   details?: string;
   last_updated_date: string;
 }
@@ -61,7 +61,7 @@ export interface EquipmentRecord {
   container_id?: string;
   image: string;
   color: string;
-  group_name: string; // used for Authorization
+
   details?: string;
   last_updated_date: string;
 }

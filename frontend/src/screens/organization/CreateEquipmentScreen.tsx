@@ -16,6 +16,7 @@ import EquipmentImageOverlay from "../../components/organization/EquipmentImageO
 import { db } from "../../lib/powersync/PowerSync";
 import { generateUUID } from "../../lib/utils/UUID";
 import { Logger } from "../../lib/utils/Logger";
+import { Queries } from "../../lib/powersync/queries";
 
 /*
   Create equipment screen allows a manager to create equipment
@@ -73,37 +74,27 @@ export default function CreateEquipmentScreen() {
 
           if (index === 0) {
             // Create Equipment
-            await tx.execute(
-              `INSERT INTO equipment (id, name, organization_id, assigned_to, image, color, group_name, details, last_updated_date)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                id,
-                name,
-                organization.id,
-                assignUser.id,
-                imageKey,
-                itemColor,
-                organization.name,
-                details,
-                timestamp,
-              ],
-            );
+            await tx.execute(Queries.Equipment.insertWithoutContainer, [
+              id,
+              name,
+              organization.id,
+              assignUser.id,
+              imageKey,
+              itemColor,
+              details,
+              timestamp,
+            ]);
           } else {
             // Create Container
-            await tx.execute(
-              `INSERT INTO containers (id, name, organization_id, assigned_to, color, group_name, details, last_updated_date)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                id,
-                name,
-                organization.id,
-                assignUser.id,
-                itemColor,
-                organization.name,
-                details,
-                timestamp,
-              ],
-            );
+            await tx.execute(Queries.Container.insert, [
+              id,
+              name,
+              organization.id,
+              assignUser.id,
+              itemColor,
+              details,
+              timestamp,
+            ]);
           }
         }
       });

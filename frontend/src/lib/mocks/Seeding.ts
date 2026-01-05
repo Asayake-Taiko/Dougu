@@ -6,6 +6,7 @@ import {
   MOCK_CONTAINERS,
   MOCK_EQUIPMENT,
 } from "./SeedingData";
+import { Queries } from "../powersync/queries";
 
 /**
  * Seeds the database with mock data.
@@ -14,97 +15,75 @@ import {
 export async function seedDatabase(db: PowerSyncDatabase) {
   await db.writeTransaction(async (tx) => {
     // Clear existing data from all relevant tables
-    const tables = [
-      "users",
-      "organizations",
-      "org_memberships",
-      "containers",
-      "equipment",
-    ];
-    for (const table of tables) {
-      await tx.execute(`DELETE FROM ${table}`);
-    }
+    await tx.execute(Queries.Equipment.deleteAll);
+    await tx.execute(Queries.Container.deleteAll);
+    await tx.execute(Queries.Membership.deleteAll);
+    await tx.execute(Queries.Organization.deleteAll);
+    await tx.execute(Queries.User.deleteAll);
 
     // Insert Users
     for (const user of MOCK_USERS) {
-      await tx.execute(
-        "INSERT INTO users (id, email, full_name, profile, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-        [
-          user.id,
-          user.email,
-          user.full_name,
-          user.profile,
-          user.created_at,
-          user.updated_at,
-        ],
-      );
+      await tx.execute(Queries.User.insert, [
+        user.id,
+        user.email,
+        user.full_name,
+        user.profile,
+        user.created_at,
+        user.updated_at,
+      ]);
     }
 
     // Insert Organizations
     for (const org of MOCK_ORGS) {
-      await tx.execute(
-        "INSERT INTO organizations (id, name, access_code, manager_id, image, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        [
-          org.id,
-          org.name,
-          org.access_code,
-          org.manager_id,
-          org.image,
-          org.created_at,
-        ],
-      );
+      await tx.execute(Queries.Organization.insert, [
+        org.id,
+        org.name,
+        org.access_code,
+        org.manager_id,
+        org.image,
+        org.created_at,
+      ]);
     }
 
     // Insert Memberships
     for (const membership of MOCK_MEMBERSHIPS) {
-      await tx.execute(
-        "INSERT INTO org_memberships (id, organization_id, type, user_id, group_name, profile, details) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [
-          membership.id,
-          membership.organization_id,
-          membership.type,
-          membership.user_id,
-          membership.group_name,
-          membership.profile,
-          membership.details,
-        ],
-      );
+      await tx.execute(Queries.Membership.insert, [
+        membership.id,
+        membership.organization_id,
+        membership.type,
+        membership.user_id || null,
+        membership.storage_name || null,
+        membership.profile || null,
+        membership.details || null,
+      ]);
     }
 
     // Insert Containers
     for (const container of MOCK_CONTAINERS) {
-      await tx.execute(
-        "INSERT INTO containers (id, name, organization_id, assigned_to, color, group_name, details, last_updated_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          container.id,
-          container.name,
-          container.organization_id,
-          container.assigned_to,
-          container.color,
-          container.group_name,
-          container.details,
-          container.last_updated_date,
-        ],
-      );
+      await tx.execute(Queries.Container.insert, [
+        container.id,
+        container.name,
+        container.organization_id,
+        container.assigned_to,
+        container.color,
+        container.details || null,
+        container.last_updated_date,
+      ]);
     }
 
     // Insert Equipment
     for (const gear of MOCK_EQUIPMENT) {
-      await tx.execute(
-        "INSERT INTO equipment (id, name, organization_id, assigned_to, container_id, image, color, group_name, details, last_updated_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          gear.id,
-          gear.name,
-          gear.organization_id,
-          gear.assigned_to,
-          gear.container_id,
-          gear.image,
-          gear.color,
-          gear.group_name,
-          gear.details,
-          gear.last_updated_date,
-        ],
-      );
+      await tx.execute(Queries.Equipment.insert, [
+        gear.id,
+        gear.name,
+        gear.organization_id,
+        gear.assigned_to,
+        gear.container_id || null,
+        gear.image,
+        gear.color,
+        gear.details || null,
+        gear.last_updated_date,
+      ]);
     }
   });
 }

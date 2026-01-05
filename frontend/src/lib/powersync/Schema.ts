@@ -23,7 +23,7 @@ export const AppSchema = new Schema({
     type: column.text,
     user_id: column.text,
     storage_name: column.text,
-    group_name: column.text,
+
     profile: column.text,
     details: column.text,
   }),
@@ -32,7 +32,7 @@ export const AppSchema = new Schema({
     organization_id: column.text,
     assigned_to: column.text,
     color: column.text,
-    group_name: column.text,
+
     details: column.text,
     last_updated_date: column.text,
   }),
@@ -43,7 +43,7 @@ export const AppSchema = new Schema({
     container_id: column.text,
     image: column.text,
     color: column.text,
-    group_name: column.text,
+
     details: column.text,
     last_updated_date: column.text,
   }),

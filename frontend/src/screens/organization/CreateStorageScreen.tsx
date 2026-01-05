@@ -13,6 +13,7 @@ import { Logger } from "../../lib/utils/Logger";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useNavigation } from "@react-navigation/native";
 import { generateUUID } from "../../lib/utils/UUID";
+import { Queries } from "../../lib/powersync/queries";
 
 /*
   Create storage screen allows a manager to create storage.
@@ -48,18 +49,15 @@ export default function CreateStorageScreen() {
     try {
       showSpinner();
 
-      await db.execute(
-        "INSERT INTO org_memberships (id, organization_id, type, storage_name, group_name, profile, details) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [
-          generateUUID(),
-          organization.id,
-          "STORAGE",
-          name,
-          organization.name,
-          profileKey,
-          details,
-        ],
-      );
+      await db.execute(Queries.Membership.insert, [
+        generateUUID(),
+        organization.id,
+        "STORAGE",
+        null, // user_id
+        name, // storage_name
+        profileKey,
+        details,
+      ]);
 
       // Reset form and go back
       onChangeName("");

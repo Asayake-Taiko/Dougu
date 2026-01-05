@@ -146,13 +146,17 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
         name,
         code,
         user?.id,
+        "default",
         new Date().toISOString(),
       ]);
       await tx.execute(Queries.Membership.insert, [
         membershipId,
         orgId,
-        user?.id,
         "USER",
+        user?.id,
+        null,
+        null,
+        null,
       ]);
     });
 

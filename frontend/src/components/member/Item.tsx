@@ -15,7 +15,11 @@ export default function ItemComponent({
   return (
     <>
       {data.type === "equipment" ? (
-        <EquipmentItem item={data as Equipment} isFloating={isFloating} draggingItem={draggingItem} />
+        <EquipmentItem
+          item={data as Equipment}
+          isFloating={isFloating}
+          draggingItem={draggingItem}
+        />
       ) : (
         <ContainerItem
           item={data as Container}

@@ -45,7 +45,8 @@ export default function MemberProfileScreen({
             try {
               showSpinner();
               const orgId = organization?.id;
-              const targetId = member.membershipType === 'USER' ? member.userId : member.id;
+              const targetId =
+                member.membershipType === "USER" ? member.userId : member.id;
 
               if (!orgId) throw new Error("No active organization found");
               if (!targetId) throw new Error("Member ID not found");
@@ -54,23 +55,22 @@ export default function MemberProfileScreen({
                 // Cascading delete based on assigned_to and organization_id for safety
                 await tx.execute(
                   "DELETE FROM equipment WHERE assigned_to = ? AND organization_id = ?",
-                  [targetId, orgId]
+                  [targetId, orgId],
                 );
                 await tx.execute(
                   "DELETE FROM containers WHERE assigned_to = ? AND organization_id = ?",
-                  [targetId, orgId]
+                  [targetId, orgId],
                 );
 
-                if (member.membershipType === 'USER') {
+                if (member.membershipType === "USER") {
                   await tx.execute(
                     "DELETE FROM org_memberships WHERE user_id = ? AND organization_id = ?",
-                    [member.userId, orgId]
+                    [member.userId, orgId],
                   );
                 } else {
-                  await tx.execute(
-                    "DELETE FROM org_memberships WHERE id = ?",
-                    [member.id]
-                  );
+                  await tx.execute("DELETE FROM org_memberships WHERE id = ?", [
+                    member.id,
+                  ]);
                 }
               });
               setMessage("Member kicked successfully.");
@@ -82,7 +82,7 @@ export default function MemberProfileScreen({
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -93,7 +93,7 @@ export default function MemberProfileScreen({
       return;
     }
 
-    if (member.membershipType !== 'USER' || !member.userId) {
+    if (member.membershipType !== "USER" || !member.userId) {
       setMessage("Ownership can only be transferred to a user.");
       return;
     }
@@ -115,7 +115,7 @@ export default function MemberProfileScreen({
               showSpinner();
               await db.execute(
                 "UPDATE organizations SET manager_id = ? WHERE id = ?",
-                [member.userId, organization!.id]
+                [member.userId, organization!.id],
               );
               setMessage(`${member.name} is now the manager.`);
               navigation.goBack();
@@ -127,17 +127,14 @@ export default function MemberProfileScreen({
             }
           },
         },
-      ]
+      ],
     );
   };
 
   return (
     <View style={ProfileStyles.container}>
       <View style={ProfileStyles.profile}>
-        <ProfileDisplay
-          isMini={false}
-          profileKey={member.profile}
-        />
+        <ProfileDisplay isMini={false} profileKey={member.profile} />
       </View>
       <View style={ProfileStyles.centerRow}>
         <Text style={ProfileStyles.text}>{member.name}</Text>
@@ -149,10 +146,16 @@ export default function MemberProfileScreen({
       )}
       {isManager && (
         <>
-          <PressableOpacity onPress={handleTransfer} style={ProfileStyles.buttonContainer}>
+          <PressableOpacity
+            onPress={handleTransfer}
+            style={ProfileStyles.buttonContainer}
+          >
             <Text style={ProfileStyles.buttonText}>Make Manager</Text>
           </PressableOpacity>
-          <PressableOpacity onPress={handleDelete} style={[ProfileStyles.buttonContainer, styles.kickButton]}>
+          <PressableOpacity
+            onPress={handleDelete}
+            style={[ProfileStyles.buttonContainer, styles.kickButton]}
+          >
             <Text style={ProfileStyles.buttonText}>Kick</Text>
           </PressableOpacity>
         </>

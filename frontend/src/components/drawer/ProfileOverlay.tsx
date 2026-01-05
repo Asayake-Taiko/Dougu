@@ -50,10 +50,7 @@ export default function ProfileOverlay({
       setVisible={setVisible}
       onSave={handleUpdateProfile}
       displayComponent={
-        <ProfileDisplay
-          isMini={false}
-          profileKey={profileKey}
-        />
+        <ProfileDisplay isMini={false} profileKey={profileKey} />
       }
       iconMenuData={profileMapping}
       handleSet={(profileData) => setProfileKey(profileData)}

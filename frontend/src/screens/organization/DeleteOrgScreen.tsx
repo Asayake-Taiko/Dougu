@@ -24,7 +24,9 @@ export default function DeleteOrgScreen() {
     return (
       <View style={styles.container}>
         <Text style={styles.header}>Access Denied</Text>
-        <Text style={styles.label}>Only the manager can delete the organization.</Text>
+        <Text style={styles.label}>
+          Only the manager can delete the organization.
+        </Text>
       </View>
     );
   }
@@ -40,10 +42,19 @@ export default function DeleteOrgScreen() {
 
       await db.writeTransaction(async (tx) => {
         // Cascading deletion
-        await tx.execute("DELETE FROM equipment WHERE organization_id = ?", [organization.id]);
-        await tx.execute("DELETE FROM containers WHERE organization_id = ?", [organization.id]);
-        await tx.execute("DELETE FROM org_memberships WHERE organization_id = ?", [organization.id]);
-        await tx.execute("DELETE FROM organizations WHERE id = ?", [organization.id]);
+        await tx.execute("DELETE FROM equipment WHERE organization_id = ?", [
+          organization.id,
+        ]);
+        await tx.execute("DELETE FROM containers WHERE organization_id = ?", [
+          organization.id,
+        ]);
+        await tx.execute(
+          "DELETE FROM org_memberships WHERE organization_id = ?",
+          [organization.id],
+        );
+        await tx.execute("DELETE FROM organizations WHERE id = ?", [
+          organization.id,
+        ]);
       });
 
       setMessage("Organization deleted successfully.");
@@ -51,7 +62,9 @@ export default function DeleteOrgScreen() {
       navigation.getParent()?.goBack();
     } catch (error: any) {
       Logger.error("Failed to delete organization", error);
-      setMessage(error.message || "An error occurred while deleting the organization.");
+      setMessage(
+        error.message || "An error occurred while deleting the organization.",
+      );
     } finally {
       hideSpinner();
     }
@@ -65,7 +78,9 @@ export default function DeleteOrgScreen() {
           WARNING: This action is IRREVERSIBLE.
         </Text>
         <Text style={styles.label}>
-          All equipment, containers, and membership data for "{organization.name}" will be permanently deleted.
+          All equipment, containers, and membership data for {'"'}
+          {organization.name}
+          {'"'} will be permanently deleted.
         </Text>
       </View>
 
@@ -86,7 +101,7 @@ export default function DeleteOrgScreen() {
         onPress={handleDelete}
         style={[
           styles.button,
-          orgNameConfirm !== organization.name && styles.buttonDisabled
+          orgNameConfirm !== organization.name && styles.buttonDisabled,
         ]}
         disabled={orgNameConfirm !== organization.name}
       >

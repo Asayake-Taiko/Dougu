@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Dimensions } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // project imports
@@ -29,30 +29,32 @@ export default function UserStoragesScreen({
   navigation,
 }: UserStoragesScreenProps) {
   const { organization, isManager } = useMembership();
-  if (!organization) return null;
-
   const { tabParam } = route.params;
   const [tab, setTab] = useState(tabParam);
 
   // Reactive members query
-  const { data: membersData } = useQuery<OrgMembershipRecord & { full_name?: string; user_profile?: string }>(
+  const { data: membersData } = useQuery<
+    OrgMembershipRecord & { full_name?: string; user_profile?: string }
+  >(
     `SELECT m.*, u.full_name, u.profile as user_profile 
      FROM org_memberships m 
      LEFT JOIN users u ON m.user_id = u.id 
      WHERE m.organization_id = ?`,
-    [organization?.id]
+    [organization?.id || ""],
   );
 
-  const members = useMemo(() =>
-    membersData
-      .map(m => new OrgMembership(m, m.full_name, m.user_profile))
-      .sort((a, b) => a.name.localeCompare(b.name))
-    , [membersData]);
+  const members = useMemo(() => {
+    if (!membersData) return [];
+    return membersData
+      .map((m) => new OrgMembership(m, m.full_name, m.user_profile))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [membersData]);
 
   const [currData, setCurrData] = useState<OrgMembership[]>([]);
 
   // update our data everytime the tab or data changes
   useEffect(() => {
+    if (!organization) return;
     const getData = async () => {
       let data;
       if (tab === "Members") {
@@ -64,7 +66,9 @@ export default function UserStoragesScreen({
     };
 
     getData();
-  }, [members, tab]);
+  }, [members, tab, organization]);
+
+  if (!organization) return null;
 
   // create a storage, only managers can create storages
   const handleCreate = async () => {

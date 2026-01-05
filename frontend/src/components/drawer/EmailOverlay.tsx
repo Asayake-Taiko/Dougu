@@ -81,10 +81,7 @@ export default function EmailOverlay({
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        <PressableOpacity
-          style={styles.sendButton}
-          onPress={handleSendCode}
-        >
+        <PressableOpacity style={styles.sendButton} onPress={handleSendCode}>
           <Text style={styles.sendButtonText}>Send</Text>
         </PressableOpacity>
       </View>
@@ -96,11 +93,13 @@ export default function EmailOverlay({
         keyboardType="numeric"
       />
 
-      <PressableOpacity
-        style={styles.saveButton}
-        onPress={handleVerifyEmail}
-      >
-        <FontAwesome name="save" size={20} color={Colors.white} style={{ marginRight: 10 }} />
+      <PressableOpacity style={styles.saveButton} onPress={handleVerifyEmail}>
+        <FontAwesome
+          name="save"
+          size={20}
+          color={Colors.white}
+          style={{ marginRight: 10 }}
+        />
         <Text style={styles.saveButtonText}>Save</Text>
       </PressableOpacity>
     </BaseProfileOverlay>

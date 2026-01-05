@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import { useAuth } from '../../lib/context/AuthContext';
+import { useAuth } from "../../lib/context/AuthContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
@@ -49,7 +49,7 @@ export default function NameOverlay({
     } finally {
       hideSpinner();
     }
-  };
+  }
 
   return (
     <BaseProfileOverlay
@@ -72,11 +72,13 @@ export default function NameOverlay({
         />
       </View>
 
-      <PressableOpacity
-        style={styles.saveButton}
-        onPress={handleUpdateName}
-      >
-        <FontAwesome name="save" size={20} color={Colors.white} style={{ marginRight: 10 }} />
+      <PressableOpacity style={styles.saveButton} onPress={handleUpdateName}>
+        <FontAwesome
+          name="save"
+          size={20}
+          color={Colors.white}
+          style={{ marginRight: 10 }}
+        />
         <Text style={styles.saveButtonText}>Save</Text>
       </PressableOpacity>
     </BaseProfileOverlay>

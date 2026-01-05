@@ -1,17 +1,61 @@
 import { ImageSourcePropType } from "react-native";
 
-const profilePath = "../../assets/userprofiles/";
+import miku from "../../assets/userprofiles/miku.png";
+import zote from "../../assets/userprofiles/zote.png";
+import jiji from "../../assets/userprofiles/jiji.png";
+import sadaharu from "../../assets/userprofiles/sadaharu.png";
+import pikachu from "../../assets/userprofiles/pikachu.png";
+import kai from "../../assets/userprofiles/kai.png";
+import saitama from "../../assets/userprofiles/saitama.png";
+import redTaiko from "../../assets/userprofiles/redTaiko.png";
+import blueTaiko from "../../assets/userprofiles/blueTaiko.png";
+import profileDefault from "../../assets/userprofiles/default.png";
+
+import chu from "../../assets/equipment/chu.png";
+import shime from "../../assets/equipment/shime.png";
+import okedo from "../../assets/equipment/okedo.png";
+import ohira from "../../assets/equipment/ohira.png";
+import odaiko from "../../assets/equipment/odaiko.png";
+import tire from "../../assets/equipment/tire.png";
+
+import nanameStand from "../../assets/equipment/nanameStand.png";
+import betaStand from "../../assets/equipment/betaStand.png";
+import shimeStand from "../../assets/equipment/shimeStand.png";
+import hachijoStand from "../../assets/equipment/hachijoStand.png";
+import okedoStand from "../../assets/equipment/okedoStand.png";
+import odaikoStand from "../../assets/equipment/odaikoStand.png";
+import yataiStand from "../../assets/equipment/yataiStand.png";
+import chair from "../../assets/equipment/chair.png";
+
+import happi from "../../assets/equipment/happi.png";
+import haori from "../../assets/equipment/haori.png";
+import hakama from "../../assets/equipment/hakama.png";
+import hachimakiBlack from "../../assets/equipment/hachimakiBlack.png";
+import hachimakiWhite from "../../assets/equipment/hachimakiWhite.png";
+
+import mallet from "../../assets/equipment/mallet.png";
+import chappa from "../../assets/equipment/chappa.png";
+import clave from "../../assets/equipment/clave.png";
+import kane from "../../assets/equipment/kane.png";
+import bachi from "../../assets/equipment/bachi.png";
+import batBachi from "../../assets/equipment/batBachi.png";
+import bells from "../../assets/equipment/bells.png";
+import iconDefault from "../../assets/equipment/default.png";
+
+import orgDefault from "../../assets/organization/default.png";
+import asayake from "../../assets/organization/asayake.png";
+
 const baseProfileMapping: { [key: string]: ImageSourcePropType } = {
-  miku: require(`${profilePath}miku.png`),
-  zote: require(`${profilePath}zote.png`),
-  jiji: require(`${profilePath}jiji.png`),
-  sadaharu: require(`${profilePath}sadaharu.png`),
-  pikachu: require(`${profilePath}pikachu.png`),
-  kai: require(`${profilePath}kai.png`),
-  saitama: require(`${profilePath}saitama.png`),
-  redTaiko: require(`${profilePath}redTaiko.png`),
-  blueTaiko: require(`${profilePath}blueTaiko.png`),
-  default: require(`${profilePath}default.png`),
+  miku,
+  zote,
+  jiji,
+  sadaharu,
+  pikachu,
+  kai,
+  saitama,
+  redTaiko,
+  blueTaiko,
+  default: profileDefault,
 };
 
 const profileMapping: { [key: string]: ImageSourcePropType } = new Proxy(
@@ -20,46 +64,45 @@ const profileMapping: { [key: string]: ImageSourcePropType } = new Proxy(
     get(target, prop: string) {
       return target[prop] ?? target.default;
     },
-  }
+  },
 );
 
-const equipmentPath = "../../assets/equipment/";
 const drums: { [key: string]: ImageSourcePropType } = {
-  chu: require(`${equipmentPath}chu.png`),
-  shime: require(`${equipmentPath}shime.png`),
-  okedo: require(`${equipmentPath}okedo.png`),
-  ohira: require(`${equipmentPath}ohira.png`),
-  odaiko: require(`${equipmentPath}odaiko.png`),
-  tire: require(`${equipmentPath}tire.png`),
+  chu,
+  shime,
+  okedo,
+  ohira,
+  odaiko,
+  tire,
 };
 
 const stands: { [key: string]: ImageSourcePropType } = {
-  nanameStand: require(`${equipmentPath}nanameStand.png`),
-  betaStand: require(`${equipmentPath}betaStand.png`),
-  shimeStand: require(`${equipmentPath}shimeStand.png`),
-  hachijoStand: require(`${equipmentPath}hachijoStand.png`),
-  okedoStand: require(`${equipmentPath}okedoStand.png`),
-  odaikoStand: require(`${equipmentPath}odaikoStand.png`),
-  yataiStand: require(`${equipmentPath}yataiStand.png`),
-  chair: require(`${equipmentPath}chair.png`),
+  nanameStand,
+  betaStand,
+  shimeStand,
+  hachijoStand,
+  okedoStand,
+  odaikoStand,
+  yataiStand,
+  chair,
 };
 
 const clothing: { [key: string]: ImageSourcePropType } = {
-  happi: require(`${equipmentPath}happi.png`),
-  haori: require(`${equipmentPath}haori.png`),
-  hakama: require(`${equipmentPath}hakama.png`),
-  hachimakiBlack: require(`${equipmentPath}hachimakiBlack.png`),
-  hachimakiWhite: require(`${equipmentPath}hachimakiWhite.png`),
+  happi,
+  haori,
+  hakama,
+  hachimakiBlack,
+  hachimakiWhite,
 };
 
 const other: { [key: string]: ImageSourcePropType } = {
-  mallet: require(`${equipmentPath}mallet.png`),
-  chappa: require(`${equipmentPath}chappa.png`),
-  clave: require(`${equipmentPath}clave.png`),
-  kane: require(`${equipmentPath}kane.png`),
-  bachi: require(`${equipmentPath}bachi.png`),
-  batBachi: require(`${equipmentPath}batBachi.png`),
-  bells: require(`${equipmentPath}bells.png`),
+  mallet,
+  chappa,
+  clave,
+  kane,
+  bachi,
+  batBachi,
+  bells,
 };
 
 const taiko: { [key: string]: ImageSourcePropType } = {
@@ -71,7 +114,7 @@ const taiko: { [key: string]: ImageSourcePropType } = {
 
 const baseIconMapping: { [key: string]: ImageSourcePropType } = {
   ...taiko,
-  default: require(`${equipmentPath}default.png`),
+  default: iconDefault,
 };
 
 const iconMapping: { [key: string]: ImageSourcePropType } = new Proxy(
@@ -80,13 +123,12 @@ const iconMapping: { [key: string]: ImageSourcePropType } = new Proxy(
     get(target, prop: string) {
       return target[prop] ?? target.default;
     },
-  }
+  },
 );
 
-const orgPath = "../../assets/organization/";
 const baseOrgMapping: { [key: string]: ImageSourcePropType } = {
-  default: require(`${orgPath}default.png`),
-  asayake: require(`${orgPath}asayake.png`),
+  default: orgDefault,
+  asayake,
 };
 
 const orgMapping: { [key: string]: ImageSourcePropType } = new Proxy(
@@ -95,7 +137,7 @@ const orgMapping: { [key: string]: ImageSourcePropType } = new Proxy(
     get(target, prop: string) {
       return target[prop] ?? target.default;
     },
-  }
+  },
 );
 
 export { iconMapping, profileMapping, orgMapping };

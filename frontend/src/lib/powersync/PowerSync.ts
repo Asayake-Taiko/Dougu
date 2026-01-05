@@ -1,30 +1,30 @@
-import { PowerSyncDatabase } from '@powersync/react-native';
-import { OPSqliteOpenFactory } from '@powersync/op-sqlite';
-import { AppSchema } from './Schema';
-import { seedDatabase } from '../mocks/Seeding';
-import { MOCK_ENABLED } from '../utils/env';
+import { PowerSyncDatabase } from "@powersync/react-native";
+import { OPSqliteOpenFactory } from "@powersync/op-sqlite";
+import { AppSchema } from "./Schema";
+import { seedDatabase } from "../mocks/Seeding";
+import { MOCK_ENABLED } from "../utils/env";
 
 /**
  * Initialize the PowerSync database.
  */
 export const db = new PowerSyncDatabase({
-    schema: AppSchema,
-    database: new OPSqliteOpenFactory({
-        dbFilename: 'dougu.db',
-    }),
+  schema: AppSchema,
+  database: new OPSqliteOpenFactory({
+    dbFilename: "dougu.db",
+  }),
 });
 
 /**
  * Setup the database, seeding it if in dev mode.
  */
 export async function setupDatabase() {
-    if (MOCK_ENABLED) {
-        try {
-            await seedDatabase(db);
-        } catch (error) {
-            console.error('Error during database setup:', error);
-        }
+  if (MOCK_ENABLED) {
+    try {
+      await seedDatabase(db);
+    } catch (error) {
+      console.error("Error during database setup:", error);
     }
+  }
 }
 
 /**
@@ -32,6 +32,5 @@ export async function setupDatabase() {
  * This will disconnect the database and delete the local SQLite file.
  */
 export async function clearAllData() {
-    await db.disconnectAndClear();
+  await db.disconnectAndClear();
 }
-

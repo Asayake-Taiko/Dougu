@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { StyleSheet, View, TouchableOpacity, Text, TextInput, Dimensions } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+  TextInput,
+} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -33,7 +39,12 @@ export default function ManageEquipmentScreen({
       <View style={styles.content}>
         <View style={styles.searchHeader}>
           <View style={styles.searchBarContainer}>
-            <MaterialCommunityIcons name="magnify" size={24} color="#828282" style={styles.searchIcon} />
+            <MaterialCommunityIcons
+              name="magnify"
+              size={24}
+              color="#828282"
+              style={styles.searchIcon}
+            />
             <TextInput
               placeholder="Search"
               onChangeText={setSearch}

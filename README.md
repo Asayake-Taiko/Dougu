@@ -15,8 +15,9 @@ The codebase is designed to isolate the frontend and backend. To begin working o
 1. Create a .env file inside /frontend and set EXPO_PUBLIC_MOCK_ENABLED=true
 2. For IOS, download XCode and for Android, download Android Studio. 
 3. Make sure nodeJS and npm is installed
-4. `cd frontend` and run `npm install`
-5. Once installed, you can run the app with `npx expo run`
+4. Install the ESLint extension if you are using VSCode or a fork of it
+5. `cd frontend` and run `npm install`
+6. Once installed, you can run the app with `npx expo run`
 
 ## Contributions
 

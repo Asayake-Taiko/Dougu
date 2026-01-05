@@ -1,4 +1,4 @@
-import { scheduleOnRN } from 'react-native-worklets';
+import { scheduleOnRN } from "react-native-worklets";
 import { View } from "react-native";
 import ColorPicker, {
   Panel1,

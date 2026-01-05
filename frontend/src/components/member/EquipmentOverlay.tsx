@@ -7,22 +7,19 @@ import { Colors } from "../../styles/global/colors";
 import { Spacing } from "../../styles/global";
 
 export default function EquipmentOverlay() {
-  const {
-    setSelectedEquipment,
-    selectedEquipment: item
-  } = useEquipment();
-  const [localUpdate, setLocalUpdate] = React.useState(0);
+  const { setSelectedEquipment, selectedEquipment: item } = useEquipment();
+  const [, setLocalUpdate] = React.useState(0);
 
   if (!item) return null;
 
   const handleToggle = (index: number) => {
     item.toggleSelection(index);
-    setLocalUpdate(prev => prev + 1);
+    setLocalUpdate((prev) => prev + 1);
   };
 
   const handleSelectAll = () => {
     item.selectAll();
-    setLocalUpdate(prev => prev + 1);
+    setLocalUpdate((prev) => prev + 1);
   };
 
   return (
@@ -37,7 +34,10 @@ export default function EquipmentOverlay() {
           <Pressable onPress={handleSelectAll} style={styles.selectAllButton}>
             <Text style={styles.selectAllText}>Select All</Text>
           </Pressable>
-          <Pressable onPress={() => setSelectedEquipment(null)} style={styles.closeButton}>
+          <Pressable
+            onPress={() => setSelectedEquipment(null)}
+            style={styles.closeButton}
+          >
             <Text style={styles.closeButtonText}>Close</Text>
           </Pressable>
         </View>
@@ -49,20 +49,26 @@ export default function EquipmentOverlay() {
           return (
             <Pressable
               key={record.id}
-              style={[
-                styles.card,
-                isSelected && styles.selectedCard
-              ]}
+              style={[styles.card, isSelected && styles.selectedCard]}
               onPress={() => handleToggle(index)}
             >
               <View style={styles.cardHeader}>
-                <Text style={[styles.recordId, isSelected && styles.selectedText]}>
+                <Text
+                  style={[styles.recordId, isSelected && styles.selectedText]}
+                >
                   {item.name} {isSelected ? "✓" : ""}
                 </Text>
-                <View style={[styles.colorBadge, { backgroundColor: record.color }]} />
+                <View
+                  style={[styles.colorBadge, { backgroundColor: record.color }]}
+                />
               </View>
-              <Text style={styles.details}>{record.details || "No details provided."}</Text>
-              <Text style={styles.date}>Last updated: {new Date(record.last_updated_date).toLocaleDateString()}</Text>
+              <Text style={styles.details}>
+                {record.details || "No details provided."}
+              </Text>
+              <Text style={styles.date}>
+                Last updated:{" "}
+                {new Date(record.last_updated_date).toLocaleDateString()}
+              </Text>
             </Pressable>
           );
         })}
@@ -90,14 +96,14 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingBottom: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   headerButtons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.sm,
   },
   title: {
@@ -112,7 +118,7 @@ const styles = StyleSheet.create({
   },
   selectAllText: {
     color: Colors.dark,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 14,
   },
   closeButton: {
@@ -120,37 +126,37 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     color: Colors.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 16,
   },
   scrollContent: {
     padding: 20,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#1f1e1eff',
+    borderColor: "#1f1e1eff",
   },
   selectedCard: {
     borderColor: Colors.primary,
     borderWidth: 2,
-    backgroundColor: '#f0f0ff',
+    backgroundColor: "#f0f0ff",
   },
   selectedText: {
     color: Colors.primary,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   recordId: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.gray500,
   },
   colorBadge: {
@@ -167,18 +173,18 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 12,
     color: Colors.gray400,
-    textAlign: 'right',
+    textAlign: "right",
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    backgroundColor: '#f9f9f9',
+    borderTopColor: "#eee",
+    backgroundColor: "#f9f9f9",
   },
   footerText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.dark,
-    textAlign: 'center',
-  }
+    textAlign: "center",
+  },
 });

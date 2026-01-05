@@ -14,13 +14,10 @@ import { PressableOpacity } from "../PressableOpacity";
     Single row from the UserStorages list. Each 
     row contains the user's name and a delete button
 */
-export default function MemberRow({
-  item,
-}: {
-  item: OrgMembership;
-}) {
+export default function MemberRow({ item }: { item: OrgMembership }) {
   const { organization } = useMembership();
-  const navigation = useNavigation<StackNavigationProp<ProfileStackParamList>>();
+  const navigation =
+    useNavigation<StackNavigationProp<ProfileStackParamList>>();
 
   if (!organization || !item) return null;
 
@@ -34,10 +31,7 @@ export default function MemberRow({
   return (
     <View style={userStorage.row}>
       <View style={userStorage.profile}>
-        <ProfileDisplay
-          isMini={true}
-          profileKey={item.profile}
-        />
+        <ProfileDisplay isMini={true} profileKey={item.profile} />
       </View>
       <View style={userStorage.nameRow}>
         <Text style={userStorage.name}>{item.name}</Text>

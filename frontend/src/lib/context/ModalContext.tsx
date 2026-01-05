@@ -1,7 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
-import { Colors, Spacing, Typography, Layout } from '../../styles/global';
-import { PressableOpacity } from '../../components/PressableOpacity';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { Colors, Spacing, Typography, Layout } from "../../styles/global";
+import { PressableOpacity } from "../../components/PressableOpacity";
 
 interface ModalContextType {
   message: string | null;
@@ -13,7 +19,7 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 export const useModal = () => {
   const context = useContext(ModalContext);
   if (!context) {
-    throw new Error('useModal must be used within a ModalProvider');
+    throw new Error("useModal must be used within a ModalProvider");
   }
   return context;
 };
@@ -43,7 +49,10 @@ export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
             <TouchableWithoutFeedback>
               <View style={styles.modalContainer}>
                 <Text style={styles.messageText}>{message}</Text>
-                <PressableOpacity style={styles.closeButton} onPress={handleClose}>
+                <PressableOpacity
+                  style={styles.closeButton}
+                  onPress={handleClose}
+                >
                   <Text style={styles.closeButtonText}>OK</Text>
                 </PressableOpacity>
               </View>
@@ -58,15 +67,15 @@ export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContainer: {
     backgroundColor: Colors.white,
     borderRadius: Layout.borderRadius.md,
     padding: Spacing.lg,
-    width: '80%',
+    width: "80%",
     maxWidth: 400,
     shadowColor: Colors.black,
     shadowOffset: {
@@ -81,13 +90,13 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.md,
     color: Colors.dark,
     marginBottom: Spacing.lg,
-    textAlign: 'center',
+    textAlign: "center",
   },
   closeButton: {
     backgroundColor: Colors.primary,
     borderRadius: Layout.borderRadius.sm,
     padding: Spacing.sm,
-    alignItems: 'center',
+    alignItems: "center",
   },
   closeButtonText: {
     color: Colors.white,

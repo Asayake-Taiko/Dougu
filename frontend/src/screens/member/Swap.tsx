@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { OrgMembershipRecord } from "../../types/db";
 import { Item } from "../../types/models";
 import SwapGestures from "../../components/member/SwapGestures";
@@ -10,45 +10,45 @@ import { useMembership } from "../../lib/context/MembershipContext";
   This section mainly focuses on getting and passing down the equipment info
 */
 export default function SwapScreen() {
-    const { ownerships } = useEquipment();
-    const { membership } = useMembership();
-    const swapUser = useRef<OrgMembershipRecord | null>(null);
-    const [listOne, setListOne] = useState<Item[]>([]);
-    const [listTwo, setListTwo] = useState<Item[]>([]);
+  const { ownerships } = useEquipment();
+  const { membership } = useMembership();
+  const swapUser = useRef<OrgMembershipRecord | null>(null);
+  const [listOne, setListOne] = useState<Item[]>([]);
+  const [listTwo, setListTwo] = useState<Item[]>([]);
 
-    const updateLists = () => {
-        if (membership) {
-            const myOwnership = ownerships.get(membership.id);
-            setListOne(myOwnership?.items || []);
-        } else {
-            setListOne([]);
-        }
+  const updateLists = useCallback(() => {
+    if (membership) {
+      const myOwnership = ownerships.get(membership.id);
+      setListOne(myOwnership?.items || []);
+    } else {
+      setListOne([]);
+    }
 
-        if (swapUser.current) {
-            const swapOwnership = ownerships.get(swapUser.current.id);
-            setListTwo(swapOwnership?.items || []);
-        } else {
-            setListTwo([]);
-        }
-    };
+    if (swapUser.current) {
+      const swapOwnership = ownerships.get(swapUser.current.id);
+      setListTwo(swapOwnership?.items || []);
+    } else {
+      setListTwo([]);
+    }
+  }, [ownerships, membership]);
 
-    // Update lists whenever ownerships or selection changes
-    useEffect(() => {
-        updateLists();
-    }, [ownerships, membership]);
+  // Update lists whenever ownerships or selection changes
+  useEffect(() => {
+    updateLists();
+  }, [ownerships, membership, updateLists]);
 
-    // get selected user equipment
-    const handleSet = (targetMembership: OrgMembershipRecord | null) => {
-        swapUser.current = targetMembership;
-        updateLists();
-    };
+  // get selected user equipment
+  const handleSet = (targetMembership: OrgMembershipRecord | null) => {
+    swapUser.current = targetMembership;
+    updateLists();
+  };
 
-    return (
-        <SwapGestures
-            listOne={listOne}
-            listTwo={listTwo}
-            handleSet={handleSet}
-            swapUser={swapUser}
-        />
-    );
+  return (
+    <SwapGestures
+      listOne={listOne}
+      listTwo={listTwo}
+      handleSet={handleSet}
+      swapUser={swapUser}
+    />
+  );
 }

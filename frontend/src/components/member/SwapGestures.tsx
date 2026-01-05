@@ -4,7 +4,10 @@ import {
   GestureDetector,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
-import Animated, { useAnimatedRef, useSharedValue } from "react-native-reanimated";
+import Animated, {
+  useAnimatedRef,
+  useSharedValue,
+} from "react-native-reanimated";
 
 import { Item } from "../../types/models";
 import { OrgMembershipRecord } from "../../types/db";
@@ -43,7 +46,7 @@ export default function SwapGestures({
     topListRef,
     bottomListRef,
     topScrollOffset,
-    bottomScrollOffset
+    bottomScrollOffset,
   );
 
   const {
@@ -102,12 +105,18 @@ export default function SwapGestures({
               draggingItem={draggingItem}
             />
           </View>
-          <ContainerOverlay containerPage={containerPage} setContainerPage={setContainerPage} draggingItem={draggingItem} />
+          <ContainerOverlay
+            containerPage={containerPage}
+            setContainerPage={setContainerPage}
+            draggingItem={draggingItem}
+          />
           <EquipmentOverlay />
-          <FloatingDraggingItem draggingItem={draggingItem} dragValues={dragValues} />
+          <FloatingDraggingItem
+            draggingItem={draggingItem}
+            dragValues={dragValues}
+          />
         </View>
       </GestureDetector>
-
     </GestureHandlerRootView>
   );
 }
@@ -133,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginHorizontal: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   spacer: {
     marginTop: 20,
@@ -147,7 +156,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     marginHorizontal: 20,
-  }
+  },
 });

@@ -88,7 +88,12 @@ export default function PasswordOverlay({
         style={styles.saveButton}
         onPress={handleUpdatePassword}
       >
-        <FontAwesome name="save" size={20} color={Colors.white} style={{ marginRight: 10 }} />
+        <FontAwesome
+          name="save"
+          size={20}
+          color={Colors.white}
+          style={{ marginRight: 10 }}
+        />
         <Text style={styles.saveButtonText}>Save</Text>
       </PressableOpacity>
     </BaseProfileOverlay>

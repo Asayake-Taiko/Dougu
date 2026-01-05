@@ -3,7 +3,6 @@ import { Hex } from "../../types/other";
 import { ItemStyles } from "../../styles/ItemStyles";
 
 export default function ContainerDisplay({ color }: { color: Hex }) {
-
   return (
     <Pressable
       style={({ pressed }) => [

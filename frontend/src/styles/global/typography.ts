@@ -11,7 +11,7 @@ export const Typography = {
     xl: 24,
     xxl: 32,
   },
-  
+
   // Font weights
   fontWeight: {
     normal: "normal" as const,
@@ -26,7 +26,7 @@ export const Typography = {
     "800": "800" as const,
     "900": "900" as const,
   },
-  
+
   // Line heights
   lineHeight: {
     tight: 1.2,

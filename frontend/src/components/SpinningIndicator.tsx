@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  View,
-  StyleSheet,
-  Animated,
-  Easing,
-} from "react-native";
+import { View, StyleSheet, Animated, Easing } from "react-native";
 import { PressableOpacity } from "./PressableOpacity";
 
 /*
@@ -30,7 +25,7 @@ export default function SpinningIndicator() {
 
   return (
     <View style={styles.container}>
-      <PressableOpacity onPress={() => { }}>
+      <PressableOpacity onPress={() => {}}>
         <Animated.View
           style={[styles.circle, { transform: [{ rotateY: spin }] }]}
         />

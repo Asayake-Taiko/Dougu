@@ -1,8 +1,4 @@
-import {
-  FlatList,
-  StyleSheet,
-  View,
-} from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { PressableOpacity } from "./PressableOpacity";
 import { chunkArray } from "../lib/utils/EquipmentUtils";

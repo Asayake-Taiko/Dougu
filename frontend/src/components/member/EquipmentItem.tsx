@@ -27,7 +27,10 @@ export default function EquipmentItem({
   if (isFloating) {
     displayCount = item.selectedCount;
     repRecord = item.selectedRecord;
-  } else if (draggingItem?.type === 'equipment' && draggingItem.id === item.id) {
+  } else if (
+    draggingItem?.type === "equipment" &&
+    draggingItem.id === item.id
+  ) {
     displayCount = item.count - item.selectedCount;
     repRecord = item.firstUnselectedRecord;
   }

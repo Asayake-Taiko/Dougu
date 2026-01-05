@@ -17,7 +17,9 @@ export default function ProfileDisplay({
 
   return (
     <Image
-      source={profileKey ? profileMapping[profileKey] : profileMapping["default"]}
+      source={
+        profileKey ? profileMapping[profileKey] : profileMapping["default"]
+      }
       style={styles}
     />
   );

@@ -10,14 +10,14 @@ export const Layout = {
     xl: 20,
     round: 9999,
   },
-  
+
   // Border widths
   borderWidth: {
     thin: 1,
     medium: 2,
     thick: 3,
   },
-  
+
   // Standard dimensions
   dimensions: {
     buttonHeight: 50,

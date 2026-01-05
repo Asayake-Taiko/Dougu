@@ -7,43 +7,45 @@ import { Item } from "../../types/models";
 const { width: windowWidth } = Dimensions.get("window");
 
 export default function FloatingDraggingItem({
-    draggingItem,
-    dragValues,
+  draggingItem,
+  dragValues,
 }: {
-    draggingItem: Item | null;
-    dragValues: {
-        x: any;
-        y: any;
-        scale: any;
-    };
+  draggingItem: Item | null;
+  dragValues: {
+    x: any;
+    y: any;
+    scale: any;
+  };
 }) {
+  const movingStyles = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateX: dragValues.x.value },
+        { translateY: dragValues.y.value },
+        { scale: dragValues.scale.value },
+      ],
+    };
+  });
 
-    const movingStyles = useAnimatedStyle(() => {
-        return {
-            transform: [
-                { translateX: dragValues.x.value },
-                { translateY: dragValues.y.value },
-                { scale: dragValues.scale.value },
-            ],
-        };
-    });
+  if (!draggingItem) return null;
 
-    if (!draggingItem) return null;
-
-    return (
-        <Animated.View pointerEvents="none" style={[styles.floatingItem, movingStyles]}>
-            <ItemComponent data={draggingItem} isFloating={true} />
-        </Animated.View>
-    );
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[styles.floatingItem, movingStyles]}
+    >
+      <ItemComponent data={draggingItem} isFloating={true} />
+    </Animated.View>
+  );
 }
 
 const styles = StyleSheet.create({
-    floatingItem: {
-        position: "absolute",
-        zIndex: 100,
-        width: windowWidth / 5,
-        height: windowWidth / 5 + 40,
-        top: 0,
-        left: 0,
-    },
+  floatingItem: {
+    position: "absolute",
+    zIndex: 100,
+    width: windowWidth / 5,
+    height: windowWidth / 5 + 40,
+    top: 0,
+    left: 0,
+  },
 });

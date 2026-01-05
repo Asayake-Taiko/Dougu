@@ -65,11 +65,13 @@ export default function DeleteOverlay({
         keyboardType="email-address"
       />
 
-      <PressableOpacity
-        style={styles.deleteButton}
-        onPress={handleDelete}
-      >
-        <FontAwesome name="trash" size={20} color={Colors.white} style={{ marginRight: 10 }} />
+      <PressableOpacity style={styles.deleteButton} onPress={handleDelete}>
+        <FontAwesome
+          name="trash"
+          size={20}
+          color={Colors.white}
+          style={{ marginRight: 10 }}
+        />
         <Text style={styles.deleteButtonText}>Delete</Text>
       </PressableOpacity>
     </BaseProfileOverlay>

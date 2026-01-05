@@ -1,12 +1,5 @@
-import {
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-} from "react-native";
-import React from "react";
-import { useState } from "react";
+import { Text, View, TextInput, StyleSheet } from "react-native";
+import React, { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { ProfileStyles } from "../../styles/ProfileStyles";
@@ -56,23 +49,22 @@ export default function CreateStorageScreen() {
       showSpinner();
 
       await db.execute(
-        'INSERT INTO org_memberships (id, organization_id, type, storage_name, group_name, profile, details) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        "INSERT INTO org_memberships (id, organization_id, type, storage_name, group_name, profile, details) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [
           generateUUID(),
           organization.id,
-          'STORAGE',
+          "STORAGE",
           name,
           organization.name,
           profileKey,
-          details
-        ]
+          details,
+        ],
       );
 
       // Reset form and go back
       onChangeName("");
       onChangeDetails("");
       navigation.goBack();
-
     } catch (error) {
       Logger.error("Error creating storage:", error);
       setMessage("Failed to create storage. Please try again.");
@@ -87,10 +79,7 @@ export default function CreateStorageScreen() {
         style={ProfileStyles.profile}
         onPress={() => setProfileVisible(true)}
       >
-        <ProfileDisplay
-          isMini={false}
-          profileKey={profileKey}
-        />
+        <ProfileDisplay isMini={false} profileKey={profileKey} />
         <View style={ProfileStyles.editButton}>
           <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
         </View>

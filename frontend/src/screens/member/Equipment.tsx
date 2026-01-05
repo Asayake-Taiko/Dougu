@@ -15,36 +15,42 @@ import ContainerOverlay from "../../components/member/ContainerOverlay";
   Screen for viewing all equipment assigned to the current user
 */
 export default function EquipmentScreen() {
-    const { ownerships } = useEquipment();
-    const { membership } = useMembership();
-    const [containerPage, setContainerPage] = React.useState(0);
-    if (!membership) {
-        return null;
-    }
+  const { ownerships } = useEquipment();
+  const { membership } = useMembership();
+  const [containerPage, setContainerPage] = React.useState(0);
+  if (!membership) {
+    return null;
+  }
 
-    // Get the items assigned to the current user
-    const userItems = ownerships.get(membership.id);
-    const items = userItems?.items || [];
-    const chunkedData = chunkArray(items, 3);
+  // Get the items assigned to the current user
+  const userItems = ownerships.get(membership.id);
+  const items = userItems?.items || [];
+  const chunkedData = chunkArray(items, 3);
 
-    return (
-        <View style={EquipmentStyles.background}>
-            <ScrollView>
-                <View style={EquipmentStyles.container}>
-                    <Text style={EquipmentStyles.title}>My Equipment</Text>
-                    {chunkedData.map((group, index) => (
-                        <View key={index} style={EquipmentStyles.equipmentRow}>
-                            {group.map((item) => (
-                                <View key={item.id} style={EquipmentStyles.equipmentItemContainer}>
-                                    <Item data={item} />
-                                </View>
-                            ))}
-                        </View>
-                    ))}
+  return (
+    <View style={EquipmentStyles.background}>
+      <ScrollView>
+        <View style={EquipmentStyles.container}>
+          <Text style={EquipmentStyles.title}>My Equipment</Text>
+          {chunkedData.map((group, index) => (
+            <View key={index} style={EquipmentStyles.equipmentRow}>
+              {group.map((item) => (
+                <View
+                  key={item.id}
+                  style={EquipmentStyles.equipmentItemContainer}
+                >
+                  <Item data={item} />
                 </View>
-            </ScrollView>
-            <EquipmentOverlay />
-            <ContainerOverlay containerPage={containerPage} setContainerPage={setContainerPage} />
+              ))}
+            </View>
+          ))}
         </View>
-    );
+      </ScrollView>
+      <EquipmentOverlay />
+      <ContainerOverlay
+        containerPage={containerPage}
+        setContainerPage={setContainerPage}
+      />
+    </View>
+  );
 }

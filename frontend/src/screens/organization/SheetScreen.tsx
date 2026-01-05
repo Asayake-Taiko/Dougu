@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Switch, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, Switch } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -25,7 +25,10 @@ export default function SheetScreen() {
       try {
         const configStr = await SecureStore.getItemAsync(STORAGE_KEY);
         if (configStr) {
-          const { showEmpty: savedShowEmpty, showContainerEquip: savedShowContainerEquip } = JSON.parse(configStr);
+          const {
+            showEmpty: savedShowEmpty,
+            showContainerEquip: savedShowContainerEquip,
+          } = JSON.parse(configStr);
           setShowEmpty(savedShowEmpty);
           setShowContainerEquip(savedShowContainerEquip);
         }
@@ -50,7 +53,7 @@ export default function SheetScreen() {
       try {
         await SecureStore.setItemAsync(
           STORAGE_KEY,
-          JSON.stringify({ showEmpty, showContainerEquip })
+          JSON.stringify({ showEmpty, showContainerEquip }),
         );
       } catch (e) {
         console.error("Failed to save sheet config", e);

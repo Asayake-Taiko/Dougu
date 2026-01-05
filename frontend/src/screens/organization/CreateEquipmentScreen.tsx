@@ -1,9 +1,4 @@
-import {
-  Text,
-  View,
-  StyleSheet,
-  TextInput,
-} from "react-native";
+import { Text, View, StyleSheet, TextInput } from "react-native";
 import React, { useState } from "react";
 
 // project imports
@@ -33,7 +28,9 @@ export default function CreateEquipmentScreen() {
 
   const [name, onChangeName] = useState("");
   const [quantity, onChangeQuantity] = useState<string>("");
-  const [assignUser, setAssignUser] = useState<OrgMembershipRecord | null>(null);
+  const [assignUser, setAssignUser] = useState<OrgMembershipRecord | null>(
+    null,
+  );
   const [details, onChangeDetails] = useState("");
 
   // Static values for now as requested to skip overlay/image logic details
@@ -88,8 +85,8 @@ export default function CreateEquipmentScreen() {
                 itemColor,
                 organization.name,
                 details,
-                timestamp
-              ]
+                timestamp,
+              ],
             );
           } else {
             // Create Container
@@ -104,8 +101,8 @@ export default function CreateEquipmentScreen() {
                 itemColor,
                 organization.name,
                 details,
-                timestamp
-              ]
+                timestamp,
+              ],
             );
           }
         }
@@ -139,9 +136,7 @@ export default function CreateEquipmentScreen() {
                 isMini={false}
               />
             ) : (
-              <ContainerDisplay
-                color={itemColor}
-              />
+              <ContainerDisplay color={itemColor} />
             )}
           </>
         }
@@ -155,15 +150,11 @@ export default function CreateEquipmentScreen() {
             isMini={false}
           />
         ) : (
-          <ContainerDisplay
-            color={itemColor}
-          />
+          <ContainerDisplay color={itemColor} />
         )}
       </View>
       <View style={styles.centerContainer}>
-        <PressableOpacity
-          onPress={() => setOverlayVisible(true)}
-        >
+        <PressableOpacity onPress={() => setOverlayVisible(true)}>
           <Text style={styles.link}>Edit Item Image</Text>
         </PressableOpacity>
       </View>
@@ -191,13 +182,21 @@ export default function CreateEquipmentScreen() {
               style={[styles.tabItem, index === 0 && styles.activeTab]}
               onPress={() => setIndex(0)}
             >
-              <Text style={[styles.tabText, index === 0 && styles.activeTabText]}>Equipment</Text>
+              <Text
+                style={[styles.tabText, index === 0 && styles.activeTabText]}
+              >
+                Equipment
+              </Text>
             </PressableOpacity>
             <PressableOpacity
               style={[styles.tabItem, index === 1 && styles.activeTab]}
               onPress={() => setIndex(1)}
             >
-              <Text style={[styles.tabText, index === 1 && styles.activeTabText]}>Container</Text>
+              <Text
+                style={[styles.tabText, index === 1 && styles.activeTabText]}
+              >
+                Container
+              </Text>
             </PressableOpacity>
           </View>
         </View>
@@ -237,7 +236,7 @@ export default function CreateEquipmentScreen() {
       <PressableOpacity style={styles.createBtn} onPress={handleCreate}>
         <Text style={styles.createBtnTxt}> Create </Text>
       </PressableOpacity>
-    </View >
+    </View>
   );
 }
 

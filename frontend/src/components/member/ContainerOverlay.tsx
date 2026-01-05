@@ -1,16 +1,25 @@
 import React from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
-import { ScrollView, GestureDetector, Gesture } from "react-native-gesture-handler";
-import Animated, { ZoomIn, ZoomOut, FadeIn, FadeOut } from "react-native-reanimated";
+import {
+  ScrollView,
+  GestureDetector,
+  Gesture,
+} from "react-native-gesture-handler";
+import Animated, {
+  ZoomIn,
+  ZoomOut,
+  FadeIn,
+  FadeOut,
+} from "react-native-reanimated";
 import { useEquipment } from "../../lib/context/EquipmentContext";
 import { chunkArray } from "../../lib/utils/EquipmentUtils";
 import EquipmentItem from "./EquipmentItem";
 import { ContainerOverlayStyles } from "../../styles/ContainerOverlay";
 import PaginationDots from "./PaginationDots";
 
-const { width: windowWidth } = Dimensions.get("window");
-
 import { Item } from "../../types/models";
+
+const { width: windowWidth } = Dimensions.get("window");
 
 export default function ContainerOverlay({
   containerPage,
@@ -21,10 +30,7 @@ export default function ContainerOverlay({
   setContainerPage: (page: number) => void;
   draggingItem?: Item | null;
 }) {
-  const {
-    setSelectedContainer,
-    selectedContainer: item,
-  } = useEquipment();
+  const { setSelectedContainer, selectedContainer: item } = useEquipment();
 
   if (!item) return null;
 
@@ -34,7 +40,7 @@ export default function ContainerOverlay({
 
   const onScroll = (event: any) => {
     const pageIndex = Math.round(
-      event.nativeEvent.contentOffset.x / (windowWidth * 0.85)
+      event.nativeEvent.contentOffset.x / (windowWidth * 0.85),
     );
     setContainerPage(pageIndex);
   };
@@ -59,9 +65,7 @@ export default function ContainerOverlay({
       {/* Content Layer - Overlays the backdrop */}
       <View pointerEvents="box-none" style={styles.contentWrapper}>
         <View style={ContainerOverlayStyles.titleContainer}>
-          <Text style={ContainerOverlayStyles.title}>
-            {item?.name}
-          </Text>
+          <Text style={ContainerOverlayStyles.title}>{item?.name}</Text>
         </View>
 
         <Animated.View
@@ -80,7 +84,9 @@ export default function ContainerOverlay({
             showsHorizontalScrollIndicator={false}
             style={{ flex: 1 }}
           >
-            <View style={{ display: "flex", flexDirection: "row", height: "100%" }}>
+            <View
+              style={{ display: "flex", flexDirection: "row", height: "100%" }}
+            >
               {equipmentChunks3.map((page, index) => (
                 <View key={index} style={ContainerOverlayStyles.itemPage}>
                   {page.map((row, index) => (
@@ -91,9 +97,7 @@ export default function ContainerOverlay({
                       {row.map((equip) => (
                         <View
                           key={equip.id}
-                          style={
-                            ContainerOverlayStyles.equipmentItemContainer
-                          }
+                          style={ContainerOverlayStyles.equipmentItemContainer}
                         >
                           <EquipmentItem
                             item={equip}
@@ -119,7 +123,7 @@ export default function ContainerOverlay({
 
 const styles = StyleSheet.create({
   contentWrapper: {
-    alignItems: 'center',
+    alignItems: "center",
     zIndex: 10,
-  }
+  },
 });

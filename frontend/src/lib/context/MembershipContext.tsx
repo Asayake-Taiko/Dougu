@@ -7,6 +7,7 @@ import { OrgMembershipRecord, OrganizationRecord } from '../../types/db';
 import { Organization, OrgMembership } from '../../types/models';
 import { Logger } from '../utils/Logger';
 import { generateUUID } from '../utils/UUID';
+import { Queries } from '../powersync/queries';
 
 interface MembershipContextType {
     organization: Organization | null;
@@ -57,15 +58,12 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
 
     // Reactive queries
     const { data: membershipData, isLoading: loadingMembership } = useQuery<OrgMembershipRecord & { full_name?: string; user_profile?: string }>(
-        `SELECT m.*, u.full_name, u.profile as user_profile
-         FROM org_memberships m 
-         LEFT JOIN users u ON m.user_id = u.id 
-         WHERE m.organization_id = ? AND m.user_id = ?`,
+        Queries.Membership.getDetailsByOrgAndUser,
         [organizationId, user?.id]
     );
 
     const { data: orgData, isLoading: loadingOrg } = useQuery<OrganizationRecord>(
-        'SELECT * FROM organizations WHERE id = ?',
+        Queries.Organization.getById,
         [organizationId]
     );
 
@@ -99,7 +97,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
     const generateUniqueCode = async (): Promise<string> => {
         while (true) {
             const code = generateRandomString(7);
-            const existing = await db.getOptional<{ id: string }>('SELECT id FROM organizations WHERE access_code = ?', [code]);
+            const existing = await db.getOptional<{ id: string }>(Queries.Organization.checkIdByCode, [code]);
             if (!existing) return code;
         }
     };
@@ -109,7 +107,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
         const nameRegEx = /^[a-zA-Z0-9-_]{1,40}$/;
         if (!nameRegEx.test(name)) throw new Error("Invalid name! Use 1-40 alphanumeric characters, no spaces (_ and - allowed).");
 
-        const existingOrg = await db.getOptional<{ id: string }>('SELECT id FROM organizations WHERE name = ?', [name]);
+        const existingOrg = await db.getOptional<{ id: string }>(Queries.Organization.checkIdByName, [name]);
         if (existingOrg) throw new Error("Organization name is already taken!");
 
         const code = await generateUniqueCode();
@@ -118,11 +116,11 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
 
         await db.writeTransaction(async (tx) => {
             await tx.execute(
-                'INSERT INTO organizations (id, name, access_code, manager_id, created_at) VALUES (?, ?, ?, ?, ?)',
+                Queries.Organization.insert,
                 [orgId, name, code, user?.id, new Date().toISOString()]
             );
             await tx.execute(
-                'INSERT INTO org_memberships (id, organization_id, user_id, type) VALUES (?, ?, ?, ?)',
+                Queries.Membership.insert,
                 [membershipId, orgId, user?.id, 'USER']
             );
         });
@@ -135,18 +133,18 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({ children
         const trimmedCode = code.trim().toUpperCase();
         if (!trimmedCode) throw new Error("Please enter an access code");
 
-        const org = await db.getOptional<OrganizationRecord>('SELECT * FROM organizations WHERE access_code = ?', [trimmedCode]);
+        const org = await db.getOptional<OrganizationRecord>(Queries.Organization.getByAccessCode, [trimmedCode]);
         if (!org) throw new Error("Organization not found");
 
         const existingMemberships = await db.getAll(
-            'SELECT * FROM org_memberships WHERE organization_id = ? AND user_id = ?',
+            Queries.Membership.getByOrgAndUser,
             [org.id, user?.id]
         );
         if (existingMemberships.length > 0) throw new Error("You are already a member of this organization.");
 
         const membershipId = generateUUID();
         await db.execute(
-            'INSERT INTO org_memberships (id, organization_id, user_id, type) VALUES (?, ?, ?, ?)',
+            Queries.Membership.insert,
             [membershipId, org.id, user?.id, 'USER']
         );
 

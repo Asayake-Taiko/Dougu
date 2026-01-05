@@ -2,8 +2,8 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import * as SecureStore from 'expo-secure-store';
 import { User } from '../../types/models';
 import { db } from '../powersync/PowerSync';
-import { mockLogin, mockRegister, mockSendCode, mockResetPassword, mockUpdateProfile, mockUpdateEmail, mockUpdateName, mockUpdatePassword, mockDeleteAccount } from '../mocks/auth';
-import { MOCK_ENABLED } from '../utils/env';
+import { authService } from '../services/auth';
+import { Queries } from '../powersync/queries';
 
 const USER_STORAGE_KEY = 'user_data';
 
@@ -66,43 +66,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, [user]);
 
     const login = async (email: string, password: string) => {
-        let res;
-        if (MOCK_ENABLED) {
-            res = await mockLogin(email, password);
-        } else {
-            throw new Error('Real login not implemented');
-        }
+        const res = await authService.login(email, password);
 
         // Fetch UserRecord from DB to be sure we have the full record
-        const result = await db.getAll('SELECT * FROM users WHERE id = ?', [res.user.id]);
+        const result = await db.getAll(Queries.User.getById, [res.user.id]);
         if (result.length > 0) {
             setUser(new User(result[0] as any));
         } else {
-            // Fallback if record not found for some reason (shouldn't happen with mockLogin)
-            setUser(new User({
-                id: res.user.id,
-                email: res.user.email,
-                full_name: res.user.full_name,
-                profile: res.user.profile
-            }));
+            throw new Error('User not found');
         }
     };
 
     const logout = async () => {
+        await authService.logout();
         setUser(null);
         await SecureStore.deleteItemAsync(USER_STORAGE_KEY);
     };
 
     const register = async (email: string, name: string, password: string) => {
-        let res;
-        if (MOCK_ENABLED) {
-            res = await mockRegister(email, name, password);
-        } else {
-            throw new Error('Real register not implemented');
-        }
+        const res = await authService.register(email, name, password);
 
         // Fetch UserRecord from DB
-        const result = await db.getAll('SELECT * FROM users WHERE id = ?', [res.user.id]);
+        const result = await db.getAll(Queries.User.getById, [res.user.id]);
         if (result.length > 0) {
             setUser(new User(result[0] as any));
         } else {
@@ -116,67 +101,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     const sendCode = async (email: string) => {
-        if (MOCK_ENABLED) {
-            await mockSendCode(email);
-        } else {
-            throw new Error('Real send code not implemented');
-        }
+        await authService.sendCode(email);
     };
 
-    const resetPassword = async (password: string, confirmPassword: string, code: string) => {
-        if (MOCK_ENABLED) {
-            await mockResetPassword(password, confirmPassword, code);
-        } else {
-            throw new Error('Real reset password not implemented');
-        }
+    const resetPassword = async (email: string, code: string, new_password: string) => {
+        await authService.resetPassword(email, code, new_password);
     };
 
     const updateProfile = async (profileKey: string) => {
         if (!user) return;
-        if (MOCK_ENABLED) {
-            await mockUpdateProfile(user, profileKey);
-        } else {
-            throw new Error('Real update profile not implemented');
-        }
+        await authService.updateProfile(user, profileKey);
         setUser(new User(user.getRecord())); // Trigger re-render with new instance
     };
 
     const updateName = async (name: string) => {
         if (!user) return;
-        if (MOCK_ENABLED) {
-            await mockUpdateName(user, name);
-        } else {
-            throw new Error('Real update name not implemented');
-        }
+        await authService.updateName(user, name);
         setUser(new User(user.getRecord()));
     };
 
     const updateEmail = async (email: string, code: string) => {
         if (!user) return;
-        if (MOCK_ENABLED) {
-            await mockUpdateEmail(user, email, code);
-        } else {
-            throw new Error('Real update email not implemented');
-        }
+        await authService.updateEmail(user, email, code);
         setUser(new User(user.getRecord()));
     };
 
     const updatePassword = async (currentPassword: string, newPassword: string) => {
         if (!user) return;
-        if (MOCK_ENABLED) {
-            await mockUpdatePassword(user, currentPassword, newPassword);
-        } else {
-            throw new Error('Real update password not implemented');
-        }
+        await authService.updatePassword(user, currentPassword, newPassword);
     };
 
     const deleteAccount = async () => {
         if (!user) return;
-        if (MOCK_ENABLED) {
-            await mockDeleteAccount(user.email);
-        } else {
-            throw new Error('Real delete account not implemented');
-        }
+        await authService.deleteAccount(user);
         setUser(null);
     };
 

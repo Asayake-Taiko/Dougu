@@ -12,8 +12,8 @@ import {
   PanGestureChangeEventPayload,
 } from "react-native-gesture-handler";
 import { Dimensions } from "react-native";
-
 import { useHeaderHeight } from '@react-navigation/elements';
+import { Item } from "../../types/models";
 
 const { width: windowWidth } = Dimensions.get("window");
 
@@ -27,7 +27,7 @@ export default function useAnimateOverlay({
   setDraggingItem,
   dragValues,
 }: {
-  setDraggingItem: (item: any | null) => void;
+  setDraggingItem: (item: Item | null) => void;
   dragValues: {
     x: SharedValue<number>;
     y: SharedValue<number>;

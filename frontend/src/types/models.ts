@@ -1,5 +1,6 @@
 import { OrgMembershipRecord, ContainerRecord, EquipmentRecord, OrganizationRecord, UserRecord } from "./db";
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
+import { Queries } from "../lib/powersync/queries";
 
 export type Item = Equipment | Container;
 
@@ -37,13 +38,13 @@ export class Container {
         await db.writeTransaction(async (tx) => {
             // Update container
             await tx.execute(
-                'UPDATE containers SET assigned_to = ?, last_updated_date = ? WHERE id = ?',
+                Queries.Container.updateAssignment,
                 [targetMemberId, now, this.id]
             );
 
             // Update all equipment in container
             await tx.execute(
-                'UPDATE equipment SET assigned_to = ?, last_updated_date = ? WHERE container_id = ?',
+                Queries.Equipment.updateAssignmentByContainer,
                 [targetMemberId, now, this.id]
             );
         });
@@ -52,9 +53,9 @@ export class Container {
     async delete(db: AbstractPowerSyncDatabase) {
         await db.writeTransaction(async (tx) => {
             // Delete all equipment in container
-            await tx.execute('DELETE FROM equipment WHERE container_id = ?', [this.id]);
+            await tx.execute(Queries.Container.deleteEquipmentIn, [this.id]);
             // Delete container
-            await tx.execute('DELETE FROM containers WHERE id = ?', [this.id]);
+            await tx.execute(Queries.Container.delete, [this.id]);
         });
     }
 }
@@ -139,7 +140,7 @@ export class Equipment {
         await db.writeTransaction(async (tx) => {
             for (const record of selectedRecords) {
                 await tx.execute(
-                    'UPDATE equipment SET assigned_to = ?, container_id = ?, last_updated_date = ? WHERE id = ?',
+                    Queries.Equipment.updateAssignment,
                     [targetMemberId, targetContainerId, now, record.id]
                 );
             }
@@ -149,7 +150,7 @@ export class Equipment {
     async delete(db: AbstractPowerSyncDatabase) {
         await db.writeTransaction(async (tx) => {
             for (const record of this.records) {
-                await tx.execute('DELETE FROM equipment WHERE id = ?', [record.id]);
+                await tx.execute(Queries.Equipment.delete, [record.id]);
             }
         });
     }
@@ -171,7 +172,7 @@ export class Organization {
 
     async updateImage(db: AbstractPowerSyncDatabase, newImage: string) {
         await db.execute(
-            'UPDATE organizations SET image = ? WHERE id = ?',
+            Queries.Organization.updateImage,
             [newImage, this.id]
         );
         this.organization.image = newImage;
@@ -224,7 +225,7 @@ export class User {
     async updateName(db: AbstractPowerSyncDatabase, newName: string) {
         const now = new Date().toISOString();
         await db.execute(
-            'UPDATE users SET full_name = ?, updated_at = ? WHERE id = ?',
+            Queries.User.updateName,
             [newName, now, this.id]
         );
         this.data.full_name = newName;
@@ -234,7 +235,7 @@ export class User {
     async updateEmail(db: AbstractPowerSyncDatabase, newEmail: string) {
         const now = new Date().toISOString();
         await db.execute(
-            'UPDATE users SET email = ?, updated_at = ? WHERE id = ?',
+            Queries.User.updateEmail,
             [newEmail, now, this.id]
         );
         this.data.email = newEmail;
@@ -244,7 +245,7 @@ export class User {
     async updateProfile(db: AbstractPowerSyncDatabase, newProfile: string) {
         const now = new Date().toISOString();
         await db.execute(
-            'UPDATE users SET profile = ?, updated_at = ? WHERE id = ?',
+            Queries.User.updateProfile,
             [newProfile, now, this.id]
         );
         this.data.profile = newProfile;

@@ -8,6 +8,7 @@ import { OrganizationRecord } from "../../types/db";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "../../styles/global/colors";
 import { orgMapping } from "../../lib/utils/ImageMapping";
+import { Queries } from "../../lib/powersync/queries";
 
 /*
   This screen will display the organizations that the user is a part of.
@@ -17,14 +18,7 @@ export default function MyOrgsScreen({ navigation }: { navigation: MyOrgsScreenN
     const { user } = useAuth();
 
     const { data: organizations } = useQuery<OrganizationRecord>(
-        `SELECT
-            o.*
-        FROM
-            organizations o
-        JOIN
-            org_memberships m ON o.id = m.organization_id
-        WHERE
-            m.user_id = ?`,
+        Queries.Organization.getAllForUser,
         [user?.id]
     );
 

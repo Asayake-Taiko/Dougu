@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Dimensions } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import ItemComponent from "./Item";
+import { Item } from "../../types/models";
 
 const { width: windowWidth } = Dimensions.get("window");
 
@@ -9,7 +10,7 @@ export default function FloatingDraggingItem({
     draggingItem,
     dragValues,
 }: {
-    draggingItem: any; // Using any for Item or null
+    draggingItem: Item | null;
     dragValues: {
         x: any;
         y: any;

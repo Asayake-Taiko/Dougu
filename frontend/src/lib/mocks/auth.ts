@@ -3,6 +3,7 @@ import { db } from '../powersync/PowerSync';
 import { UserRecord } from '../../types/db';
 import { User } from '../../types/models';
 import { generateUUID } from '../utils/UUID';
+import { Queries } from '../powersync/queries';
 
 let HARDCODED_PASSWORD = 'password';
 const HARDCODED_CODE = '22222';
@@ -19,7 +20,7 @@ export const mockLogin = async (email: string, password: string): Promise<AuthRe
         // Wait for 1 second to simulate network delay
     }
 
-    const result = await db.getAll('SELECT * FROM users WHERE email = ?', [email]);
+    const result = await db.getAll(Queries.User.getByEmail, [email]);
     if (result.length > 0) {
         const user = result[0] as UserRecord;
 
@@ -35,7 +36,7 @@ export const mockLogin = async (email: string, password: string): Promise<AuthRe
 export const mockRegister = async (email: string, name: string, password: string): Promise<AuthResponse> => {
     email = email.toLowerCase();
 
-    const existing = await db.getAll('SELECT * FROM users WHERE email = ?', [email]);
+    const existing = await db.getAll(Queries.User.getByEmail, [email]);
     if (existing.length > 0) {
         throw new Error('User already exists');
     }
@@ -44,7 +45,7 @@ export const mockRegister = async (email: string, name: string, password: string
     const now = new Date().toISOString();
 
     await db.execute(
-        'INSERT INTO users (id, email, full_name, profile, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+        Queries.User.insert,
         [newId, email, name, 'default', now, now]
     );
 
@@ -65,7 +66,7 @@ export const mockRegister = async (email: string, name: string, password: string
 
 export const mockSendCode = async (email: string): Promise<void> => {
     email = email.toLowerCase();
-    const result = await db.getAll('SELECT * FROM users WHERE email = ?', [email]);
+    const result = await db.getAll(Queries.User.getByEmail, [email]);
     if (result.length === 0) {
         throw new Error('Email not found');
     }
@@ -74,7 +75,7 @@ export const mockSendCode = async (email: string): Promise<void> => {
 export const mockResetPassword = async (email: string, code: string, new_password: string): Promise<void> => {
     email = email.toLowerCase();
 
-    const result = await db.getAll('SELECT * FROM users WHERE email = ?', [email]);
+    const result = await db.getAll(Queries.User.getByEmail, [email]);
     if (result.length === 0) {
         throw new Error('Email not found');
     }
@@ -106,7 +107,7 @@ export const mockUpdateEmail = async (user: User, newEmail: string, code: string
         throw new Error('Invalid code');
     }
 
-    const existing = await db.getAll('SELECT * FROM users WHERE email = ?', [newEmail]);
+    const existing = await db.getAll(Queries.User.getByEmail, [newEmail]);
     if (existing.length > 0) {
         throw new Error('New email already in use');
     }
@@ -116,5 +117,5 @@ export const mockUpdateEmail = async (user: User, newEmail: string, code: string
 
 export const mockDeleteAccount = async (email: string): Promise<void> => {
     email = email.toLowerCase();
-    await db.execute('DELETE FROM users WHERE email = ?', [email]);
+    await db.execute(Queries.User.deleteByEmail, [email]);
 };

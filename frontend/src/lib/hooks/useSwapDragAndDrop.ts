@@ -57,9 +57,9 @@ export default function useSwapDragAndDrop({
 
     // --- STATE & SHARED VALUES ---
     const [containerPage, setContainerPage] = useState(0);
-    const dragX = useSharedValue(0);
-    const dragY = useSharedValue(0);
-    const dragScale = useSharedValue(1);
+    const dragX = useSharedValue<number>(0);
+    const dragY = useSharedValue<number>(0);
+    const dragScale = useSharedValue<number>(1);
     const dragValues = { x: dragX, y: dragY, scale: dragScale };
 
     // --- REFS FOR HOVER LOGIC ---

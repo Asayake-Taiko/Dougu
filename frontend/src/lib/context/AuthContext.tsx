@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { User } from '../../types/models';
 import { db } from '../powersync/PowerSync';
 import { mockLogin, mockRegister, mockSendCode, mockResetPassword, mockUpdateProfile, mockUpdateEmail, mockUpdateName, mockUpdatePassword, mockDeleteAccount } from '../mocks/auth';
-import { MOCK_ENABLED } from '../env';
+import { MOCK_ENABLED } from '../utils/env';
 
 const USER_STORAGE_KEY = 'user_data';
 

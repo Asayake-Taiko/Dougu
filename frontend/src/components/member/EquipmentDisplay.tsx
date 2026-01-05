@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ImageSourcePropType, Pressable } from "react-native";
 import { Image } from "expo-image";
-import { iconMapping } from "../../lib/ImageMapping";
+import { iconMapping } from "../../lib/utils/ImageMapping";
 import { ItemStyles } from "../../styles/ItemStyles";
 
 /*

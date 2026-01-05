@@ -5,7 +5,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { InfoScreenProps } from "../../types/navigation";
 import { useMembership } from "../../lib/context/MembershipContext";
 import OrgImageOverlay from "../../components/organization/OrgImageOverlay";
-import { orgMapping } from "../../lib/ImageMapping";
+import { orgMapping } from "../../lib/utils/ImageMapping";
 import { DisplayStyles } from "../../styles/Display";
 
 /*

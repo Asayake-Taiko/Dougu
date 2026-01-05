@@ -5,7 +5,7 @@ import { db } from '../powersync/PowerSync';
 import { useAuth } from './AuthContext';
 import { OrgMembershipRecord, OrganizationRecord } from '../../types/db';
 import { Organization, OrgMembership } from '../../types/models';
-import { Logger } from '../Logger';
+import { Logger } from '../utils/Logger';
 import { generateUUID } from '../utils/UUID';
 
 interface MembershipContextType {

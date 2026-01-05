@@ -7,7 +7,7 @@ import { useQuery } from "@powersync/react-native";
 import { OrganizationRecord } from "../../types/db";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "../../styles/global/colors";
-import { orgMapping } from "../../lib/ImageMapping";
+import { orgMapping } from "../../lib/utils/ImageMapping";
 
 /*
   This screen will display the organizations that the user is a part of.

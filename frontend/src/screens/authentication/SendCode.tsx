@@ -7,7 +7,7 @@ import type { SendCodeScreenNavigationProp } from '../../types/navigation';
 import { PressableOpacity } from '../../components/PressableOpacity';
 import { useSpinner } from '../../lib/context/SpinnerContext';
 import { useModal } from '../../lib/context/ModalContext';
-import { Logger } from '../../lib/Logger';
+import { Logger } from '../../lib/utils/Logger';
 
 export default function SendCodeScreen() {
     const [email, onChangeEmail] = useState('');

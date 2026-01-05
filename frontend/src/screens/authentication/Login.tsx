@@ -6,7 +6,7 @@ import PasswordInput from '../../components/PasswordInput';
 import { PressableOpacity } from '../../components/PressableOpacity';
 import { useSpinner } from '../../lib/context/SpinnerContext';
 import { useModal } from '../../lib/context/ModalContext';
-import { Logger } from '../../lib/Logger';
+import { Logger } from '../../lib/utils/Logger';
 import { LoginScreenNavigationProp } from '../../types/navigation';
 
 export default function LoginScreen({ navigation }: { navigation: LoginScreenNavigationProp }) {

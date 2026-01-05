@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { ScrollView, GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, { ZoomIn, ZoomOut, FadeIn, FadeOut } from "react-native-reanimated";
 import { useEquipment } from "../../lib/context/EquipmentContext";
-import { chunkArray } from "../../lib/helper/EquipmentUtils";
+import { chunkArray } from "../../lib/utils/EquipmentUtils";
 import EquipmentItem from "./EquipmentItem";
 import { ContainerOverlayStyles } from "../../styles/ContainerOverlay";
 import PaginationDots from "./PaginationDots";

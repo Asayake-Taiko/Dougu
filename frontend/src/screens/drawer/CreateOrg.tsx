@@ -7,7 +7,7 @@ import { CreateOrgScreenNavigationProp } from "../../types/navigation";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { useMembership } from "../../lib/context/MembershipContext";
-import { Logger } from "../../lib/Logger";
+import { Logger } from "../../lib/utils/Logger";
 
 /*
   Screen for creating an organization, user enters the name of the org

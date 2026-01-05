@@ -5,7 +5,7 @@ import { ScrollView } from "react-native-gesture-handler";
 // Project imports
 import { useEquipment } from "../../lib/context/EquipmentContext";
 import { useMembership } from "../../lib/context/MembershipContext";
-import { chunkArray } from "../../lib/helper/EquipmentUtils";
+import { chunkArray } from "../../lib/utils/EquipmentUtils";
 import { EquipmentStyles } from "../../styles/EquipmentStyles";
 import Item from "../../components/member/Item";
 import EquipmentOverlay from "../../components/member/EquipmentOverlay";

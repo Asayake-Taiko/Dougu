@@ -13,7 +13,7 @@ import DeleteOverlay from '../../components/drawer/DeleteOverlay';
 import { PressableOpacity } from '../../components/PressableOpacity';
 import { useModal } from '../../lib/context/ModalContext';
 import { useSpinner } from '../../lib/context/SpinnerContext';
-import { Logger } from '../../lib/Logger';
+import { Logger } from '../../lib/utils/Logger';
 
 
 export default function ProfileScreen() {

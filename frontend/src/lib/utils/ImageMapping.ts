@@ -1,6 +1,6 @@
 import { ImageSourcePropType } from "react-native";
 
-const profilePath = "../assets/userprofiles/";
+const profilePath = "../../assets/userprofiles/";
 const baseProfileMapping: { [key: string]: ImageSourcePropType } = {
   miku: require(`${profilePath}miku.png`),
   zote: require(`${profilePath}zote.png`),
@@ -23,7 +23,7 @@ const profileMapping: { [key: string]: ImageSourcePropType } = new Proxy(
   }
 );
 
-const equipmentPath = "../assets/equipment/";
+const equipmentPath = "../../assets/equipment/";
 const drums: { [key: string]: ImageSourcePropType } = {
   chu: require(`${equipmentPath}chu.png`),
   shime: require(`${equipmentPath}shime.png`),
@@ -83,7 +83,7 @@ const iconMapping: { [key: string]: ImageSourcePropType } = new Proxy(
   }
 );
 
-const orgPath = "../assets/organization/";
+const orgPath = "../../assets/organization/";
 const baseOrgMapping: { [key: string]: ImageSourcePropType } = {
   default: require(`${orgPath}default.png`),
   asayake: require(`${orgPath}asayake.png`),

@@ -6,7 +6,7 @@ import { PressableOpacity } from "../PressableOpacity";
 import { ContainerOverlayStyles } from "../../styles/ContainerOverlay";
 import IconMenu from "../IconMenu";
 import ColorSelect from "./ColorSelect";
-import { iconMapping } from "../../lib/ImageMapping";
+import { iconMapping } from "../../lib/utils/ImageMapping";
 import { Hex } from "../../types/other";
 
 /*

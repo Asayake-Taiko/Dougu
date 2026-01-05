@@ -7,7 +7,7 @@ import { useRoute } from '@react-navigation/native';
 import type { ResetPasswordScreenRouteProp } from '../../types/navigation';
 import { useModal } from '../../lib/context/ModalContext';
 import { useSpinner } from '../../lib/context/SpinnerContext';
-import { Logger } from '../../lib/Logger';
+import { Logger } from '../../lib/utils/Logger';
 import { PressableOpacity } from '../../components/PressableOpacity';
 
 export default function ResetPasswordScreen() {

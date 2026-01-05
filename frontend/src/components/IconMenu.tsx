@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { PressableOpacity } from "./PressableOpacity";
-import { chunkArray } from "../lib/helper/EquipmentUtils";
+import { chunkArray } from "../lib/utils/EquipmentUtils";
 
 /*
   IconMenu displays a grid of icons that the user can choose from

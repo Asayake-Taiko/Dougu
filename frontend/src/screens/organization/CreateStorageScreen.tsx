@@ -16,7 +16,7 @@ import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { db } from "../../lib/powersync/PowerSync";
-import { Logger } from "../../lib/Logger";
+import { Logger } from "../../lib/utils/Logger";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useNavigation } from "@react-navigation/native";
 import { generateUUID } from "../../lib/utils/UUID";

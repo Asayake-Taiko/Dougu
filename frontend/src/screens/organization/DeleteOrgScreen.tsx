@@ -7,7 +7,7 @@ import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { db } from "../../lib/powersync/PowerSync";
 import { Colors, Spacing } from "../../styles/global";
-import { Logger } from "../../lib/Logger";
+import { Logger } from "../../lib/utils/Logger";
 
 /*
   DeleteOrgScreen allows a manager to permanently delete an organization

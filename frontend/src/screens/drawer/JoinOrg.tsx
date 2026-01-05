@@ -8,7 +8,7 @@ import { JoinOrgScreenNavigationProp } from "../../types/navigation";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
-import { Logger } from "../../lib/Logger";
+import { Logger } from "../../lib/utils/Logger";
 
 /*
   Screen for joining an organization, user enters the access code to join

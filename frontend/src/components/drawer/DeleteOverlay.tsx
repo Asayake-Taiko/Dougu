@@ -4,7 +4,7 @@ import { StyleSheet, Text, TextInput } from "react-native";
 import { useAuth } from "../../lib/context/AuthContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
-import { Logger } from "../../lib/Logger";
+import { Logger } from "../../lib/utils/Logger";
 import BaseProfileOverlay from "./BaseProfileOverlay";
 import { PressableOpacity } from "../PressableOpacity";
 import { ProfileStyles } from "../../styles/ProfileStyles";

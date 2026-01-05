@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { profileMapping } from "../lib/ImageMapping";
+import { profileMapping } from "../lib/utils/ImageMapping";
 import { DisplayStyles } from "../styles/Display";
 
 /*

@@ -1,10 +1,10 @@
 import React from "react";
-import { profileMapping } from "../../lib/ImageMapping";
+import { profileMapping } from "../../lib/utils/ImageMapping";
 import ProfileDisplay from "../ProfileDisplay";
 import { useAuth } from "../../lib/context/AuthContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
-import { Logger } from "../../lib/Logger";
+import { Logger } from "../../lib/utils/Logger";
 import BaseImageOverlay from "../BaseImageOverlay";
 
 /* 

@@ -20,7 +20,7 @@ import { Hex } from "../../types/other";
 import EquipmentImageOverlay from "../../components/organization/EquipmentImageOverlay";
 import { db } from "../../lib/powersync/PowerSync";
 import { generateUUID } from "../../lib/utils/UUID";
-import { Logger } from "../../lib/Logger";
+import { Logger } from "../../lib/utils/Logger";
 
 /*
   Create equipment screen allows a manager to create equipment

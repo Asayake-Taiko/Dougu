@@ -2,7 +2,7 @@ import { PowerSyncDatabase } from '@powersync/react-native';
 import { OPSqliteOpenFactory } from '@powersync/op-sqlite';
 import { AppSchema } from './Schema';
 import { seedDatabase } from '../mocks/Seeding';
-import { MOCK_ENABLED } from '../env';
+import { MOCK_ENABLED } from '../utils/env';
 
 /**
  * Initialize the PowerSync database.

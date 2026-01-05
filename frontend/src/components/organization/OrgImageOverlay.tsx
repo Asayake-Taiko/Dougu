@@ -1,11 +1,11 @@
 import React from "react";
 import { Image } from "expo-image";
-import { orgMapping } from "../../lib/ImageMapping";
+import { orgMapping } from "../../lib/utils/ImageMapping";
 import { DisplayStyles } from "../../styles/Display";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
-import { Logger } from "../../lib/Logger";
+import { Logger } from "../../lib/utils/Logger";
 import BaseImageOverlay from "../BaseImageOverlay";
 import { usePowerSync } from "@powersync/react-native";
 

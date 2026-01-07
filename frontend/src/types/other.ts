@@ -1,8 +1,8 @@
-import { UserRecord } from "./db";
+import { Session } from "@supabase/supabase-js";
+import { ProfileRecord } from "./db";
 
 export interface AuthResponse {
-  user: UserRecord;
-  token: string;
+  session: Session;
 }
 
 // equipment item background colors should be Hex

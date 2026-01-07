@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@powersync/react-native";
 import {
-  User,
   Container,
   Equipment,
   OrgOwnership,
@@ -15,7 +14,7 @@ import {
 import { Queries } from "../powersync/queries";
 
 export function useEquipmentData(
-  user: User | null,
+  userId: string | undefined,
   membership: any,
   organizationId: string | undefined,
 ) {
@@ -95,7 +94,7 @@ export function useEquipmentData(
 
   // 3. Combine into final Ownerships Map
   const ownerships = useMemo(() => {
-    if (!user || !membership || !organizationId) {
+    if (!userId || !membership || !organizationId) {
       return new Map<string, OrgOwnership>();
     }
 
@@ -135,7 +134,7 @@ export function useEquipmentData(
 
     return finalMap;
   }, [
-    user,
+    userId,
     membership,
     organizationId,
     membershipMap,

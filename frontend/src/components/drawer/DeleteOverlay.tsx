@@ -23,14 +23,18 @@ export default function DeleteOverlay({
   setVisible: Dispatch<SetStateAction<boolean>>;
 }) {
   const [email, setEmail] = useState("");
-  const { user, deleteAccount } = useAuth();
+  const { session } = useAuth();
+  // const { user, deleteAccount } = useAuth();
+  const deleteAccount = async () => {
+    Logger.info("Delete account not implemented");
+  };
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
 
   const handleDelete = async () => {
     try {
       showSpinner();
-      if (email !== user?.email) {
+      if (email !== session?.user.email) {
         setMessage("Email does not match");
         return;
       }

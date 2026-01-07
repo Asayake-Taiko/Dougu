@@ -19,15 +19,14 @@ export async function seedDatabase(db: PowerSyncDatabase) {
     await tx.execute(Queries.Container.deleteAll);
     await tx.execute(Queries.Membership.deleteAll);
     await tx.execute(Queries.Organization.deleteAll);
-    await tx.execute(Queries.User.deleteAll);
+    await tx.execute(Queries.Profile.deleteAll);
 
-    // Insert Users
+    // Insert Profiles
     for (const user of MOCK_USERS) {
-      await tx.execute(Queries.User.insert, [
+      await tx.execute(Queries.Profile.insert, [
         user.id,
-        user.email,
-        user.full_name,
-        user.profile,
+        user.name,
+        user.profile_image,
         user.created_at,
         user.updated_at,
       ]);
@@ -53,7 +52,7 @@ export async function seedDatabase(db: PowerSyncDatabase) {
         membership.type,
         membership.user_id || null,
         membership.storage_name || null,
-        membership.profile || null,
+        membership.profile_image || null,
         membership.details || null,
       ]);
     }

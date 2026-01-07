@@ -1,33 +1,30 @@
 import {
-  UserRecord,
+  ProfileRecord,
   OrganizationRecord,
   OrgMembershipRecord,
   ContainerRecord,
   EquipmentRecord,
 } from "../../types/db";
 
-export const MOCK_USERS: UserRecord[] = [
+export const MOCK_USERS: ProfileRecord[] = [
   {
     id: "123",
-    email: "johndoe@example.com",
-    full_name: "John Doe",
-    profile: "default",
+    name: "John Doe",
+    profile_image: "default",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
   {
     id: "124",
-    email: "janesmith@example.com",
-    full_name: "Jane Smith",
-    profile: "jiji",
+    name: "Jane Smith",
+    profile_image: "jiji",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
   {
     id: "125",
-    email: "e@gmail.com",
-    full_name: "Test User",
-    profile: "saitama",
+    name: "Test User",
+    profile_image: "saitama",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -50,7 +47,7 @@ export const MOCK_MEMBERSHIPS: OrgMembershipRecord[] = [
     organization_id: "dev-org-id",
     type: "USER",
     user_id: "123",
-    profile: "default",
+    profile_image: "default",
     details: "Primary developer account",
   },
   {
@@ -58,7 +55,7 @@ export const MOCK_MEMBERSHIPS: OrgMembershipRecord[] = [
     organization_id: "dev-org-id",
     type: "USER",
     user_id: "125",
-    profile: "default",
+    profile_image: "default",
     details: "Secondary developer account",
   },
 ];

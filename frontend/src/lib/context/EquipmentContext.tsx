@@ -34,12 +34,12 @@ export const useEquipment = () => {
 export const EquipmentProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { user } = useAuth();
+  const { session } = useAuth();
   const { membership, isManager } = useMembership();
   const organizationId = membership?.organizationId;
 
   // Use optimized hook for data processing
-  const ownerships = useEquipmentData(user, membership, organizationId);
+  const ownerships = useEquipmentData(session?.user.id, membership, organizationId);
 
   // Overlay state
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(

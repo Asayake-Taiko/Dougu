@@ -1,7 +1,7 @@
+import { Session } from "@supabase/supabase-js";
 import { AuthResponse } from "../../types/other";
 import { db } from "../powersync/PowerSync";
-import { UserRecord } from "../../types/db";
-import { User } from "../../types/models";
+import { Profile } from "../../types/models";
 import { generateUUID } from "../utils/UUID";
 import { Queries } from "../powersync/queries";
 
@@ -17,23 +17,37 @@ export const mockLogin = async (
   if (password !== HARDCODED_PASSWORD) {
     throw new Error("Invalid credentials");
   }
-
   const start = new Date().getTime();
   while (new Date().getTime() - start < 1000) {
     // Wait for 1 second to simulate network delay
   }
 
-  const result = await db.getAll(Queries.User.getByEmail, [email]);
-  if (result.length > 0) {
-    const user = result[0] as UserRecord;
+  // Simulating Supabase Auth Login
+  // We don't check profiles table for email anymore since it was removed.
+  // We just return a session.
 
-    return {
-      user,
-      token: "fake-jwt-token-" + user.id,
-    } as AuthResponse;
-  } else {
-    throw new Error("User not found");
-  }
+  // Ideally, valid user needs to exist in profiles table for other parts of app to work.
+  // So we might want to ensure a profile exists for this mocked user?
+  // For now, let's assume one exists or we don't care about profile existence for LOGIN success.
+  const userId = "mock-user-id-123";
+
+  const session: Session = {
+    access_token: "fake-jwt-token-" + userId,
+    refresh_token: "fake-refresh-token",
+    expires_in: 3600,
+    token_type: "bearer",
+    user: {
+      id: userId,
+      aud: "authenticated",
+      role: "authenticated",
+      email: email,
+      app_metadata: {},
+      user_metadata: {},
+      created_at: new Date().toISOString(),
+    },
+  };
+
+  return { session };
 };
 
 export const mockRegister = async (
@@ -43,44 +57,43 @@ export const mockRegister = async (
 ): Promise<AuthResponse> => {
   email = email.toLowerCase();
 
-  const existing = await db.getAll(Queries.User.getByEmail, [email]);
-  if (existing.length > 0) {
-    throw new Error("User already exists");
-  }
+  // In real Supabase, registration creates User in Auth.
+  // Then we (client) or trigger creates Profile.
+  // Here we do both.
 
   const newId = generateUUID();
   const now = new Date().toISOString();
 
-  await db.execute(Queries.User.insert, [
+  // Insert Profile
+  await db.execute(Queries.Profile.insert, [
     newId,
-    email,
     name,
-    "default",
+    "default", // profile_image placeholder
     now,
     now,
   ]);
 
-  const user: UserRecord = {
-    id: newId,
-    full_name: name,
-    email: email,
-    profile: "default",
-    created_at: now,
-    updated_at: now,
+  const session: Session = {
+    access_token: "fake-jwt-token-" + newId,
+    refresh_token: "fake-refresh-token",
+    expires_in: 3600,
+    token_type: "bearer",
+    user: {
+      id: newId,
+      aud: "authenticated",
+      role: "authenticated",
+      email: email,
+      app_metadata: {},
+      user_metadata: {},
+      created_at: now,
+    },
   };
 
-  return {
-    user,
-    token: "fake-jwt-token-" + newId,
-  } as AuthResponse;
+  return { session };
 };
 
 export const mockSendCode = async (email: string): Promise<void> => {
-  email = email.toLowerCase();
-  const result = await db.getAll(Queries.User.getByEmail, [email]);
-  if (result.length === 0) {
-    throw new Error("Email not found");
-  }
+  // Just pretend it worked
 };
 
 export const mockResetPassword = async (
@@ -88,27 +101,20 @@ export const mockResetPassword = async (
   code: string,
   new_password: string,
 ): Promise<void> => {
-  email = email.toLowerCase();
-
-  const result = await db.getAll(Queries.User.getByEmail, [email]);
-  if (result.length === 0) {
-    throw new Error("Email not found");
-  }
-
   if (code !== HARDCODED_CODE) {
     throw new Error("Invalid code");
   }
 };
 
-export const mockUpdateProfile = async (
-  user: User,
-  profileKey: string,
+export const mockUpdateProfileImage = async (
+  profile: Profile,
+  profileImage: string,
 ): Promise<void> => {
-  await user.updateProfile(db, profileKey);
+  await profile.updateProfileImage(db, profileImage);
 };
 
 export const mockUpdatePassword = async (
-  user: User,
+  profile: Profile,
   currentPassword: string,
   newPassword: string,
 ): Promise<void> => {
@@ -119,32 +125,23 @@ export const mockUpdatePassword = async (
 };
 
 export const mockUpdateName = async (
-  user: User,
+  profile: Profile,
   name: string,
 ): Promise<void> => {
-  await user.updateName(db, name);
+  await profile.updateName(db, name);
 };
 
 export const mockUpdateEmail = async (
-  user: User,
+  profile: Profile,
   newEmail: string,
   code: string,
 ): Promise<void> => {
-  newEmail = newEmail.toLowerCase();
-
   if (code !== HARDCODED_CODE) {
     throw new Error("Invalid code");
   }
-
-  const existing = await db.getAll(Queries.User.getByEmail, [newEmail]);
-  if (existing.length > 0) {
-    throw new Error("New email already in use");
-  }
-
-  await user.updateEmail(db, newEmail);
+  // No-op on profile table as it has no email
 };
 
-export const mockDeleteAccount = async (email: string): Promise<void> => {
-  email = email.toLowerCase();
-  await db.execute(Queries.User.deleteByEmail, [email]);
+export const mockDeleteAccount = async (profile: Profile): Promise<void> => {
+  await db.execute(Queries.Profile.delete, [profile.id]);
 };

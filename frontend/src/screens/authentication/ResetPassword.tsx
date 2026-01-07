@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { View, Text, TextInput } from "react-native";
 import { AuthStyles } from "../../styles/AuthStyles";
-import { useAuth } from "../../lib/context/AuthContext";
 import PasswordInput from "../../components/PasswordInput";
 import { useRoute } from "@react-navigation/native";
 import type { ResetPasswordScreenRouteProp } from "../../types/navigation";
@@ -9,12 +8,12 @@ import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
 import { PressableOpacity } from "../../components/PressableOpacity";
+import { authService } from "../../lib/services/auth";
 
 export default function ResetPasswordScreen() {
   const [password, onChangePassword] = useState("");
   const [confirmPassword, onChangeConfirmPassword] = useState("");
   const [code, setCode] = useState("");
-  const { resetPassword } = useAuth();
   const route = useRoute<ResetPasswordScreenRouteProp>();
   const email = route.params?.email || "";
   const { setMessage } = useModal();
@@ -31,7 +30,7 @@ export default function ResetPasswordScreen() {
 
     try {
       showSpinner();
-      await resetPassword(email, code, password);
+      await authService.resetPassword(email, code, password);
       setMessage("Password has been reset successfully");
     } catch (err: any) {
       Logger.error(err);

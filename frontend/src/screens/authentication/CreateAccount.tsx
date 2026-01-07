@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { View, Text, TextInput } from "react-native";
 import { AuthStyles } from "../../styles/AuthStyles";
-import { useAuth } from "../../lib/context/AuthContext";
 import PasswordInput from "../../components/PasswordInput";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
 import { CreateAccountScreenNavigationProp } from "../../types/navigation";
+import { authService } from "../../lib/services/auth";
 
 export default function CreateAccountScreen({
   navigation,
@@ -18,14 +18,13 @@ export default function CreateAccountScreen({
   const [first, onChangeFirst] = useState("");
   const [last, onChangeLast] = useState("");
   const [password, onChangePassword] = useState("");
-  const { register } = useAuth();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
 
   async function handleRegister() {
     try {
       showSpinner();
-      await register(email, first + " " + last, password);
+      await authService.register(email, first + " " + last, password);
     } catch (err: any) {
       Logger.error(err);
       setMessage(err.message || "An unexpected error occured");

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import { useAuth } from "../../lib/context/AuthContext";
+// import { useAuth } from "../../lib/context/AuthContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
@@ -21,7 +21,10 @@ export default function NameOverlay({
   visible: boolean;
   setVisible: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { updateName } = useAuth();
+  // const { updateName } = useAuth();
+  const updateName = async (name: string) => {
+    Logger.info("Update name not implemented in this refactor step");
+  };
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
   const [firstName, setFirstName] = useState("");

@@ -295,7 +295,10 @@ export class Profile {
     this.data.updated_at = now;
   }
 
-  async updateProfileImage(db: AbstractPowerSyncDatabase, newProfileImage: string) {
+  async updateProfileImage(
+    db: AbstractPowerSyncDatabase,
+    newProfileImage: string,
+  ) {
     const now = new Date().toISOString();
     await db.execute(Queries.Profile.updateProfile, [
       newProfileImage,

@@ -82,6 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (error) {
           Logger.error("Error fetching profile:", error);
         }
+        console.log("PROFILE: ", data);
         setProfile(data ? new Profile(data) : null);
       } else {
         setProfile(null);

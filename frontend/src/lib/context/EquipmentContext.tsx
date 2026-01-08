@@ -39,7 +39,11 @@ export const EquipmentProvider: React.FC<{ children: ReactNode }> = ({
   const organizationId = membership?.organizationId;
 
   // Use optimized hook for data processing
-  const ownerships = useEquipmentData(session?.user.id, membership, organizationId);
+  const ownerships = useEquipmentData(
+    session?.user.id,
+    membership,
+    organizationId,
+  );
 
   // Overlay state
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(

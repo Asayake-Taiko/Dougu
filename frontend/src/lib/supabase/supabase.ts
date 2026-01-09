@@ -4,7 +4,6 @@ import { Logger } from "../utils/Logger";
 
 const ExpoSecureStoreAdapter = {
   getItem: (key: string) => {
-    Logger.debug("getItem", { key, getItemAsync });
     return getItemAsync(key);
   },
   setItem: (key: string, value: string) => {

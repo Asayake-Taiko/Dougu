@@ -12,8 +12,8 @@ Dougu is an equipment management app that seeks to make tracking and transferrin
 
 ## Contributing
 The codebase is designed to isolate the frontend and backend. To begin working on the frontend with mock data, you can follow these steps:
-1. Create a .env file inside /frontend and set EXPO_PUBLIC_MOCK_ENABLED=true
-2. For IOS, download XCode and for Android, download Android Studio. 
+1. Create a .env file inside /frontend and set the env variables as per the .env.example file
+2. If you are using macOS, download XCode and for Windows or Linux, download Android Studio. 
 3. Make sure nodeJS and npm is installed
 4. Install the ESLint extension if you are using VSCode or a fork of it
 5. `cd frontend` and run `npm install`

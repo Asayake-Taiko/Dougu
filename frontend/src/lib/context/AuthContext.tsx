@@ -56,10 +56,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      Logger.info("Auth state changed:", {
-        event: _event,
-        session: newSession,
-      });
       setSession(newSession);
     });
 
@@ -82,7 +78,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (error) {
           Logger.error("Error fetching profile:", error);
         }
-        console.log("PROFILE: ", data);
         setProfile(data ? new Profile(data) : null);
       } else {
         setProfile(null);

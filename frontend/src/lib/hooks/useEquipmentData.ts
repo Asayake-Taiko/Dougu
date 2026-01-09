@@ -20,7 +20,7 @@ export function useEquipmentData(
 ) {
   // Reactive queries
   const { data: rawMemberships } = useQuery<
-    OrgMembershipRecord & { full_name?: string; user_profile?: string }
+    OrgMembershipRecord & { name?: string; user_profile?: string }
   >(Queries.Membership.getAllByOrg, [organizationId]);
 
   const { data: rawContainers } = useQuery<ContainerRecord>(
@@ -38,7 +38,7 @@ export function useEquipmentData(
     const map = new Map<string, OrgOwnership>();
     rawMemberships.forEach((m) => {
       map.set(m.id, {
-        membership: new OrgMembership(m, m.full_name, m.user_profile),
+        membership: new OrgMembership(m, m.name, m.user_profile),
         items: [],
       });
     });
@@ -142,5 +142,6 @@ export function useEquipmentData(
     directAssignments,
   ]);
 
+  console.log("ownerships", ownerships);
   return ownerships;
 }

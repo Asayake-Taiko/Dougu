@@ -36,11 +36,6 @@ export default function EquipmentItem({
     repRecord = item.firstUnselectedRecord;
   }
 
-  // Hide if count is 0
-  if (displayCount === 0) {
-    return null;
-  }
-
   const tapGesture = Gesture.Tap()
     .onEnd(() => {
       setSelectedEquipment(item);
@@ -49,7 +44,9 @@ export default function EquipmentItem({
 
   return (
     <GestureDetector gesture={tapGesture}>
-      <View style={ItemStyles.container}>
+      <View
+        style={[ItemStyles.container, { opacity: displayCount === 0 ? 0 : 1 }]}
+      >
         <View>
           <EquipmentDisplay
             imageKey={repRecord.image}

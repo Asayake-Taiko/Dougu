@@ -26,14 +26,10 @@ export default function ContainerItem({
 
   const { setSelectedContainer } = useEquipment();
 
-  // Hide if this container is being dragged (not floating)
-  if (
+  const isDragging =
     !isFloating &&
     draggingItem?.type === "container" &&
-    draggingItem.id === item.id
-  ) {
-    return null;
-  }
+    draggingItem.id === item.id;
 
   // display the first 9 equipment items in a 3x3 grid
   const firstNine = equipmentItems.slice(0, 9);
@@ -47,7 +43,7 @@ export default function ContainerItem({
 
   return (
     <GestureDetector gesture={tapGesture}>
-      <View style={ItemStyles.container}>
+      <View style={[ItemStyles.container, { opacity: isDragging ? 0 : 1 }]}>
         <Pressable
           style={({ pressed }) => [
             {

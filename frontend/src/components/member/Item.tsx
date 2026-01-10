@@ -1,4 +1,5 @@
-import { Item, Equipment, Container } from "../../types/models";
+import { Equipment, Container } from "../../types/models";
+import { Item } from "../../types/other";
 import ContainerItem from "./ContainerItem";
 import EquipmentItem from "./EquipmentItem";
 

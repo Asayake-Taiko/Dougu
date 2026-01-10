@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { View, Text, TextInput } from "react-native";
 import { AuthStyles } from "../../styles/AuthStyles";
-import { useAuth } from "../../lib/context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import type { SendCodeScreenNavigationProp } from "../../types/navigation";
 import { PressableOpacity } from "../../components/PressableOpacity";
@@ -9,9 +8,10 @@ import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
 
+import { authService } from "../../lib/services/auth";
+
 export default function SendCodeScreen() {
   const [email, onChangeEmail] = useState("");
-  const { sendCode } = useAuth();
   const navigation = useNavigation<SendCodeScreenNavigationProp>();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
@@ -19,7 +19,7 @@ export default function SendCodeScreen() {
   async function handleSendCode() {
     try {
       showSpinner();
-      await sendCode(email);
+      await authService.resetPassword(email);
       navigation.navigate("ResetPassword", { email });
     } catch (err: any) {
       Logger.error(err);

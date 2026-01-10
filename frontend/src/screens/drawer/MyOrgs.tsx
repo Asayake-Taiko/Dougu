@@ -25,11 +25,11 @@ export default function MyOrgsScreen({
 }: {
   navigation: MyOrgsScreenNavigationProp;
 }) {
-  const { user } = useAuth();
+  const { session } = useAuth();
 
   const { data: organizations } = useQuery<OrganizationRecord>(
     Queries.Organization.getAllForUser,
-    [user?.id],
+    [session?.user?.id],
   );
 
   // set the current organization and navigate to the MemberTabs

@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import { useAuth } from "../../lib/context/AuthContext";
+
+import { authService } from "../../lib/services/auth";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
@@ -21,7 +22,6 @@ export default function NameOverlay({
   visible: boolean;
   setVisible: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { updateName } = useAuth();
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
   const [firstName, setFirstName] = useState("");
@@ -37,7 +37,7 @@ export default function NameOverlay({
   async function handleUpdateName() {
     try {
       showSpinner();
-      await updateName(username);
+      await authService.updateName(username);
       setVisible(false);
     } catch (error) {
       Logger.error(error);

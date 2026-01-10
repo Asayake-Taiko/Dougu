@@ -1,12 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useQuery } from "@powersync/react-native";
-import {
-  User,
-  Container,
-  Equipment,
-  OrgOwnership,
-  OrgMembership,
-} from "../../types/models";
+import { Container, Equipment, OrgMembership } from "../../types/models";
+import { OrgOwnership } from "../../types/other";
 import {
   OrgMembershipRecord,
   ContainerRecord,
@@ -15,13 +10,13 @@ import {
 import { Queries } from "../powersync/queries";
 
 export function useEquipmentData(
-  user: User | null,
+  userId: string | undefined,
   membership: any,
   organizationId: string | undefined,
 ) {
   // Reactive queries
   const { data: rawMemberships } = useQuery<
-    OrgMembershipRecord & { full_name?: string; user_profile?: string }
+    OrgMembershipRecord & { name?: string; user_profile?: string }
   >(Queries.Membership.getAllByOrg, [organizationId]);
 
   const { data: rawContainers } = useQuery<ContainerRecord>(
@@ -39,12 +34,21 @@ export function useEquipmentData(
     const map = new Map<string, OrgOwnership>();
     rawMemberships.forEach((m) => {
       map.set(m.id, {
-        membership: new OrgMembership(m, m.full_name, m.user_profile),
+        membership: new OrgMembership(m, m.name, m.user_profile),
         items: [],
       });
     });
     return map;
   }, [rawMemberships]);
+
+  // Selection Cache to persist selection state across data refreshes
+  const selectionCache = useRef(new Map<string, Set<number>>());
+  const getSelectionState = (id: string) => {
+    if (!selectionCache.current.has(id)) {
+      selectionCache.current.set(id, new Set([0]));
+    }
+    return selectionCache.current.get(id);
+  };
 
   // 2. Process Containers and Equipment together
   const { assignedContainers, directAssignments } = useMemo(() => {
@@ -62,6 +66,9 @@ export function useEquipmentData(
 
     // Group Equipment into Containers or Direct Assignments
     rawEquipment.forEach((record) => {
+      // Get persistent selection set for this equipment ID
+      const selectionSet = getSelectionState(record.name); // Using Name as key for the Group since they are grouped by name
+
       if (record.container_id && containerMap.has(record.container_id)) {
         // Inside a container
         const container = containerMap.get(record.container_id)!;
@@ -72,7 +79,8 @@ export function useEquipmentData(
         if (existingGroup) {
           existingGroup.addRecord(record);
         } else {
-          const equipmentInstance = new Equipment(record);
+          // Pass the cached selection set
+          const equipmentInstance = new Equipment(record, selectionSet);
           container.equipment.push(equipmentInstance);
         }
       } else {
@@ -83,7 +91,8 @@ export function useEquipmentData(
         if (topLevelEquipmentMap.has(groupKey)) {
           topLevelEquipmentMap.get(groupKey)!.addRecord(record);
         } else {
-          const equipmentInstance = new Equipment(record);
+          // Pass the cached selection set
+          const equipmentInstance = new Equipment(record, selectionSet);
           topLevelEquipmentMap.set(groupKey, equipmentInstance);
           direct.push({ equipment: equipmentInstance, ownerId });
         }
@@ -95,7 +104,7 @@ export function useEquipmentData(
 
   // 3. Combine into final Ownerships Map
   const ownerships = useMemo(() => {
-    if (!user || !membership || !organizationId) {
+    if (!userId || !membership || !organizationId) {
       return new Map<string, OrgOwnership>();
     }
 
@@ -135,7 +144,7 @@ export function useEquipmentData(
 
     return finalMap;
   }, [
-    user,
+    userId,
     membership,
     organizationId,
     membershipMap,

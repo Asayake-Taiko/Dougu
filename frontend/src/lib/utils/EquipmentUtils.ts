@@ -1,4 +1,5 @@
-import { OrgOwnership, Container } from "../../types/models";
+import { Container } from "../../types/models";
+import { OrgOwnership } from "../../types/other";
 import { csvSheet } from "../../components/organization/Sheet";
 
 // chunk the equipment into groups of size

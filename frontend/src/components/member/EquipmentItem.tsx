@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import { Item, Equipment } from "../../types/models";
+import { Equipment } from "../../types/models";
+import { Item } from "../../types/other";
 import EquipmentDisplay from "./EquipmentDisplay";
 import { ItemStyles } from "../../styles/ItemStyles";
 import { useEquipment } from "../../lib/context/EquipmentContext";
@@ -35,11 +36,6 @@ export default function EquipmentItem({
     repRecord = item.firstUnselectedRecord;
   }
 
-  // Hide if count is 0
-  if (displayCount === 0) {
-    return null;
-  }
-
   const tapGesture = Gesture.Tap()
     .onEnd(() => {
       setSelectedEquipment(item);
@@ -48,18 +44,18 @@ export default function EquipmentItem({
 
   return (
     <GestureDetector gesture={tapGesture}>
-      <View style={ItemStyles.container}>
+      <View
+        style={[ItemStyles.container, { opacity: displayCount === 0 ? 0 : 1 }]}
+      >
         <View>
           <EquipmentDisplay
             imageKey={repRecord.image}
             isMini={false}
             color={repRecord.color}
           />
-          {displayCount > 1 && (
-            <View style={ItemStyles.circle}>
-              <Text style={ItemStyles.count}>{displayCount}</Text>
-            </View>
-          )}
+          <View style={ItemStyles.circle}>
+            <Text style={ItemStyles.count}>{displayCount}</Text>
+          </View>
         </View>
         <View style={ItemStyles.textContainer}>
           <Text style={ItemStyles.text} numberOfLines={2}>

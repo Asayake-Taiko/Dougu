@@ -3,17 +3,10 @@ import {
   ContainerRecord,
   EquipmentRecord,
   OrganizationRecord,
-  UserRecord,
+  ProfileRecord,
 } from "./db";
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
 import { Queries } from "../lib/powersync/queries";
-
-export type Item = Equipment | Container;
-
-export interface OrgOwnership {
-  membership: OrgMembership;
-  items: Item[];
-}
 
 export class Container {
   readonly type = "container";
@@ -81,10 +74,11 @@ export class Container {
 export class Equipment {
   readonly type = "equipment";
   records: EquipmentRecord[];
-  selectedIndices: Set<number> = new Set([0]); // Default to first item
+  selectedIndices: Set<number>;
 
-  constructor(record: EquipmentRecord) {
+  constructor(record: EquipmentRecord, selectedIndices?: Set<number>) {
     this.records = [record];
+    this.selectedIndices = selectedIndices || new Set([0]);
   }
 
   addRecord(record: EquipmentRecord) {
@@ -259,32 +253,29 @@ export class OrgMembership {
     return this.membership.user_id;
   }
   get profile() {
-    return this.userProfile || this.membership.profile;
+    return this.userProfile || this.membership.profile_image;
   }
   get details() {
     return this.membership.details;
   }
 }
 
-export class User {
-  readonly type = "user";
-  private data: UserRecord;
+export class Profile {
+  readonly type = "profile";
+  private data: ProfileRecord;
 
-  constructor(data: UserRecord) {
+  constructor(data: ProfileRecord) {
     this.data = data;
   }
 
   get id() {
     return this.data.id;
   }
-  get email() {
-    return this.data.email;
-  }
   get name() {
-    return this.data.full_name;
+    return this.data.name;
   }
-  get profile() {
-    return this.data.profile;
+  get profileImage() {
+    return this.data.profile_image;
   }
 
   getRecord() {
@@ -293,22 +284,22 @@ export class User {
 
   async updateName(db: AbstractPowerSyncDatabase, newName: string) {
     const now = new Date().toISOString();
-    await db.execute(Queries.User.updateName, [newName, now, this.id]);
-    this.data.full_name = newName;
+    await db.execute(Queries.Profile.updateName, [newName, now, this.id]);
+    this.data.name = newName;
     this.data.updated_at = now;
   }
 
-  async updateEmail(db: AbstractPowerSyncDatabase, newEmail: string) {
+  async updateProfileImage(
+    db: AbstractPowerSyncDatabase,
+    newProfileImage: string,
+  ) {
     const now = new Date().toISOString();
-    await db.execute(Queries.User.updateEmail, [newEmail, now, this.id]);
-    this.data.email = newEmail;
-    this.data.updated_at = now;
-  }
-
-  async updateProfile(db: AbstractPowerSyncDatabase, newProfile: string) {
-    const now = new Date().toISOString();
-    await db.execute(Queries.User.updateProfile, [newProfile, now, this.id]);
-    this.data.profile = newProfile;
+    await db.execute(Queries.Profile.updateProfile, [
+      newProfileImage,
+      now,
+      this.id,
+    ]);
+    this.data.profile_image = newProfileImage;
     this.data.updated_at = now;
   }
 }

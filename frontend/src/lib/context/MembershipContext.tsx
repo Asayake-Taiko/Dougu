@@ -6,7 +6,7 @@ import React, {
   ReactNode,
   useMemo,
 } from "react";
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@powersync/react-native";
 import { db } from "../powersync/PowerSync";
 import { useAuth } from "./AuthContext";
@@ -48,7 +48,7 @@ const STORAGE_KEYS = {
 export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { user } = useAuth();
+  const { session } = useAuth();
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [loadingPersistedOrg, setLoadingPersistedOrg] = useState(true);
 
@@ -56,7 +56,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     async function loadPersistedOrg() {
       try {
-        const id = await SecureStore.getItemAsync(STORAGE_KEYS.ORG_ID);
+        const id = await AsyncStorage.getItem(STORAGE_KEYS.ORG_ID);
         if (id) {
           setOrganizationId(id);
         }
@@ -71,8 +71,11 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
 
   // Reactive queries
   const { data: membershipData, isLoading: loadingMembership } = useQuery<
-    OrgMembershipRecord & { full_name?: string; user_profile?: string }
-  >(Queries.Membership.getDetailsByOrgAndUser, [organizationId, user?.id]);
+    OrgMembershipRecord & { name?: string; user_profile?: string }
+  >(Queries.Membership.getDetailsByOrgAndUser, [
+    organizationId,
+    session?.user.id,
+  ]);
 
   const { data: orgData, isLoading: loadingOrg } = useQuery<OrganizationRecord>(
     Queries.Organization.getById,
@@ -82,9 +85,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
   // Derive models and state
   const membership = useMemo(() => {
     const data = membershipData[0];
-    return data
-      ? new OrgMembership(data, data.full_name, data.user_profile)
-      : null;
+    return data ? new OrgMembership(data, data.name, data.user_profile) : null;
   }, [membershipData]);
 
   const organization = useMemo(
@@ -98,8 +99,8 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
 
   const switchOrganization = async (orgId: string, orgName: string) => {
     setOrganizationId(orgId);
-    await SecureStore.setItemAsync(STORAGE_KEYS.ORG_ID, orgId);
-    await SecureStore.setItemAsync(STORAGE_KEYS.ORG_NAME, orgName);
+    await AsyncStorage.setItem(STORAGE_KEYS.ORG_ID, orgId);
+    await AsyncStorage.setItem(STORAGE_KEYS.ORG_NAME, orgName);
   };
 
   const generateRandomString = (length: number) => {
@@ -145,7 +146,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
         orgId,
         name,
         code,
-        user?.id,
+        session?.user.id,
         "default",
         new Date().toISOString(),
       ]);
@@ -153,7 +154,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
         membershipId,
         orgId,
         "USER",
-        user?.id,
+        session?.user.id,
         null,
         null,
         null,
@@ -176,7 +177,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
 
     const existingMemberships = await db.getAll(
       Queries.Membership.getByOrgAndUser,
-      [org.id, user?.id],
+      [org.id, session?.user.id],
     );
     if (existingMemberships.length > 0)
       throw new Error("You are already a member of this organization.");
@@ -185,8 +186,11 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
     await db.execute(Queries.Membership.insert, [
       membershipId,
       org.id,
-      user?.id,
       "USER",
+      session?.user.id,
+      null,
+      null,
+      null,
     ]);
 
     await switchOrganization(org.id, org.name);
@@ -197,7 +201,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
     organization,
     membership,
     isResolving,
-    isManager: organization?.managerId === user?.id,
+    isManager: organization?.managerId === session?.user.id,
     switchOrganization,
     createOrganization,
     joinOrganization,

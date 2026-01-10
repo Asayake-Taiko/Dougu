@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import { Item, Container } from "../../types/models";
+import { Container } from "../../types/models";
+import { Item } from "../../types/other";
 import { chunkArray } from "../../lib/utils/EquipmentUtils";
 import { ItemStyles } from "../../styles/ItemStyles";
 import EquipmentDisplay from "./EquipmentDisplay";
@@ -25,14 +26,10 @@ export default function ContainerItem({
 
   const { setSelectedContainer } = useEquipment();
 
-  // Hide if this container is being dragged (not floating)
-  if (
+  const isDragging =
     !isFloating &&
     draggingItem?.type === "container" &&
-    draggingItem.id === item.id
-  ) {
-    return null;
-  }
+    draggingItem.id === item.id;
 
   // display the first 9 equipment items in a 3x3 grid
   const firstNine = equipmentItems.slice(0, 9);
@@ -46,7 +43,7 @@ export default function ContainerItem({
 
   return (
     <GestureDetector gesture={tapGesture}>
-      <View style={ItemStyles.container}>
+      <View style={[ItemStyles.container, { opacity: isDragging ? 0 : 1 }]}>
         <Pressable
           style={({ pressed }) => [
             {

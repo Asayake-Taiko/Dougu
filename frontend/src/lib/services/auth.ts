@@ -1,152 +1,156 @@
-import { AuthResponse } from "../../types/other";
-import { User } from "../../types/models";
-import {
-  mockLogin,
-  mockRegister,
-  mockSendCode,
-  mockResetPassword,
-  mockUpdateProfile,
-  mockUpdateName,
-  mockUpdateEmail,
-  mockUpdatePassword,
-  mockDeleteAccount,
-} from "../mocks/auth";
-import { MOCK_ENABLED } from "../utils/env";
+import { db } from "../powersync/PowerSync";
+import { Queries } from "../powersync/queries";
+import { supabase } from "../supabase/supabase";
 
 export interface IAuthService {
-  login(email: string, password: string): Promise<AuthResponse>;
-  register(
-    email: string,
-    name: string,
-    password: string,
-  ): Promise<AuthResponse>;
+  login(email: string, password: string): Promise<void>;
+  register(email: string, name: string, password: string): Promise<void>;
   logout(): Promise<void>;
-  resetPassword(
+  resetPassword(email: string): Promise<void>;
+  confirmResetPassword(
     email: string,
     code: string,
-    new_password: string,
-  ): Promise<void>;
-  sendCode(email: string): Promise<void>;
-  updateProfile(user: User, profileKey: string): Promise<void>;
-  updateName(user: User, name: string): Promise<void>;
-  updateEmail(user: User, email: string, code: string): Promise<void>;
-  updatePassword(
-    user: User,
-    currentPassword: string,
     newPassword: string,
   ): Promise<void>;
-  deleteAccount(user: User): Promise<void>;
-}
-
-export class MockAuthService implements IAuthService {
-  async login(email: string, password: string): Promise<AuthResponse> {
-    return mockLogin(email, password);
-  }
-
-  async register(
-    email: string,
-    name: string,
-    password: string,
-  ): Promise<AuthResponse> {
-    return mockRegister(email, name, password);
-  }
-
-  async logout(): Promise<void> {
-    // No-op for mock
-  }
-
-  async resetPassword(
-    email: string,
-    code: string,
-    new_password: string,
-  ): Promise<void> {
-    return mockResetPassword(email, code, new_password);
-  }
-
-  async sendCode(email: string): Promise<void> {
-    return mockSendCode(email);
-  }
-
-  async updateProfile(user: User, profileKey: string): Promise<void> {
-    return mockUpdateProfile(user, profileKey);
-  }
-
-  async updateName(user: User, name: string): Promise<void> {
-    return mockUpdateName(user, name);
-  }
-
-  async updateEmail(user: User, email: string, code: string): Promise<void> {
-    return mockUpdateEmail(user, email, code);
-  }
-
-  async updatePassword(
-    user: User,
-    currentPassword: string,
-    newPassword: string,
-  ): Promise<void> {
-    return mockUpdatePassword(user, currentPassword, newPassword);
-  }
-
-  async deleteAccount(user: User): Promise<void> {
-    return mockDeleteAccount(user.email);
-  }
+  updateProfileImage(profileImage: string): Promise<void>;
+  updateName(name: string): Promise<void>;
+  sendEmailUpdateCode(email: string): Promise<void>;
+  confirmEmailUpdate(email: string, code: string): Promise<void>;
+  updatePassword(currentPassword: string, newPassword: string): Promise<void>;
+  deleteAccount(): Promise<void>;
 }
 
 export class AuthService implements IAuthService {
-  async login(email: string, password: string): Promise<AuthResponse> {
-    throw new Error("Real login not implemented");
+  async login(email: string, password: string): Promise<void> {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      throw error;
+    }
   }
 
-  async register(
-    email: string,
-    name: string,
-    password: string,
-  ): Promise<AuthResponse> {
-    throw new Error("Real register not implemented");
+  async register(email: string, name: string, password: string): Promise<void> {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          profile_image: "default",
+        },
+      },
+    });
+    if (error) {
+      throw error;
+    }
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (loginError) {
+      throw loginError;
+    }
   }
 
   async logout(): Promise<void> {
-    throw new Error("Real logout not implemented");
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw error;
+    }
   }
 
-  async resetPassword(
+  async resetPassword(email: string): Promise<void> {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) {
+      throw error;
+    }
+  }
+
+  async confirmResetPassword(
     email: string,
     code: string,
-    new_password: string,
-  ): Promise<void> {
-    throw new Error("Real reset password not implemented");
-  }
-
-  async sendCode(email: string): Promise<void> {
-    throw new Error("Real send code not implemented");
-  }
-
-  async updateProfile(user: User, profileKey: string): Promise<void> {
-    throw new Error("Real update profile not implemented");
-  }
-
-  async updateName(user: User, name: string): Promise<void> {
-    throw new Error("Real update name not implemented");
-  }
-
-  async updateEmail(user: User, email: string, code: string): Promise<void> {
-    throw new Error("Real update email not implemented");
-  }
-
-  async updatePassword(
-    user: User,
-    currentPassword: string,
     newPassword: string,
   ): Promise<void> {
-    throw new Error("Real update password not implemented");
+    const { error: otpError } = await supabase.auth.verifyOtp({
+      email,
+      token: code,
+      type: "recovery",
+    });
+    if (otpError) {
+      throw otpError;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (updateError) {
+      throw updateError;
+    }
   }
 
-  async deleteAccount(user: User): Promise<void> {
-    throw new Error("Real delete account not implemented");
+  async updateProfileImage(profileImage: string): Promise<void> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("No user session found");
+    }
+
+    const now = new Date().toISOString();
+    await db.execute(Queries.Profile.updateProfile, [
+      profileImage,
+      now,
+      user.id,
+    ]);
+  }
+
+  async updateName(name: string): Promise<void> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("No user session found");
+    }
+
+    const now = new Date().toISOString();
+    await db.execute(Queries.Profile.updateName, [name, now, user.id]);
+  }
+
+  async sendEmailUpdateCode(email: string): Promise<void> {
+    const { error } = await supabase.auth.updateUser({
+      email,
+    });
+    if (error) {
+      throw error;
+    }
+  }
+
+  async confirmEmailUpdate(newEmail: string, code: string): Promise<void> {
+    const { error } = await supabase.auth.verifyOtp({
+      email: newEmail,
+      token: code,
+      type: "email_change",
+    });
+    if (error) {
+      throw error;
+    }
+  }
+
+  async updatePassword(newPassword: string): Promise<void> {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (error) {
+      throw error;
+    }
+  }
+
+  async deleteAccount(): Promise<void> {
+    throw new Error("Not implemented");
   }
 }
 
 // Singleton instance export
-export const authService = MOCK_ENABLED
-  ? new MockAuthService()
-  : new AuthService();
+export const authService = new AuthService();

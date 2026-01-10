@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { OrgMembershipRecord } from "../../types/db";
-import { Item } from "../../types/models";
+import { Item } from "../../types/other";
 import SwapGestures from "../../components/member/SwapGestures";
 import { useEquipment } from "../../lib/context/EquipmentContext";
 import { useMembership } from "../../lib/context/MembershipContext";

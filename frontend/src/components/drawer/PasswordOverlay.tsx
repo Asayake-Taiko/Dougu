@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { StyleSheet, Text } from "react-native";
 
 import PasswordInput from "../PasswordInput";
-import { useAuth } from "../../lib/context/AuthContext";
+import { authService } from "../../lib/services/auth";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
@@ -26,7 +26,6 @@ export default function PasswordOverlay({
   const [currPassword, setCurrPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const { updatePassword } = useAuth();
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
 
@@ -44,11 +43,7 @@ export default function PasswordOverlay({
         return;
       }
       showSpinner();
-      // set user password in cognito
-      await updatePassword(currPassword, newPassword);
-      setCurrPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      await authService.updatePassword(newPassword);
       setVisible(false);
     } catch (e) {
       Logger.error(e);

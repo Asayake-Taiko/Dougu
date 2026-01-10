@@ -1,14 +1,13 @@
 export const Queries = {
-  User: {
-    getById: "SELECT * FROM users WHERE id = ?",
-    getByEmail: "SELECT * FROM users WHERE email = ?",
+  Profile: {
+    getById: "SELECT * FROM profiles WHERE id = ?",
     insert:
-      "INSERT INTO users (id, email, full_name, profile, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-    deleteByEmail: "DELETE FROM users WHERE email = ?",
-    deleteAll: "DELETE FROM users",
-    updateName: "UPDATE users SET full_name = ?, updated_at = ? WHERE id = ?",
-    updateEmail: "UPDATE users SET email = ?, updated_at = ? WHERE id = ?",
-    updateProfile: "UPDATE users SET profile = ?, updated_at = ? WHERE id = ?",
+      "INSERT INTO profiles (id, name, profile_image, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+    delete: "DELETE FROM profiles WHERE id = ?",
+    deleteAll: "DELETE FROM profiles",
+    updateName: "UPDATE profiles SET name = ?, updated_at = ? WHERE id = ?",
+    updateProfile:
+      "UPDATE profiles SET profile_image = ?, updated_at = ? WHERE id = ?",
   },
   Organization: {
     getById: "SELECT * FROM organizations WHERE id = ?",
@@ -31,20 +30,20 @@ export const Queries = {
   },
   Membership: {
     getAllByOrg: `
-            SELECT m.*, u.full_name, u.profile as user_profile
+            SELECT m.*, p.name, p.profile_image as user_profile
             FROM org_memberships m 
-            LEFT JOIN users u ON m.user_id = u.id
+            LEFT JOIN profiles p ON m.user_id = p.id
             WHERE m.organization_id = ?
         `,
     getByOrgAndUser:
       "SELECT * FROM org_memberships WHERE organization_id = ? AND user_id = ?",
     getDetailsByOrgAndUser: `
-            SELECT m.*, u.full_name, u.profile as user_profile
+            SELECT m.*, p.name, p.profile_image as user_profile
             FROM org_memberships m 
-            LEFT JOIN users u ON m.user_id = u.id 
+            LEFT JOIN profiles p ON m.user_id = p.id 
             WHERE m.organization_id = ? AND m.user_id = ?`,
     insert:
-      "INSERT INTO org_memberships (id, organization_id, type, user_id, storage_name, profile, details) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO org_memberships (id, organization_id, type, user_id, storage_name, profile_image, details) VALUES (?, ?, ?, ?, ?, ?, ?)",
     deleteAll: "DELETE FROM org_memberships",
   },
   Container: {

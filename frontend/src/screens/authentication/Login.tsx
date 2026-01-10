@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, Text, TextInput } from "react-native";
-import { useAuth } from "../../lib/context/AuthContext";
 import { AuthStyles } from "../../styles/AuthStyles";
 import PasswordInput from "../../components/PasswordInput";
 import { PressableOpacity } from "../../components/PressableOpacity";
@@ -8,13 +7,13 @@ import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
 import { LoginScreenNavigationProp } from "../../types/navigation";
+import { authService } from "../../lib/services/auth";
 
 export default function LoginScreen({
   navigation,
 }: {
   navigation: LoginScreenNavigationProp;
 }) {
-  const { login } = useAuth();
   const [email, onChangeEmail] = useState("");
   const [password, onChangePassword] = useState("");
   const { showSpinner, hideSpinner } = useSpinner();
@@ -23,7 +22,7 @@ export default function LoginScreen({
   async function handleLogin() {
     try {
       showSpinner();
-      await login(email, password);
+      await authService.login(email, password);
     } catch (err: any) {
       Logger.error(err);
       setMessage(err.message || "An unexpected error occurred");

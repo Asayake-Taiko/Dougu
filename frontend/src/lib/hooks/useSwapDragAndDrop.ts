@@ -17,7 +17,8 @@ import { useHeaderHeight } from "@react-navigation/elements";
 
 import { useEquipment } from "../context/EquipmentContext";
 import { useMembership } from "../context/MembershipContext";
-import { Item, Equipment, Container } from "../../types/models";
+import { Equipment, Container } from "../../types/models";
+import { Item } from "../../types/other";
 import { OrgMembershipRecord } from "../../types/db";
 import { db } from "../powersync/PowerSync";
 import useAnimateOverlay from "./useAnimateOverlay";
@@ -312,6 +313,7 @@ export default function useSwapDragAndDrop({
           const equip = draggingItem as Equipment;
           const targetContainerId = hoverContainer.current?.id || null;
           await equip.reassign(db, targetMember.id, targetContainerId);
+          equip.clearSelection();
         } else {
           const container = draggingItem as Container;
           await container.reassign(db, targetMember.id);

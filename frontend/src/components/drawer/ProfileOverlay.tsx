@@ -1,7 +1,7 @@
 import React from "react";
 import { profileMapping } from "../../lib/utils/ImageMapping";
 import ProfileDisplay from "../ProfileDisplay";
-import { useAuth } from "../../lib/context/AuthContext";
+import { authService } from "../../lib/services/auth";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
@@ -22,7 +22,6 @@ export default function ProfileOverlay({
   profileKey: string;
   setProfileKey: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const { updateProfile } = useAuth();
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
 
@@ -30,7 +29,7 @@ export default function ProfileOverlay({
   async function handleUpdateProfile() {
     try {
       showSpinner();
-      await updateProfile(profileKey);
+      await authService.updateProfileImage(profileKey);
       setVisible(false);
     } catch (err) {
       Logger.error(err);

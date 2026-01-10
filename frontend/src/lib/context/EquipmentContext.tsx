@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 import { useAuth } from "./AuthContext";
 import { useMembership } from "./MembershipContext";
-import { Container, Equipment, OrgOwnership, Item } from "../../types/models";
+import { Container, Equipment } from "../../types/models";
+import { OrgOwnership, Item } from "../../types/other";
 import { db } from "../powersync/PowerSync";
 import { useEquipmentData } from "../hooks/useEquipmentData";
 
@@ -34,12 +35,16 @@ export const useEquipment = () => {
 export const EquipmentProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { user } = useAuth();
+  const { session } = useAuth();
   const { membership, isManager } = useMembership();
   const organizationId = membership?.organizationId;
 
   // Use optimized hook for data processing
-  const ownerships = useEquipmentData(user, membership, organizationId);
+  const ownerships = useEquipmentData(
+    session?.user.id,
+    membership,
+    organizationId,
+  );
 
   // Overlay state
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(

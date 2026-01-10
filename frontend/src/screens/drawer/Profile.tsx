@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text } from "react-native";
 import { useAuth } from "../../lib/context/AuthContext";
 import { ProfileStyles } from "../../styles/ProfileStyles";
@@ -14,10 +14,12 @@ import { PressableOpacity } from "../../components/PressableOpacity";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
+import { authService } from "../../lib/services/auth";
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
-  const [profileKey, setProfileKey] = useState(user?.profile || "default");
+  const { session, profile } = useAuth();
+
+  const [profileImage, setProfileImage] = useState("default");
   const [profileVisible, setProfileVisible] = useState(false);
   const [nameVisible, setNameVisible] = useState(false);
   const [emailVisible, setEmailVisible] = useState(false);
@@ -26,10 +28,16 @@ export default function ProfileScreen() {
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
 
+  useEffect(() => {
+    if (profile) {
+      setProfileImage(profile.profileImage || "default");
+    }
+  }, [profile]);
+
   async function handleLogout() {
     try {
       showSpinner();
-      await logout();
+      await authService.logout();
     } catch (error) {
       Logger.error(error);
       setMessage("Logout failed");
@@ -44,7 +52,7 @@ export default function ProfileScreen() {
         style={ProfileStyles.profile}
         onPress={() => setProfileVisible(true)}
       >
-        <ProfileDisplay isMini={false} profileKey={user?.profile} />
+        <ProfileDisplay isMini={false} profileKey={profile?.profileImage} />
         <View style={ProfileStyles.editButton}>
           <FontAwesome name="pencil" size={20} />
         </View>
@@ -55,7 +63,7 @@ export default function ProfileScreen() {
       >
         <Text style={ProfileStyles.text}>Name</Text>
         <View style={ProfileStyles.changeBtn}>
-          <Text style={ProfileStyles.text}>{user?.name}</Text>
+          <Text style={ProfileStyles.text}>{profile?.name}</Text>
           <MaterialCommunityIcons name="chevron-right" size={30} />
         </View>
       </PressableOpacity>
@@ -65,7 +73,7 @@ export default function ProfileScreen() {
       >
         <Text style={ProfileStyles.text}>Email</Text>
         <View style={ProfileStyles.changeBtn}>
-          <Text style={ProfileStyles.text}>{user?.email}</Text>
+          <Text style={ProfileStyles.text}>{session?.user.email}</Text>
           <MaterialCommunityIcons name="chevron-right" size={30} />
         </View>
       </PressableOpacity>
@@ -96,8 +104,8 @@ export default function ProfileScreen() {
       <ProfileOverlay
         visible={profileVisible}
         setVisible={setProfileVisible}
-        profileKey={profileKey}
-        setProfileKey={setProfileKey}
+        profileKey={profileImage}
+        setProfileKey={setProfileImage}
       />
       <NameOverlay visible={nameVisible} setVisible={setNameVisible} />
       <PasswordOverlay

@@ -4,10 +4,10 @@ import { column, Schema, Table } from "@powersync/react-native";
  * Very simple initial schema for PowerSync.
  */
 export const AppSchema = new Schema({
-  users: new Table({
+  profiles: new Table({
     email: column.text,
-    full_name: column.text,
-    profile: column.text,
+    name: column.text,
+    profile_image: column.text,
     created_at: column.text,
     updated_at: column.text,
   }),
@@ -23,8 +23,7 @@ export const AppSchema = new Schema({
     type: column.text,
     user_id: column.text,
     storage_name: column.text,
-
-    profile: column.text,
+    profile_image: column.text,
     details: column.text,
   }),
   containers: new Table({
@@ -32,7 +31,6 @@ export const AppSchema = new Schema({
     organization_id: column.text,
     assigned_to: column.text,
     color: column.text,
-
     details: column.text,
     last_updated_date: column.text,
   }),
@@ -43,7 +41,6 @@ export const AppSchema = new Schema({
     container_id: column.text,
     image: column.text,
     color: column.text,
-
     details: column.text,
     last_updated_date: column.text,
   }),

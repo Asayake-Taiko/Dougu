@@ -17,7 +17,7 @@ import EquipmentItem from "./EquipmentItem";
 import { ContainerOverlayStyles } from "../../styles/ContainerOverlay";
 import PaginationDots from "./PaginationDots";
 
-import { Item } from "../../types/models";
+import { Item } from "../../types/other";
 
 const { width: windowWidth } = Dimensions.get("window");
 

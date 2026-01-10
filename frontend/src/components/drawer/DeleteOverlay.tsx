@@ -10,6 +10,7 @@ import { PressableOpacity } from "../PressableOpacity";
 import { ProfileStyles } from "../../styles/ProfileStyles";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "../../styles/global";
+import { authService } from "../../lib/services/auth";
 
 /*
     A component that allows the user to delete their account
@@ -23,18 +24,18 @@ export default function DeleteOverlay({
   setVisible: Dispatch<SetStateAction<boolean>>;
 }) {
   const [email, setEmail] = useState("");
-  const { user, deleteAccount } = useAuth();
+  const { session } = useAuth();
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
 
   const handleDelete = async () => {
     try {
       showSpinner();
-      if (email !== user?.email) {
+      if (email !== session?.user.email) {
         setMessage("Email does not match");
         return;
       }
-      await deleteAccount();
+      await authService.deleteAccount();
     } catch (e) {
       Logger.error(e);
       if (e instanceof Error) {

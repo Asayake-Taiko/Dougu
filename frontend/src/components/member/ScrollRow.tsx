@@ -6,7 +6,7 @@ import Animated, {
   AnimatedRef,
 } from "react-native-reanimated";
 
-import { Item } from "../../types/models";
+import { Item } from "../../types/other";
 import ItemComponent from "./Item";
 
 const windowWidth = Dimensions.get("window").width;

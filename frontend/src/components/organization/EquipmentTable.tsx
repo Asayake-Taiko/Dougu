@@ -11,7 +11,8 @@ import { Entypo } from "@expo/vector-icons";
 
 // project imports
 import { useEquipment } from "../../lib/context/EquipmentContext";
-import { Item, Container, OrgOwnership } from "../../types/models";
+import { Container } from "../../types/models";
+import { Item, OrgOwnership } from "../../types/other";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 

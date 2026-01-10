@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Switch } from "react-native";
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 
 // project imports
@@ -23,7 +23,7 @@ export default function SheetScreen() {
   useEffect(() => {
     const loadConfig = async () => {
       try {
-        const configStr = await SecureStore.getItemAsync(STORAGE_KEY);
+        const configStr = await AsyncStorage.getItem(STORAGE_KEY);
         if (configStr) {
           const {
             showEmpty: savedShowEmpty,
@@ -51,7 +51,7 @@ export default function SheetScreen() {
     if (isLoadingConfig) return;
     const saveConfig = async () => {
       try {
-        await SecureStore.setItemAsync(
+        await AsyncStorage.setItem(
           STORAGE_KEY,
           JSON.stringify({ showEmpty, showContainerEquip }),
         );

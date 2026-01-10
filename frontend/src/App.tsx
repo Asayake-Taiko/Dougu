@@ -11,7 +11,7 @@ import AuthNavigator from "./screens/authentication/AuthNavigator";
 import RootStackNavigator from "./screens/organization/RootStackNavigator";
 
 function AppContent() {
-  const { user, isLoading } = useAuth();
+  const { session, isLoading } = useAuth();
 
   if (isLoading) {
     return <SplashScreen />;
@@ -20,7 +20,7 @@ function AppContent() {
   return (
     <NavigationContainer>
       <StatusBar style="auto" />
-      {user ? <RootStackNavigator /> : <AuthNavigator />}
+      {session ? <RootStackNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

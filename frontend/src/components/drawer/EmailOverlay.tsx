@@ -53,7 +53,7 @@ export default function EmailOverlay({
       }
       showSpinner();
       await authService.confirmEmailUpdate(email, code);
-      setMessage("Email updated successfully");
+      setVisible(false);
     } catch (e) {
       Logger.error(e);
       if (e instanceof Error) {

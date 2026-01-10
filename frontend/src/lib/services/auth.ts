@@ -148,11 +148,7 @@ export class AuthService implements IAuthService {
   }
 
   async deleteAccount(): Promise<void> {
-    const { error } = await supabase.rpc("delete_user");
-    if (error) {
-      throw error;
-    }
-    await this.logout();
+    throw new Error("Not implemented");
   }
 }
 

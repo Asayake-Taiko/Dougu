@@ -44,9 +44,6 @@ export default function PasswordOverlay({
       }
       showSpinner();
       await authService.updatePassword(newPassword);
-      setCurrPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
       setVisible(false);
     } catch (e) {
       Logger.error(e);

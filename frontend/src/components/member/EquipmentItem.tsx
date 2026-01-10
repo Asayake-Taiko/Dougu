@@ -53,11 +53,9 @@ export default function EquipmentItem({
             isMini={false}
             color={repRecord.color}
           />
-          {displayCount > 1 && (
-            <View style={ItemStyles.circle}>
-              <Text style={ItemStyles.count}>{displayCount}</Text>
-            </View>
-          )}
+          <View style={ItemStyles.circle}>
+            <Text style={ItemStyles.count}>{displayCount}</Text>
+          </View>
         </View>
         <View style={ItemStyles.textContainer}>
           <Text style={ItemStyles.text} numberOfLines={2}>

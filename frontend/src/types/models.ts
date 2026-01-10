@@ -74,10 +74,11 @@ export class Container {
 export class Equipment {
   readonly type = "equipment";
   records: EquipmentRecord[];
-  selectedIndices: Set<number> = new Set([0]); // Default to first item
+  selectedIndices: Set<number>;
 
-  constructor(record: EquipmentRecord) {
+  constructor(record: EquipmentRecord, selectedIndices?: Set<number>) {
     this.records = [record];
+    this.selectedIndices = selectedIndices || new Set([0]);
   }
 
   addRecord(record: EquipmentRecord) {

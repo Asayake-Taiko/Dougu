@@ -313,6 +313,7 @@ export default function useSwapDragAndDrop({
           const equip = draggingItem as Equipment;
           const targetContainerId = hoverContainer.current?.id || null;
           await equip.reassign(db, targetMember.id, targetContainerId);
+          equip.clearSelection();
         } else {
           const container = draggingItem as Container;
           await container.reassign(db, targetMember.id);

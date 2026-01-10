@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useQuery } from "@powersync/react-native";
 import { Container, Equipment, OrgMembership } from "../../types/models";
 import { OrgOwnership } from "../../types/other";
@@ -41,6 +41,15 @@ export function useEquipmentData(
     return map;
   }, [rawMemberships]);
 
+  // Selection Cache to persist selection state across data refreshes
+  const selectionCache = useRef(new Map<string, Set<number>>());
+  const getSelectionState = (id: string) => {
+    if (!selectionCache.current.has(id)) {
+      selectionCache.current.set(id, new Set([0]));
+    }
+    return selectionCache.current.get(id);
+  };
+
   // 2. Process Containers and Equipment together
   const { assignedContainers, directAssignments } = useMemo(() => {
     const containerMap = new Map<string, Container>();
@@ -57,6 +66,9 @@ export function useEquipmentData(
 
     // Group Equipment into Containers or Direct Assignments
     rawEquipment.forEach((record) => {
+      // Get persistent selection set for this equipment ID
+      const selectionSet = getSelectionState(record.name); // Using Name as key for the Group since they are grouped by name
+
       if (record.container_id && containerMap.has(record.container_id)) {
         // Inside a container
         const container = containerMap.get(record.container_id)!;
@@ -67,7 +79,8 @@ export function useEquipmentData(
         if (existingGroup) {
           existingGroup.addRecord(record);
         } else {
-          const equipmentInstance = new Equipment(record);
+          // Pass the cached selection set
+          const equipmentInstance = new Equipment(record, selectionSet);
           container.equipment.push(equipmentInstance);
         }
       } else {
@@ -78,7 +91,8 @@ export function useEquipmentData(
         if (topLevelEquipmentMap.has(groupKey)) {
           topLevelEquipmentMap.get(groupKey)!.addRecord(record);
         } else {
-          const equipmentInstance = new Equipment(record);
+          // Pass the cached selection set
+          const equipmentInstance = new Equipment(record, selectionSet);
           topLevelEquipmentMap.set(groupKey, equipmentInstance);
           direct.push({ equipment: equipmentInstance, ownerId });
         }

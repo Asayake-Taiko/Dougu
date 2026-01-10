@@ -8,13 +8,6 @@ import {
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
 import { Queries } from "../lib/powersync/queries";
 
-export type Item = Equipment | Container;
-
-export interface OrgOwnership {
-  membership: OrgMembership;
-  items: Item[];
-}
-
 export class Container {
   readonly type = "container";
   container: ContainerRecord;

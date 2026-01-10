@@ -19,7 +19,7 @@ export default function SendCodeScreen() {
   async function handleSendCode() {
     try {
       showSpinner();
-      await authService.sendCode(email);
+      await authService.resetPassword(email);
       navigation.navigate("ResetPassword", { email });
     } catch (err: any) {
       Logger.error(err);

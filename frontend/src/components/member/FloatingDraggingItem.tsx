@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Dimensions } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import ItemComponent from "./Item";
-import { Item } from "../../types/models";
+import { Item } from "../../types/other";
 
 const { width: windowWidth } = Dimensions.get("window");
 

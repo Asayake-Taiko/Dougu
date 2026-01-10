@@ -18,7 +18,6 @@ import { authService } from "../../lib/services/auth";
 
 export default function ProfileScreen() {
   const { session, profile } = useAuth();
-  // const { session, logout } = useAuth();
 
   const [profileImage, setProfileImage] = useState("default");
   const [profileVisible, setProfileVisible] = useState(false);

@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect } from "react";
 import { PowerSyncContext } from "@powersync/react-native";
-import { db, setupDatabase, connectToDatabase } from "../powersync/PowerSync";
+import { db, connectToDatabase } from "../powersync/PowerSync";
 
 interface PowerSyncProviderProps {
   children: ReactNode;
@@ -13,7 +13,6 @@ export const PowerSyncProvider: React.FC<PowerSyncProviderProps> = ({
   children,
 }) => {
   useEffect(() => {
-    setupDatabase();
     connectToDatabase();
   }, []);
 

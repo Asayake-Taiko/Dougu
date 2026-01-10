@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 import { useAuth } from "./AuthContext";
 import { useMembership } from "./MembershipContext";
-import { Container, Equipment, OrgOwnership, Item } from "../../types/models";
+import { Container, Equipment } from "../../types/models";
+import { OrgOwnership, Item } from "../../types/other";
 import { db } from "../powersync/PowerSync";
 import { useEquipmentData } from "../hooks/useEquipmentData";
 

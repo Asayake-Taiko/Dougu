@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import { Item, Equipment } from "../../types/models";
+import { Equipment } from "../../types/models";
+import { Item } from "../../types/other";
 import EquipmentDisplay from "./EquipmentDisplay";
 import { ItemStyles } from "../../styles/ItemStyles";
 import { useEquipment } from "../../lib/context/EquipmentContext";

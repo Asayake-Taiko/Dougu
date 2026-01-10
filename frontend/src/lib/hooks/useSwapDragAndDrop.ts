@@ -17,7 +17,8 @@ import { useHeaderHeight } from "@react-navigation/elements";
 
 import { useEquipment } from "../context/EquipmentContext";
 import { useMembership } from "../context/MembershipContext";
-import { Item, Equipment, Container } from "../../types/models";
+import { Equipment, Container } from "../../types/models";
+import { Item } from "../../types/other";
 import { OrgMembershipRecord } from "../../types/db";
 import { db } from "../powersync/PowerSync";
 import useAnimateOverlay from "./useAnimateOverlay";

@@ -30,7 +30,7 @@ export default function ResetPasswordScreen() {
 
     try {
       showSpinner();
-      await authService.resetPassword(email, code, password);
+      await authService.confirmResetPassword(email, code, password);
       setMessage("Password has been reset successfully");
     } catch (err: any) {
       Logger.error(err);

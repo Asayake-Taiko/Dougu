@@ -9,7 +9,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 
-import { Item } from "../../types/models";
+import { Item } from "../../types/other";
 import { OrgMembershipRecord } from "../../types/db";
 import CurrMembersDropdown from "./CurrMembersDropdown";
 import ScrollRow from "./ScrollRow";

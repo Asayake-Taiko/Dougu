@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-// import { useAuth } from "../../lib/context/AuthContext";
+import { authService } from "../../lib/services/auth";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
@@ -24,13 +24,6 @@ export default function EmailOverlay({
 }) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  // const { updateEmail, sendCode } = useAuth(); // Assuming updateEmail initiates the change
-  const updateEmail = async (email: string, code: string) => {
-    Logger.info("Update email not implemented");
-  };
-  const sendCode = async (email: string) => {
-    Logger.info("Send code not implemented");
-  };
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
 
@@ -38,7 +31,8 @@ export default function EmailOverlay({
   const handleSendCode = async () => {
     try {
       showSpinner();
-      await sendCode(email);
+      await authService.sendEmailUpdateCode(email);
+      setMessage("Please check your email for a verification code.");
     } catch (error) {
       Logger.error(error);
       if (error instanceof Error) {
@@ -58,8 +52,8 @@ export default function EmailOverlay({
         return;
       }
       showSpinner();
-      await updateEmail(email, code);
-      setVisible(false);
+      await authService.confirmEmailUpdate(email, code);
+      setMessage("Email updated successfully");
     } catch (e) {
       Logger.error(e);
       if (e instanceof Error) {

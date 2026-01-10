@@ -14,7 +14,7 @@ import {
 } from "react-native-gesture-handler";
 import { Dimensions } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { Item } from "../../types/models";
+import { Item } from "../../types/other";
 
 const { width: windowWidth } = Dimensions.get("window");
 

@@ -1,11 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@powersync/react-native";
-import {
-  Container,
-  Equipment,
-  OrgOwnership,
-  OrgMembership,
-} from "../../types/models";
+import { Container, Equipment, OrgMembership } from "../../types/models";
+import { OrgOwnership } from "../../types/other";
 import {
   OrgMembershipRecord,
   ContainerRecord,
@@ -142,6 +138,5 @@ export function useEquipmentData(
     directAssignments,
   ]);
 
-  console.log("ownerships", ownerships);
   return ownerships;
 }

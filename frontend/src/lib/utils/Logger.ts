@@ -3,13 +3,12 @@
  * Logs are output only when the application is running in development mode (__DEV__ is true)
  * or when mocking is enabled (MOCK_ENABLED is true).
  */
-import { MOCK_ENABLED } from "./env";
 export const Logger = {
   /**
    * Log standard info messages
    */
   info: (...args: any[]) => {
-    if (__DEV__ || MOCK_ENABLED) {
+    if (__DEV__) {
       console.log(...args);
     }
   },
@@ -18,7 +17,7 @@ export const Logger = {
    * Log warning messages
    */
   warn: (...args: any[]) => {
-    if (__DEV__ || MOCK_ENABLED) {
+    if (__DEV__) {
       console.warn(...args);
     }
   },
@@ -27,7 +26,7 @@ export const Logger = {
    * Log error messages
    */
   error: (...args: any[]) => {
-    if (__DEV__ || MOCK_ENABLED) {
+    if (__DEV__) {
       console.error(...args);
     }
   },
@@ -36,7 +35,7 @@ export const Logger = {
    * Log debug messages (alias for log/info)
    */
   debug: (...args: any[]) => {
-    if (__DEV__ || MOCK_ENABLED) {
+    if (__DEV__) {
       console.debug(...args);
     }
   },

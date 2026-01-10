@@ -6,7 +6,7 @@ import React, {
   ReactNode,
   useMemo,
 } from "react";
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@powersync/react-native";
 import { db } from "../powersync/PowerSync";
 import { useAuth } from "./AuthContext";
@@ -56,7 +56,7 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     async function loadPersistedOrg() {
       try {
-        const id = await SecureStore.getItemAsync(STORAGE_KEYS.ORG_ID);
+        const id = await AsyncStorage.getItem(STORAGE_KEYS.ORG_ID);
         if (id) {
           setOrganizationId(id);
         }
@@ -99,8 +99,8 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
 
   const switchOrganization = async (orgId: string, orgName: string) => {
     setOrganizationId(orgId);
-    await SecureStore.setItemAsync(STORAGE_KEYS.ORG_ID, orgId);
-    await SecureStore.setItemAsync(STORAGE_KEYS.ORG_NAME, orgName);
+    await AsyncStorage.setItem(STORAGE_KEYS.ORG_ID, orgId);
+    await AsyncStorage.setItem(STORAGE_KEYS.ORG_NAME, orgName);
   };
 
   const generateRandomString = (length: number) => {

@@ -4,9 +4,13 @@ import React, {
   useState,
   ReactNode,
   useEffect,
+  useMemo,
 } from "react";
 import { Logger } from "../utils/Logger";
 import { Session } from "@supabase/supabase-js";
+import { useQuery } from "@powersync/react-native";
+import { Queries } from "../powersync/queries";
+import { ProfileRecord } from "../../types/db";
 import { supabase } from "../supabase/supabase";
 import { Profile } from "../../types/models";
 
@@ -33,7 +37,6 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [session, setSession] = useState<Session | null | undefined>();
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Fetch the session once, and subscribe to auth state changes
@@ -65,27 +68,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
-  // Fetch the profile when the session changes
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (session?.user) {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
-
-        if (error) {
-          Logger.error("Error fetching profile:", error);
-        }
-        setProfile(data ? new Profile(data) : null);
-      } else {
-        setProfile(null);
-      }
-    };
-
-    fetchProfile();
-  }, [session]);
+  // Fetch the profile reactively using PowerSync
+  const { data: profileRecords } = useQuery<ProfileRecord>(
+    Queries.Profile.getById,
+    [session?.user.id || ""],
+  );
+  const profile = useMemo(() => {
+    const record = profileRecords[0];
+    return record ? new Profile(record) : null;
+  }, [profileRecords]);
 
   return (
     <AuthContext.Provider

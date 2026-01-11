@@ -32,18 +32,8 @@ export default function PasswordOverlay({
   // update user profile attributes in Cognito
   const handleUpdatePassword = async () => {
     try {
-      // ensure new password and confirm password match
-      if (newPassword !== confirmPassword) {
-        setMessage("Passwords do not match");
-        return;
-      }
-      // check password length
-      if (newPassword.length < 8) {
-        setMessage("Password must be at least 8 characters long.");
-        return;
-      }
       showSpinner();
-      await authService.updatePassword(newPassword);
+      await authService.updatePassword(currPassword, newPassword);
       setVisible(false);
     } catch (e) {
       Logger.error(e);

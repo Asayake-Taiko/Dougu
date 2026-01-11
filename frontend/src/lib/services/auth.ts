@@ -10,6 +10,7 @@ export interface IAuthService {
   confirmResetPassword(
     email: string,
     code: string,
+    password: string,
     newPassword: string,
   ): Promise<void>;
   updateProfileImage(profileImage: string): Promise<void>;
@@ -71,8 +72,15 @@ export class AuthService implements IAuthService {
   async confirmResetPassword(
     email: string,
     code: string,
+    password: string,
     newPassword: string,
   ): Promise<void> {
+    if (password !== newPassword) {
+      throw new Error("Passwords do not match");
+    }
+    if (newPassword.length < 8) {
+      throw new Error("Password must be at least 8 characters long.");
+    }
     const { error: otpError } = await supabase.auth.verifyOtp({
       email,
       token: code,
@@ -128,6 +136,9 @@ export class AuthService implements IAuthService {
   }
 
   async confirmEmailUpdate(newEmail: string, code: string): Promise<void> {
+    if (!code) {
+      throw new Error("No code provided");
+    }
     const { error } = await supabase.auth.verifyOtp({
       email: newEmail,
       token: code,
@@ -138,7 +149,16 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async updatePassword(newPassword: string): Promise<void> {
+  async updatePassword(
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    if (currentPassword !== newPassword) {
+      throw new Error("Passwords do not match");
+    }
+    if (newPassword.length < 8) {
+      throw new Error("Password must be at least 8 characters long");
+    }
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });

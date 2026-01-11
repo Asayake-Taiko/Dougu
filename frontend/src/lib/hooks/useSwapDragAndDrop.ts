@@ -22,6 +22,7 @@ import { Item } from "../../types/other";
 import { OrgMembershipRecord } from "../../types/db";
 import { db } from "../powersync/PowerSync";
 import useAnimateOverlay from "./useAnimateOverlay";
+import { Logger } from "../utils/Logger";
 
 const { width: windowWidth } = Dimensions.get("window");
 
@@ -319,7 +320,7 @@ export default function useSwapDragAndDrop({
           await container.reassign(db, targetMember.id);
         }
       } catch (error) {
-        console.error("Error reassigning item:", error);
+        Logger.error("Error reassigning item:", error);
       }
     },
     [draggingItem, swapContainerVisible, membership, halfLine, swapUser],

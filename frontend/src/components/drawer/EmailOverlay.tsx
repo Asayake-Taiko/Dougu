@@ -47,10 +47,6 @@ export default function EmailOverlay({
 
   const handleVerifyEmail = async () => {
     try {
-      if (!code) {
-        setMessage("Please enter a code");
-        return;
-      }
       showSpinner();
       await authService.confirmEmailUpdate(email, code);
       setVisible(false);

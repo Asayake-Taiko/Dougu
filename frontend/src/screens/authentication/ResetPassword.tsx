@@ -20,17 +20,14 @@ export default function ResetPasswordScreen() {
   const { showSpinner, hideSpinner } = useSpinner();
 
   async function handleResetPassword() {
-    if (password !== confirmPassword) {
-      setMessage("Passwords do not match");
-      return;
-    } else if (password.length < 8) {
-      setMessage("Password must be at least 8 characters long");
-      return;
-    }
-
     try {
       showSpinner();
-      await authService.confirmResetPassword(email, code, password);
+      await authService.confirmResetPassword(
+        email,
+        code,
+        password,
+        confirmPassword,
+      );
       setMessage("Password has been reset successfully");
     } catch (err: any) {
       Logger.error(err);

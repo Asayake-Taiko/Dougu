@@ -18,7 +18,7 @@ export interface IAuthService {
   sendEmailUpdateCode(email: string): Promise<void>;
   confirmEmailUpdate(email: string, code: string): Promise<void>;
   updatePassword(currentPassword: string, newPassword: string): Promise<void>;
-  deleteAccount(): Promise<void>;
+  deleteAccount(userId: string): Promise<void>;
 }
 
 export class AuthService implements IAuthService {
@@ -167,8 +167,8 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async deleteAccount(): Promise<void> {
-    throw new Error("Not implemented");
+  async deleteAccount(userId: string): Promise<void> {
+
   }
 }
 

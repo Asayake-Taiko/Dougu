@@ -8,12 +8,10 @@ import ProfileOverlay from "../../components/drawer/ProfileOverlay";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
-import { db } from "../../lib/powersync/PowerSync";
 import { Logger } from "../../lib/utils/Logger";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useNavigation } from "@react-navigation/native";
-import { generateUUID } from "../../lib/utils/UUID";
-import { Queries } from "../../lib/powersync/queries";
+import { organizationService } from "../../lib/services/organization";
 
 /*
   Create storage screen allows a manager to create storage.
@@ -21,7 +19,7 @@ import { Queries } from "../../lib/powersync/queries";
 */
 export default function CreateStorageScreen() {
   const navigation = useNavigation();
-  const { organization, isManager } = useMembership();
+  const { organization } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
 
@@ -32,10 +30,6 @@ export default function CreateStorageScreen() {
 
   // Create a new storage
   const handleCreate = async () => {
-    if (!isManager) {
-      setMessage("You do not have permission to create a storage.");
-      return;
-    }
     if (!name.trim()) {
       setMessage("Please enter a name for the storage.");
       return;
@@ -49,15 +43,12 @@ export default function CreateStorageScreen() {
     try {
       showSpinner();
 
-      await db.execute(Queries.Membership.insert, [
-        generateUUID(),
+      await organizationService.createStorage(
         organization.id,
-        "STORAGE",
-        null, // user_id
-        name, // storage_name
+        name,
         profileKey,
         details,
-      ]);
+      );
 
       // Reset form and go back
       onChangeName("");

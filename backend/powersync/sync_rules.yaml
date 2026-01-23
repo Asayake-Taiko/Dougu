@@ -1,0 +1,20 @@
+bucket_definitions:
+  # 1. Individual Profile Buckets
+  # Every profile gets its own bucket. 
+  # It is only downloaded if another bucket "references" this profile_id.
+  profiles:
+    parameters: SELECT id as profile_id FROM profiles
+    data:
+      - SELECT * FROM profiles WHERE id = bucket.profile_id
+
+  # 2. Organization Data Bucket
+  org_data:
+    parameters: |
+      SELECT organization_id 
+      FROM org_memberships 
+      WHERE user_id = request.user_id()
+    data:
+      - SELECT * FROM organizations WHERE id = bucket.organization_id
+      - SELECT * FROM containers WHERE organization_id = bucket.organization_id
+      - SELECT * FROM equipment WHERE organization_id = bucket.organization_id
+      - SELECT * FROM org_memberships WHERE organization_id = bucket.organization_id

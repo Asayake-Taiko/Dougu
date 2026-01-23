@@ -1,5 +1,3 @@
-import { db } from "../powersync/PowerSync";
-import { Queries } from "../powersync/queries";
 import { supabase } from "../supabase/supabase";
 
 export interface IAuthService {
@@ -107,11 +105,17 @@ export class AuthService implements IAuthService {
     }
 
     const now = new Date().toISOString();
-    await db.execute(Queries.Profile.updateProfile, [
-      profileImage,
-      now,
-      user.id,
-    ]);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        profile_image: profileImage,
+        updated_at: now,
+      })
+      .eq("id", user.id);
+
+    if (error) {
+      throw error;
+    }
   }
 
   async updateName(name: string): Promise<void> {
@@ -123,7 +127,17 @@ export class AuthService implements IAuthService {
     }
 
     const now = new Date().toISOString();
-    await db.execute(Queries.Profile.updateName, [name, now, user.id]);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        name,
+        updated_at: now,
+      })
+      .eq("id", user.id);
+
+    if (error) {
+      throw error;
+    }
   }
 
   async sendEmailUpdateCode(email: string): Promise<void> {
@@ -167,9 +181,7 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async deleteAccount(userId: string): Promise<void> {
-
-  }
+  async deleteAccount(userId: string): Promise<void> {}
 }
 
 // Singleton instance export

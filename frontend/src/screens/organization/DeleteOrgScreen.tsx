@@ -5,7 +5,6 @@ import { PressableOpacity } from "../../components/PressableOpacity";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
-import { db } from "../../lib/powersync/PowerSync";
 import { Colors, Spacing } from "../../styles/global";
 import { Logger } from "../../lib/utils/Logger";
 
@@ -15,20 +14,13 @@ import { Logger } from "../../lib/utils/Logger";
 */
 export default function DeleteOrgScreen() {
   const navigation = useNavigation();
-  const { organization, isManager } = useMembership();
+  const { organization } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
   const [orgNameConfirm, setOrgNameConfirm] = useState("");
 
-  if (!organization || !isManager) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.header}>Access Denied</Text>
-        <Text style={styles.label}>
-          Only the manager can delete the organization.
-        </Text>
-      </View>
-    );
+  if (!organization) {
+    return null;
   }
 
   const handleDelete = async () => {
@@ -39,26 +31,8 @@ export default function DeleteOrgScreen() {
 
     try {
       showSpinner();
-
-      await db.writeTransaction(async (tx) => {
-        // Cascading deletion
-        await tx.execute("DELETE FROM equipment WHERE organization_id = ?", [
-          organization.id,
-        ]);
-        await tx.execute("DELETE FROM containers WHERE organization_id = ?", [
-          organization.id,
-        ]);
-        await tx.execute(
-          "DELETE FROM org_memberships WHERE organization_id = ?",
-          [organization.id],
-        );
-        await tx.execute("DELETE FROM organizations WHERE id = ?", [
-          organization.id,
-        ]);
-      });
-
+      await organization.delete();
       setMessage("Organization deleted successfully.");
-      // Navigate back to the start (MyOrgs should refresh via PowerSync watchers)
       navigation.getParent()?.goBack();
     } catch (error: any) {
       Logger.error("Failed to delete organization", error);

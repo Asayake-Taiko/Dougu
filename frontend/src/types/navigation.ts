@@ -32,7 +32,7 @@ export type DrawerStackParamList = {
   MyOrgs: undefined;
   JoinOrg: undefined;
   CreateOrg: undefined;
-  MemberTabs: { organizationId: string; organizationName: string } | undefined;
+  MemberTabs: { organizationId: string } | undefined;
 };
 
 // Profile Stack Parameter List (Overlays everything)

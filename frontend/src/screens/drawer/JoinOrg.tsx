@@ -5,7 +5,8 @@ import { PressableOpacity } from "../../components/PressableOpacity";
 // project imports
 import { createJoinStyles } from "../../styles/CreateJoinStyles";
 import { JoinOrgScreenNavigationProp } from "../../types/navigation";
-import { useMembership } from "../../lib/context/MembershipContext";
+import { useAuth } from "../../lib/context/AuthContext";
+import { organizationService } from "../../lib/services/organization";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
@@ -19,18 +20,24 @@ export default function JoinOrgScreen({
   navigation: JoinOrgScreenNavigationProp;
 }) {
   const [code, onChangeCode] = useState("");
-  const { joinOrganization } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
+  const { session } = useAuth();
 
   const handleJoin = async () => {
+    if (!session?.user.id) {
+      setMessage("Please sign in to join an organization.");
+      return;
+    }
     showSpinner();
     try {
-      const { id, name } = await joinOrganization(code);
+      const { id, name } = await organizationService.joinOrganization(
+        code,
+        session?.user.id,
+      );
       setMessage(`Successfully joined ${name}!`);
       navigation.navigate("MemberTabs", {
         organizationId: id,
-        organizationName: name,
       });
     } catch (error: any) {
       Logger.error("Error joining organization:", error);

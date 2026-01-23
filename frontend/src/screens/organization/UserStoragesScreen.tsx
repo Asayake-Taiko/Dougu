@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Alert,
   Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,8 +15,7 @@ import { UserStoragesScreenProps } from "../../types/navigation";
 import { OrgMembership } from "../../types/models";
 import MemberRow from "../../components/organization/MemberRow";
 import { useMembership } from "../../lib/context/MembershipContext";
-import { useQuery } from "@powersync/react-native";
-import { OrgMembershipRecord } from "../../types/db";
+import { useEquipment } from "../../lib/context/EquipmentContext";
 
 /*
   Screen for viewing all members and storages in an organization
@@ -28,27 +26,16 @@ export default function UserStoragesScreen({
   route,
   navigation,
 }: UserStoragesScreenProps) {
-  const { organization, isManager } = useMembership();
+  const { organization } = useMembership();
   const { tabParam } = route.params;
   const [tab, setTab] = useState(tabParam);
-
-  // Reactive members query
-  const { data: membersData } = useQuery<
-    OrgMembershipRecord & { full_name?: string; user_profile?: string }
-  >(
-    `SELECT m.*, u.full_name, u.profile as user_profile 
-     FROM org_memberships m 
-     LEFT JOIN users u ON m.user_id = u.id 
-     WHERE m.organization_id = ?`,
-    [organization?.id || ""],
-  );
+  const { ownerships } = useEquipment();
 
   const members = useMemo(() => {
-    if (!membersData) return [];
-    return membersData
-      .map((m) => new OrgMembership(m, m.full_name, m.user_profile))
+    return Array.from(ownerships.values())
+      .map((ownership) => ownership.membership)
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [membersData]);
+  }, [ownerships]);
 
   const [currData, setCurrData] = useState<OrgMembership[]>([]);
 
@@ -72,13 +59,7 @@ export default function UserStoragesScreen({
 
   // create a storage, only managers can create storages
   const handleCreate = async () => {
-    if (!isManager)
-      Alert.alert(
-        "Authorization Error",
-        "You do not have permission to create storages",
-        [{ text: "OK" }],
-      );
-    else navigation.navigate("CreateStorage");
+    navigation.navigate("CreateStorage");
   };
 
   return (
@@ -121,7 +102,7 @@ export default function UserStoragesScreen({
         {currData.map((item, index) => (
           <MemberRow key={index} item={item} />
         ))}
-        {tab === "Storages" && isManager ? (
+        {tab === "Storages" ? (
           <TouchableOpacity style={styles.createBtn} onPress={handleCreate}>
             <Text style={styles.createBtnTxt}>Create Storage</Text>
             <MaterialCommunityIcons name="crown" color={"#fff"} size={32} />

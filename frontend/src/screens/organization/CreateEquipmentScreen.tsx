@@ -13,17 +13,15 @@ import { Colors } from "../../styles/global";
 import { OrgMembershipRecord } from "../../types/db";
 import { Hex } from "../../types/other";
 import EquipmentImageOverlay from "../../components/organization/EquipmentImageOverlay";
-import { db } from "../../lib/powersync/PowerSync";
-import { generateUUID } from "../../lib/utils/UUID";
 import { Logger } from "../../lib/utils/Logger";
-import { Queries } from "../../lib/powersync/queries";
+import { equipmentService } from "../../lib/services/equipment";
 
 /*
   Create equipment screen allows a manager to create equipment
   and assign it to a user/storage.
 */
 export default function CreateEquipmentScreen() {
-  const { isManager, organization } = useMembership();
+  const { organization } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
 
@@ -44,11 +42,6 @@ export default function CreateEquipmentScreen() {
 
   // Create a new equipment and assign it to a user
   const handleCreate = async () => {
-    if (!isManager) {
-      setMessage("You do not have permission to create items.");
-      return;
-    }
-
     if (!organization) {
       setMessage("Organization not found.");
       return;
@@ -67,37 +60,26 @@ export default function CreateEquipmentScreen() {
 
     try {
       showSpinner();
-      await db.writeTransaction(async (tx) => {
-        for (let i = 0; i < quantityCount; i++) {
-          const id = generateUUID();
-          const timestamp = new Date().toISOString();
-
-          if (index === 0) {
-            // Create Equipment
-            await tx.execute(Queries.Equipment.insertWithoutContainer, [
-              id,
-              name,
-              organization.id,
-              assignUser.id,
-              imageKey,
-              itemColor,
-              details,
-              timestamp,
-            ]);
-          } else {
-            // Create Container
-            await tx.execute(Queries.Container.insert, [
-              id,
-              name,
-              organization.id,
-              assignUser.id,
-              itemColor,
-              details,
-              timestamp,
-            ]);
-          }
-        }
-      });
+      if (index === 0) {
+        // Create Equipment
+        await equipmentService.createEquipment(quantityCount, {
+          name,
+          organization_id: organization.id,
+          assigned_to: assignUser.id,
+          image: imageKey,
+          color: itemColor,
+          details,
+        });
+      } else {
+        // Create Container
+        await equipmentService.createContainer(quantityCount, {
+          name,
+          organization_id: organization.id,
+          assigned_to: assignUser.id,
+          color: itemColor,
+          details,
+        });
+      }
       setMessage("Items created successfully.");
       onChangeName("");
       onChangeQuantity("");

@@ -39,8 +39,13 @@ export default function ProfileScreen() {
       showSpinner();
       await authService.logout();
     } catch (error) {
+      console.log("test");
+      if (error instanceof Error) {
+        setMessage(error.message);
+      } else {
+        setMessage("Logout failed");
+      }
       Logger.error(error);
-      setMessage("Logout failed");
     } finally {
       hideSpinner();
     }

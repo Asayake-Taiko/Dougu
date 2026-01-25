@@ -79,10 +79,10 @@ export default function MemberTabs({
 
   // Update state and persist when route params change (coming from MyOrgs or other navigation)
   useEffect(() => {
-    if (route.params?.organizationId && route.params?.organizationName) {
-      const { organizationId: newId, organizationName: newName } = route.params;
+    if (route.params?.organizationId) {
+      const { organizationId: newId } = route.params;
       if (newId !== organization?.id) {
-        switchOrganization(newId, newName);
+        switchOrganization(newId);
       }
     }
   }, [route.params, organization?.id, switchOrganization]);

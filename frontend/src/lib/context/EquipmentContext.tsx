@@ -3,8 +3,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { useAuth } from "./AuthContext";
 import { useMembership } from "./MembershipContext";
 import { Container, Equipment } from "../../types/models";
-import { OrgOwnership, Item } from "../../types/other";
-import { db } from "../powersync/PowerSync";
+import { OrgOwnership } from "../../types/other";
 import { useEquipmentData } from "../hooks/useEquipmentData";
 
 interface EquipmentContextType {
@@ -15,9 +14,6 @@ interface EquipmentContextType {
   setSelectedEquipment: (equipment: Equipment | null) => void;
   selectedContainer: Container | null;
   setSelectedContainer: (container: Container | null) => void;
-
-  // Actions
-  deleteItem: (item: Item) => Promise<void>;
 }
 
 const EquipmentContext = createContext<EquipmentContextType | undefined>(
@@ -36,7 +32,7 @@ export const EquipmentProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const { session } = useAuth();
-  const { membership, isManager } = useMembership();
+  const { membership } = useMembership();
   const organizationId = membership?.organizationId;
 
   // Use optimized hook for data processing
@@ -54,21 +50,12 @@ export const EquipmentProvider: React.FC<{ children: ReactNode }> = ({
     null,
   );
 
-  const deleteItem = async (item: Item) => {
-    if (!isManager) {
-      throw new Error("You do not have permission to delete this item");
-    } else {
-      await item.delete(db);
-    }
-  };
-
   const contextValue: EquipmentContextType = {
     ownerships,
     selectedEquipment,
     setSelectedEquipment,
     selectedContainer,
     setSelectedContainer,
-    deleteItem,
   };
 
   return (

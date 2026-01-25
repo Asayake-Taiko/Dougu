@@ -6,8 +6,9 @@ import { createJoinStyles } from "../../styles/CreateJoinStyles";
 import { CreateOrgScreenNavigationProp } from "../../types/navigation";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
-import { useMembership } from "../../lib/context/MembershipContext";
+import { organizationService } from "../../lib/services/organization";
 import { Logger } from "../../lib/utils/Logger";
+import { useAuth } from "../../lib/context/AuthContext";
 
 /*
   Screen for creating an organization, user enters the name of the org
@@ -22,19 +23,26 @@ export default function CreateOrgScreen({
   const [name, onChangeName] = useState("");
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
-  const { createOrganization } = useMembership();
+  const { session } = useAuth();
 
   // handle verification, creation, and navigation when creating a new Organization
   async function handleCreate() {
+    if (!session?.user.id) {
+      setMessage("Please sign in to create an organization.");
+      return;
+    }
     showSpinner();
     try {
-      const { id, name: orgName, code } = await createOrganization(name);
+      const {
+        id,
+        name: orgName,
+        code,
+      } = await organizationService.createOrganization(name, session.user.id);
       setMessage(
         `Successfully created ${orgName}! Your access code is: ${code}`,
       );
       navigation.navigate("MemberTabs", {
         organizationId: id,
-        organizationName: orgName,
       });
     } catch (error: any) {
       Logger.error("Error creating organization:", error);

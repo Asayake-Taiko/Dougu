@@ -7,7 +7,6 @@ import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
 import BaseImageOverlay from "../BaseImageOverlay";
-import { usePowerSync } from "@powersync/react-native";
 
 export default function OrgImageOverlay({
   visible,
@@ -20,17 +19,11 @@ export default function OrgImageOverlay({
   imageKey: string;
   setImageKey: (key: string) => void;
 }) {
-  const { isManager, organization } = useMembership();
+  const { organization } = useMembership();
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
-  const db = usePowerSync();
 
   async function handleUpdateOrgImage() {
-    if (!isManager) {
-      setMessage("You are not the manager of this organization");
-      return;
-    }
-
     if (!organization) {
       setMessage("Organization not found");
       return;
@@ -38,7 +31,7 @@ export default function OrgImageOverlay({
 
     try {
       showSpinner();
-      await organization.updateImage(db, imageKey);
+      await organization.updateImage(imageKey);
       setVisible(false);
     } catch (err: any) {
       Logger.error(err);

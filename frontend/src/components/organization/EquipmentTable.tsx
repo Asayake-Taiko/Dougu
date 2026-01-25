@@ -31,12 +31,11 @@ function ItemRow({
   const [openContainer, setOpenContainer] = useState(false);
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
-  const { deleteItem } = useEquipment();
 
   async function handleDelete(selectedItem: Item) {
     try {
       showSpinner();
-      await deleteItem(selectedItem);
+      await selectedItem.delete();
     } catch (error: any) {
       setMessage(error.message || "Failed to delete item");
     } finally {

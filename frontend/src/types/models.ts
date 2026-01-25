@@ -7,6 +7,8 @@ import {
 } from "./db";
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
 import { Queries } from "../lib/powersync/queries";
+import { equipmentService } from "../lib/services/equipment";
+import { organizationService } from "../lib/services/organization";
 
 export class Container {
   readonly type = "container";
@@ -61,13 +63,8 @@ export class Container {
     });
   }
 
-  async delete(db: AbstractPowerSyncDatabase) {
-    await db.writeTransaction(async (tx) => {
-      // Delete all equipment in container
-      await tx.execute(Queries.Container.deleteEquipmentIn, [this.id]);
-      // Delete container
-      await tx.execute(Queries.Container.delete, [this.id]);
-    });
+  async delete() {
+    await equipmentService.deleteContainer(this);
   }
 }
 
@@ -179,12 +176,8 @@ export class Equipment {
     });
   }
 
-  async delete(db: AbstractPowerSyncDatabase) {
-    await db.writeTransaction(async (tx) => {
-      for (const record of this.records) {
-        await tx.execute(Queries.Equipment.delete, [record.id]);
-      }
-    });
+  async delete() {
+    await equipmentService.deleteEquipment(this);
   }
 }
 
@@ -212,9 +205,16 @@ export class Organization {
     return this.organization.image;
   }
 
-  async updateImage(db: AbstractPowerSyncDatabase, newImage: string) {
-    await db.execute(Queries.Organization.updateImage, [newImage, this.id]);
-    this.organization.image = newImage;
+  async updateImage(newImage: string) {
+    await organizationService.updateOrganizationImage(this.id, newImage);
+  }
+
+  async delete() {
+    await organizationService.deleteOrganization(this.id);
+  }
+
+  async transferOwnership(newManagerId: string) {
+    await organizationService.transferOwnership(this.id, newManagerId);
   }
 }
 
@@ -257,6 +257,10 @@ export class OrgMembership {
   }
   get details() {
     return this.membership.details;
+  }
+
+  async delete() {
+    await organizationService.deleteMembership(this.id);
   }
 }
 

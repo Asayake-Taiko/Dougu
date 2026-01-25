@@ -33,16 +33,15 @@ export default function MyOrgsScreen({
   );
 
   // set the current organization and navigate to the MemberTabs
-  const setAndNavigate = async (orgId: string, orgName: string) => {
+  const setAndNavigate = async (orgId: string) => {
     navigation.navigate("MemberTabs", {
       organizationId: orgId,
-      organizationName: orgName,
     });
   };
 
   const renderOrgItem = ({ item }: { item: OrganizationRecord }) => (
     <TouchableOpacity
-      onPress={() => setAndNavigate(item.id, item.name)}
+      onPress={() => setAndNavigate(item.id)}
       style={styles.orgContainer}
       activeOpacity={0.7}
     >

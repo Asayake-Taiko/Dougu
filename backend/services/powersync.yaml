@@ -18,10 +18,8 @@ services:
     #     command: ['migrate', 'up']
     # Note that this container must finish executing before starting the sync or unified container.
     command: ["start", "-r", "unified"]
-    volumes:
-      # Mounts the specified config folder to the container
-      # This folder should contain `powersync.yaml and sync_rules.yaml
-      - ../config:/config
+    # volumes:
+    #   - ../config:/config
     environment:
       # This is the path (inside the container) to the YAML config file
       # Alternatively the config path can be specified in the command
@@ -50,7 +48,7 @@ services:
       PS_MONGO_URI: mongodb://mongo:27017/powersync_demo
 
       # Note that powersync.yaml->client_auth->allow_local_jwks must be true for local URLs to work
-      PS_JWKS_URL: ${PS_JWKS_URL}
+      # PS_JWKS_URL: ${PS_JWKS_URL}
 
       # The port which the PowerSync API server should run on
       PS_PORT: ${PS_PORT}

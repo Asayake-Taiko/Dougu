@@ -19,6 +19,12 @@ The codebase is designed to isolate the frontend and backend. To begin working o
 5. `cd frontend` and run `npm install`
 6. Once installed, you can run the app with `npx expo run`
 
+## Testing
+Make sure you have a local supabase and powersync server running (see backend/README.md), then run
+```
+npm test
+```
+
 ## Contributions
 
 The app was designed by [Neela Kolte](https://www.behance.net/neelakolte), and these are some words from her:

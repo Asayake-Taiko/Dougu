@@ -23,6 +23,12 @@ Make sure the supabase and powersync are running, then run
 npm run test
 ```
 
+# Closing
+Close supabase and powersync
+```
+npx supabase stop
+docker compose down
+```
 
 # Other
 Pull changes from cloud to local:

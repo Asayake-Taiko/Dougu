@@ -2,6 +2,8 @@ import { supabase } from "../supabase/supabase";
 import { generateUUID } from "../utils/UUID";
 import { EquipmentRecord, ContainerRecord } from "../../types/db";
 import { Equipment, Container } from "../../types/models";
+import { AbstractPowerSyncDatabase } from "@powersync/react-native";
+import { Queries } from "../powersync/queries";
 
 export interface IEquipmentService {
   deleteEquipment(equipment: Equipment): Promise<void>;
@@ -13,6 +15,17 @@ export interface IEquipmentService {
   createContainer(
     quantity: number,
     data: Omit<ContainerRecord, "id" | "last_updated_date">,
+  ): Promise<void>;
+  reassignEquipment(
+    db: AbstractPowerSyncDatabase,
+    equipment: Equipment,
+    targetMemberId: string,
+    targetContainerId: string | null,
+  ): Promise<void>;
+  reassignContainer(
+    db: AbstractPowerSyncDatabase,
+    container: Container,
+    targetMemberId: string,
   ): Promise<void>;
 }
 
@@ -59,6 +72,52 @@ export class EquipmentService implements IEquipmentService {
 
     const { error } = await supabase.from("containers").insert(items);
     if (error) throw error;
+  }
+
+  async reassignEquipment(
+    db: AbstractPowerSyncDatabase,
+    equipment: Equipment,
+    targetMemberId: string,
+    targetContainerId: string | null = null,
+  ): Promise<void> {
+    const now = new Date().toISOString();
+    const selectedRecords = Array.from(equipment.selectedIndices).map(
+      (i) => equipment.records[i],
+    );
+
+    await db.writeTransaction(async (tx) => {
+      for (const record of selectedRecords) {
+        await tx.execute(Queries.Equipment.updateAssignment, [
+          targetMemberId,
+          targetContainerId,
+          now,
+          record.id,
+        ]);
+      }
+    });
+  }
+
+  async reassignContainer(
+    db: AbstractPowerSyncDatabase,
+    container: Container,
+    targetMemberId: string,
+  ): Promise<void> {
+    const now = new Date().toISOString();
+    await db.writeTransaction(async (tx) => {
+      // Update container
+      await tx.execute(Queries.Container.updateAssignment, [
+        targetMemberId,
+        now,
+        container.id,
+      ]);
+
+      // Update all equipment in container
+      await tx.execute(Queries.Equipment.updateAssignmentByContainer, [
+        targetMemberId,
+        now,
+        container.id,
+      ]);
+    });
   }
 }
 

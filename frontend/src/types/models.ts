@@ -45,22 +45,7 @@ export class Container {
   }
 
   async reassign(db: AbstractPowerSyncDatabase, targetMemberId: string) {
-    const now = new Date().toISOString();
-    await db.writeTransaction(async (tx) => {
-      // Update container
-      await tx.execute(Queries.Container.updateAssignment, [
-        targetMemberId,
-        now,
-        this.id,
-      ]);
-
-      // Update all equipment in container
-      await tx.execute(Queries.Equipment.updateAssignmentByContainer, [
-        targetMemberId,
-        now,
-        this.id,
-      ]);
-    });
+    await equipmentService.reassignContainer(db, this, targetMemberId);
   }
 
   async delete() {
@@ -159,21 +144,12 @@ export class Equipment {
     targetMemberId: string,
     targetContainerId: string | null = null,
   ) {
-    const now = new Date().toISOString();
-    const selectedRecords = Array.from(this.selectedIndices).map(
-      (i) => this.records[i],
+    await equipmentService.reassignEquipment(
+      db,
+      this,
+      targetMemberId,
+      targetContainerId,
     );
-
-    await db.writeTransaction(async (tx) => {
-      for (const record of selectedRecords) {
-        await tx.execute(Queries.Equipment.updateAssignment, [
-          targetMemberId,
-          targetContainerId,
-          now,
-          record.id,
-        ]);
-      }
-    });
   }
 
   async delete() {

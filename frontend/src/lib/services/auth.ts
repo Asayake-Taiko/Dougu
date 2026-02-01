@@ -15,7 +15,7 @@ export interface IAuthService {
   updateName(name: string): Promise<void>;
   sendEmailUpdateCode(email: string): Promise<void>;
   confirmEmailUpdate(email: string, code: string): Promise<void>;
-  updatePassword(currentPassword: string, newPassword: string): Promise<void>;
+  updatePassword(newPassword: string, confirmPassword: string): Promise<void>;
   deleteAccount(userId: string): Promise<void>;
 }
 
@@ -161,10 +161,10 @@ export class AuthService implements IAuthService {
   }
 
   async updatePassword(
-    currentPassword: string,
     newPassword: string,
+    confirmPassword: string,
   ): Promise<void> {
-    if (currentPassword !== newPassword) {
+    if (newPassword !== confirmPassword) {
       throw new Error("Passwords do not match");
     }
     const { error } = await supabase.auth.updateUser({

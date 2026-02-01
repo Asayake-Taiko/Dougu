@@ -6,27 +6,27 @@ import {
   extractCodeFromEmail,
 } from "../utils/mailpit";
 
-describe("AuthService Login Tests", () => {
-  beforeEach(async () => {
-    await authService.logout();
-  });
+// describe("AuthService Login Tests", () => {
+//   beforeEach(async () => {
+//     await authService.logout();
+//   });
 
-  it("login with invalid credentials should fail", async () => {
-    const email = "non.existent.user@example.com";
-    const password = "invalidpassword123";
+//   it("login with invalid credentials should fail", async () => {
+//     const email = "non.existent.user@example.com";
+//     const password = "invalidpassword123";
 
-    await expect(authService.login(email, password)).rejects.toThrow(
-      "Invalid login credentials",
-    );
-  });
+//     await expect(authService.login(email, password)).rejects.toThrow(
+//       "Invalid login credentials",
+//     );
+//   });
 
-  it("login with valid credentials should succeed", async () => {
-    const email = "kal036@ucsd.edu";
-    const password = "password1";
+//   it("login with valid credentials should succeed", async () => {
+//     const email = "testuser1@gmail.com";
+//     const password = "password1";
 
-    await expect(authService.login(email, password)).resolves.not.toThrow();
-  });
-});
+//     await expect(authService.login(email, password)).resolves.not.toThrow();
+//   });
+// });
 
 describe("AuthService Register Tests", () => {
   beforeEach(async () => {

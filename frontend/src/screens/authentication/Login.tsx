@@ -47,7 +47,11 @@ export default function LoginScreen({
         setPassword={onChangePassword}
         placeHolder="password"
       />
-      <PressableOpacity style={AuthStyles.button} onPress={handleLogin}>
+      <PressableOpacity
+        style={AuthStyles.button}
+        onPress={handleLogin}
+        testID="login-button"
+      >
         <Text style={AuthStyles.btnText}>Login</Text>
       </PressableOpacity>
       <PressableOpacity onPress={() => navigation.navigate("CreateAccount")}>

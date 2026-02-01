@@ -7,14 +7,10 @@ npx supabase init
 npx supabase link
 ```
 
-Start the supabase server
+Start the backend
 ```
-npx supabase start -x vector
-```
-
-Start powersync 
-```
-docker compose up
+npx supabase start -x vector // supabase backend
+docker compose up            // powersync
 ```
 
 # Closing

@@ -76,9 +76,6 @@ export class AuthService implements IAuthService {
     if (password !== newPassword) {
       throw new Error("Passwords do not match");
     }
-    if (newPassword.length < 8) {
-      throw new Error("Password must be at least 8 characters long.");
-    }
     const { error: otpError } = await supabase.auth.verifyOtp({
       email,
       token: code,
@@ -169,9 +166,6 @@ export class AuthService implements IAuthService {
   ): Promise<void> {
     if (currentPassword !== newPassword) {
       throw new Error("Passwords do not match");
-    }
-    if (newPassword.length < 8) {
-      throw new Error("Password must be at least 8 characters long");
     }
     const { error } = await supabase.auth.updateUser({
       password: newPassword,

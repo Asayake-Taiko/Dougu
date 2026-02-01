@@ -60,6 +60,9 @@
     "preset": "jest-expo",
     "setupFilesAfterEnv": [
       "./jest.setup.js"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/__tests__/utils/"
     ]
   }
 }

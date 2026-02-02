@@ -8,7 +8,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "NODE_OPTIONS=\"--no-warnings\" jest"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

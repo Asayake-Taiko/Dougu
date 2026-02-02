@@ -54,8 +54,15 @@ export class AuthService implements IAuthService {
   }
 
   async logout(): Promise<void> {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      if (error.message === "Auth session missing!") {
+        return;
+      }
       throw error;
     }
   }

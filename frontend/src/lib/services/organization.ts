@@ -35,18 +35,26 @@ export class OrganizationService implements IOrganizationService {
         "Invalid name! Use 1-40 alphanumeric characters, no spaces (_ and - allowed).",
       );
 
+    // verify that the user exists
+    const { data: user, error: userError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
+    if (userError || !user) throw new Error("Invalid user id!");
+
+    // verify that the code isn't taken yet
+    const code = await this.generateUniqueCode();
     const { data: existingOrg, error: existingOrgError } = await supabase
       .from("organizations")
       .select("id")
-      .eq("name", name)
+      .eq("access_code", code)
       .maybeSingle();
 
     if (existingOrgError) throw existingOrgError;
-    if (existingOrg) throw new Error("Organization name is already taken!");
+    if (existingOrg) throw new Error("Organization code is already taken!");
 
-    const code = await this.generateUniqueCode();
     const orgId = generateUUID();
-
     const { error: orgError } = await supabase.from("organizations").insert({
       id: orgId,
       name,
@@ -67,25 +75,34 @@ export class OrganizationService implements IOrganizationService {
     const trimmedCode = code.trim().toUpperCase();
     if (!trimmedCode) throw new Error("Please enter an access code");
 
+    // verify that the user exists
+    const { data: user, error: userError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
+    if (userError || !user) throw new Error("Invalid user id!");
+
+    // find the organization by access code
     const { data: org, error: orgError } = await supabase
       .from("organizations")
       .select("*")
       .eq("access_code", trimmedCode)
       .maybeSingle();
-
     if (orgError) throw orgError;
     if (!org) throw new Error("Organization not found");
 
+    // make sure the user is not already a member of the organization
     const { data: existingMemberships, error: membershipError } = await supabase
       .from("org_memberships")
       .select("id")
       .eq("organization_id", org.id)
       .eq("user_id", userId);
-
     if (membershipError) throw membershipError;
     if (existingMemberships && existingMemberships.length > 0)
       throw new Error("You are already a member of this organization.");
 
+    // create the membership
     const membershipId = generateUUID();
     const { error: insertError } = await supabase
       .from("org_memberships")
@@ -114,6 +131,15 @@ export class OrganizationService implements IOrganizationService {
     image: string,
     details: string,
   ): Promise<void> {
+    // verify that the organization exists
+    const { data: org, error: orgError } = await supabase
+      .from("organizations")
+      .select("id")
+      .eq("id", orgId)
+      .maybeSingle();
+    if (orgError) throw orgError;
+    if (!org) throw new Error("Organization not found");
+
     const { error } = await supabase.from("org_memberships").insert({
       id: generateUUID(),
       organization_id: orgId,

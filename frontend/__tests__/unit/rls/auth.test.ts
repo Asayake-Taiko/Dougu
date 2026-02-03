@@ -1,12 +1,11 @@
 import { authService } from "../../../src/lib/services/auth";
 import { supabase } from "../../../src/lib/supabase/supabase";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("Auth/Profile RLS Permission Tests", () => {
-  const randomStr1 = Math.random().toString(36).substring(7);
-  const randomStr2 = Math.random().toString(36).substring(7);
-  const user1Email = `user1-${randomStr1}@example.com`;
+  const user1Email = `user1-${generateUUID()}@example.com`;
   const user1Password = "password123";
-  const user2Email = `user2-${randomStr2}@example.com`;
+  const user2Email = `user2-${generateUUID()}@example.com`;
   const user2Password = "password123";
 
   beforeAll(async () => {
@@ -113,7 +112,7 @@ describe("Auth/Profile RLS Permission Tests", () => {
       .from("organizations")
       .insert({
         name: "Shared Org",
-        access_code: "SHARE_" + Math.random().toString(36).substring(7),
+        access_code: "SHARE_" + generateUUID().substring(0, 10),
         manager_id: user1Id,
       })
       .select()
@@ -148,7 +147,7 @@ describe("Auth/Profile RLS Permission Tests", () => {
   });
 
   it("users should not be able to read profiles of people that don't share an organization", async () => {
-    const user3Email = `user3-${Math.random().toString(36).substring(7)}@example.com`;
+    const user3Email = `user3-${generateUUID()}@example.com`;
     await authService.register(user3Email, "User Three", "password123");
 
     await authService.login(user3Email, "password123");

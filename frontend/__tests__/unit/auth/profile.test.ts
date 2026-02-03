@@ -1,8 +1,9 @@
 import { authService } from "../../../src/lib/services/auth";
 import { supabase } from "../../../src/lib/supabase/supabase";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("AuthService Profile Update Tests", () => {
-  const randomStr = Math.random().toString(36).substring(7);
+  const randomStr = generateUUID();
   const email = `name-update-${randomStr}@example.com`;
   const password = "password123";
   const oldName = `Old Name ${randomStr}`;

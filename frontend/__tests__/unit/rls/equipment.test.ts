@@ -1,8 +1,9 @@
 import { authService } from "../../../src/lib/services/auth";
 import { supabase } from "../../../src/lib/supabase/supabase";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("Equipment RLS Permission Tests", () => {
-  const randomStr = Math.random().toString(36).substring(7);
+  const randomStr = generateUUID();
   const ownerEmail = `equip_owner-${randomStr}@example.com`;
   const ownerPassword = "password123";
   const memberEmail = `equip_member-${randomStr}@example.com`;
@@ -32,7 +33,7 @@ describe("Equipment RLS Permission Tests", () => {
       .from("organizations")
       .insert({
         name: "Equipment Test Org",
-        access_code: "EQP_" + Date.now(),
+        access_code: "EQP_" + generateUUID().substring(0, 10),
         manager_id: ownerId,
       })
       .select()

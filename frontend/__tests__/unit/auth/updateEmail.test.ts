@@ -4,6 +4,7 @@ import {
   findLatestEmail,
   extractCodeFromEmail,
 } from "../../utils/mailpit";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("AuthService Update Email Tests", () => {
   beforeEach(async () => {
@@ -12,7 +13,7 @@ describe("AuthService Update Email Tests", () => {
   });
 
   it("update email flow", async () => {
-    const randomStr = Math.random().toString(36).substring(7);
+    const randomStr = generateUUID();
     const oldEmail = `old-email-${randomStr}@example.com`;
     const newEmail = `new-email-${randomStr}@example.com`;
     const password = "password123";

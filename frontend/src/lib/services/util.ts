@@ -4,6 +4,11 @@ import { supabase } from "../supabase/supabase";
 export function handleSupabaseError(error: PostgrestError): never {
   if (error.code === "23503") {
     // Foreign Key Violation
+    if (error.message?.includes("organizations_manager_membership_fkey")) {
+      throw new Error(
+        "Cannot delete membership: User is the Organization Manager. Transfer ownership first.",
+      );
+    }
     throw new Error("Invalid reference: User or Organization not found.");
   }
 
@@ -22,7 +27,7 @@ export function handleSupabaseError(error: PostgrestError): never {
     if (error.message?.includes("organizations_access_code_key")) {
       throw new Error("Organization code is already taken!");
     }
-    if (error.message?.includes("org_memberships_user_org_unique")) {
+    if (error.message?.includes("org_memberships_org_user_key")) {
       throw new Error("You are already a member of this organization.");
     }
     throw new Error("Resource already exists.");

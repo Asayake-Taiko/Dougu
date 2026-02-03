@@ -121,7 +121,7 @@ export class OrganizationService implements IOrganizationService {
       .from("org_memberships")
       .delete()
       .eq("id", membershipId);
-    if (error) throw error;
+    if (error) handleSupabaseError(error);
   }
   async transferOwnership(orgId: string, newManagerId: string): Promise<void> {
     if (!(await isManager(orgId)))
@@ -131,7 +131,8 @@ export class OrganizationService implements IOrganizationService {
       .from("organizations")
       .update({ manager_id: newManagerId })
       .eq("id", orgId);
-    if (error) throw error;
+
+    if (error) handleSupabaseError(error);
   }
 
   async updateOrganizationImage(
@@ -145,7 +146,7 @@ export class OrganizationService implements IOrganizationService {
       .from("organizations")
       .update({ image: imageKey })
       .eq("id", orgId);
-    if (error) throw error;
+    if (error) handleSupabaseError(error);
   }
 
   // Helpers

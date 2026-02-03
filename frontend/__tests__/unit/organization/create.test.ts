@@ -1,14 +1,14 @@
 import { organizationService } from "../../../src/lib/services/organization";
 import { authService } from "../../../src/lib/services/auth";
 import { supabase } from "../../../src/lib/supabase/supabase";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("Create Organization Tests", () => {
   let testUser: { email: string; id: string };
 
   beforeEach(async () => {
     // Create a fresh user for each test
-    const timestamp = Date.now();
-    const email = `testuser_${timestamp}@example.com`;
+    const email = `testuser_${generateUUID()}@example.com`;
     const password = "password123";
 
     await authService.logout();
@@ -20,8 +20,7 @@ describe("Create Organization Tests", () => {
   });
 
   it("create organization with valid name should succeed", async () => {
-    const randomStr = Math.random().toString(36).substring(7);
-    const name = `Test_Organization_${randomStr}`;
+    const name = `Test_Org_${generateUUID().substring(0, 10)}`;
 
     expect(testUser).toBeDefined();
     expect(testUser.id).toBeDefined();
@@ -70,7 +69,7 @@ describe("Create Organization Tests", () => {
   });
 
   it("create organization with an invalid user id should fail", async () => {
-    const name = `Test_Organization_${Math.random().toString(36).substring(7)}`;
+    const name = `Test_Org_${generateUUID().substring(0, 10)}`;
     const invalidUserId = "invalid-user-id";
 
     await expect(

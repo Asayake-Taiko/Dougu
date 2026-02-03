@@ -1,11 +1,11 @@
 import { organizationService } from "../../../src/lib/services/organization";
 import { authService } from "../../../src/lib/services/auth";
 import { supabase } from "../../../src/lib/supabase/supabase";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("Create Storage Tests", () => {
   beforeEach(async () => {
-    const timestamp = Date.now();
-    const email = `testuser_${timestamp}@example.com`;
+    const email = `testuser_${generateUUID()}@example.com`;
     const password = "password123";
 
     await authService.logout();
@@ -14,7 +14,7 @@ describe("Create Storage Tests", () => {
 
   it("create storage with valid orgId should succeed", async () => {
     // 1. Create an organization
-    const orgName = `Storage_Test_Org_${Math.random().toString(36).substring(7)}`;
+    const orgName = `Storage_Test_Org_${generateUUID().substring(0, 10)}`;
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -66,7 +66,7 @@ describe("Create Storage Tests", () => {
 
   it("only managers should be able to create storages", async () => {
     // 1. User 1 creates an organization
-    const orgName = `Manager_Only_Storage_${Math.random().toString(36).substring(7)}`;
+    const orgName = `Manager_Only_Storage_${generateUUID().substring(0, 10)}`;
     const {
       data: { user: user1 },
     } = await supabase.auth.getUser();
@@ -76,7 +76,7 @@ describe("Create Storage Tests", () => {
     );
 
     // 2. Register and Login as User 2
-    const user2Email = `user2_${Math.random().toString(36).substring(7)}@test.com`;
+    const user2Email = `user2_${generateUUID()}@test.com`;
     await authService.register(user2Email, "User Two", "password123");
     await authService.login(user2Email, "password123");
 
@@ -93,7 +93,7 @@ describe("Create Storage Tests", () => {
 
   it("create a storage for a valid organization you are not a part of should fail", async () => {
     // 1. User 1 creates an organization
-    const orgName = `Not_Part_Of_Org_${Math.random().toString(36).substring(7)}`;
+    const orgName = `Not_Part_Of_Org_${generateUUID().substring(0, 10)}`;
     const {
       data: { user: user1 },
     } = await supabase.auth.getUser();
@@ -103,7 +103,7 @@ describe("Create Storage Tests", () => {
     );
 
     // 2. Register and Login as User 2
-    const user2Email = `user2_${Math.random().toString(36).substring(7)}@test.com`;
+    const user2Email = `user2_${generateUUID()}@test.com`;
     await authService.register(user2Email, "User Two", "password123");
     await authService.login(user2Email, "password123");
 
@@ -119,5 +119,3 @@ describe("Create Storage Tests", () => {
     ).rejects.toThrow("Only managers can create storage.");
   });
 });
-
-// only managers should be able to create storages

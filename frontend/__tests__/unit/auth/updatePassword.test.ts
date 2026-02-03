@@ -1,4 +1,5 @@
 import { authService } from "../../../src/lib/services/auth";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("AuthService Update Password Tests", () => {
   beforeEach(async () => {
@@ -6,7 +7,7 @@ describe("AuthService Update Password Tests", () => {
   });
 
   it("update password flow", async () => {
-    const randomStr = Math.random().toString(36).substring(7);
+    const randomStr = generateUUID();
     const email = `pwd-update-${randomStr}@example.com`;
     const oldPassword = "oldPassword123";
     const newPassword = "newPassword123";

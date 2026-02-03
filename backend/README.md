@@ -7,20 +7,10 @@ npx supabase init
 npx supabase link
 ```
 
-Start the supabase server
+Start the backend
 ```
-npx supabase start -x vector
-```
-
-Start powersync 
-```
-docker compose up
-```
-
-# Testing
-Make sure the supabase and powersync are running, then run
-```
-npm run test
+npx supabase start -x vector // supabase backend
+docker compose up            // powersync
 ```
 
 # Closing

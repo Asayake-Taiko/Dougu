@@ -19,9 +19,14 @@ The codebase is designed to isolate the frontend and backend. To begin working o
 5. `cd frontend` and run `npm install`
 6. Once installed, you can run the app with `npx expo run`
 
+## Testing
+Make sure you have a local supabase and powersync server running (see backend/README.md), then run
+```
+npm test
+```
+
 ## Contributions
 
 The app was designed by [Neela Kolte](https://www.behance.net/neelakolte), and these are some words from her:
 
 > "Kane and I designed Dougu to assist with keeping track of our taiko club's equipment as it was strewn about the city in our club members' cars. When I approached Kane, he already had a basic digital wireframe. I fleshed out his design to prioritize ease of access to self and team equipment, the most frequently used aspects based on how we redistributed equipment after practices. The sheer amount of equipment drivers and equipment was challenging to put on one page without becoming overwhelming for the user, so I designed a horizontal and vertical scrolling list with icons to simplify it
-

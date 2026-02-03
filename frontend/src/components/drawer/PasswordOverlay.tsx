@@ -33,7 +33,7 @@ export default function PasswordOverlay({
   const handleUpdatePassword = async () => {
     try {
       showSpinner();
-      await authService.updatePassword(currPassword, newPassword);
+      await authService.updatePassword(newPassword, confirmPassword);
       setVisible(false);
     } catch (e) {
       Logger.error(e);

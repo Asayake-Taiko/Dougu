@@ -15,7 +15,7 @@ export interface IAuthService {
   updateName(name: string): Promise<void>;
   sendEmailUpdateCode(email: string): Promise<void>;
   confirmEmailUpdate(email: string, code: string): Promise<void>;
-  updatePassword(currentPassword: string, newPassword: string): Promise<void>;
+  updatePassword(newPassword: string, confirmPassword: string): Promise<void>;
   deleteAccount(userId: string): Promise<void>;
 }
 
@@ -54,8 +54,15 @@ export class AuthService implements IAuthService {
   }
 
   async logout(): Promise<void> {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      if (error.message === "Auth session missing!") {
+        return;
+      }
       throw error;
     }
   }
@@ -75,9 +82,6 @@ export class AuthService implements IAuthService {
   ): Promise<void> {
     if (password !== newPassword) {
       throw new Error("Passwords do not match");
-    }
-    if (newPassword.length < 8) {
-      throw new Error("Password must be at least 8 characters long.");
     }
     const { error: otpError } = await supabase.auth.verifyOtp({
       email,
@@ -164,14 +168,11 @@ export class AuthService implements IAuthService {
   }
 
   async updatePassword(
-    currentPassword: string,
     newPassword: string,
+    confirmPassword: string,
   ): Promise<void> {
-    if (currentPassword !== newPassword) {
+    if (newPassword !== confirmPassword) {
       throw new Error("Passwords do not match");
-    }
-    if (newPassword.length < 8) {
-      throw new Error("Password must be at least 8 characters long");
     }
     const { error } = await supabase.auth.updateUser({
       password: newPassword,

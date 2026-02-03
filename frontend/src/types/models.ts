@@ -236,7 +236,7 @@ export class OrgMembership {
   }
 
   async delete() {
-    await organizationService.deleteMembership(this.id);
+    await organizationService.deleteMembership(this.organizationId, this.id);
   }
 }
 

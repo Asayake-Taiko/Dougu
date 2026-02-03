@@ -49,9 +49,9 @@ describe("Organization RLS Permission Tests", () => {
     } = await supabase.auth.getUser();
     memberId = member!.id;
 
-    // Add Member to Org
+    // Member joins Org (Self-service)
     await authService.logout();
-    await authService.login(ownerEmail, ownerPassword);
+    await authService.login(memberEmail, memberPassword);
 
     await supabase.from("org_memberships").insert({
       organization_id: orgId,

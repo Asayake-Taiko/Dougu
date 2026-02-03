@@ -1,11 +1,16 @@
 import { organizationService } from "../../../src/lib/services/organization";
 import { authService } from "../../../src/lib/services/auth";
 import { supabase } from "../../../src/lib/supabase/supabase";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("Delete Organization Tests", () => {
   beforeEach(async () => {
+    const timestamp = Date.now();
+    const email = `testuser_${timestamp}@example.com`;
+    const password = "password123";
+
     await authService.logout();
-    await authService.login("testuser1@gmail.com", "password1");
+    await authService.register(email, "Test User", password);
   });
 
   it("delete organization should succeed and remove from database", async () => {
@@ -42,11 +47,11 @@ describe("Delete Organization Tests", () => {
     expect(deletedOrg).toBeNull();
   });
 
-  it("deleting a non-existent organization should not throw", async () => {
+  it("deleting a non-existent organization should throw", async () => {
     const nonExistentId = "00000000-0000-0000-0000-000000000000";
     await expect(
       organizationService.deleteOrganization(nonExistentId),
-    ).resolves.not.toThrow();
+    ).rejects.toThrow("Only managers can delete organizations.");
   });
 
   it("delete organization should cascade delete related entities", async () => {
@@ -61,7 +66,7 @@ describe("Delete Organization Tests", () => {
     );
 
     // 2. Add extra membership (storage)
-    const storageId = "00000000-0000-0000-0000-000000000001";
+    const storageId = generateUUID();
     await supabase.from("org_memberships").insert({
       id: storageId,
       organization_id: orgId,
@@ -70,7 +75,7 @@ describe("Delete Organization Tests", () => {
     });
 
     // 3. Add a container
-    const containerId = "00000000-0000-0000-0000-000000000002";
+    const containerId = generateUUID();
     await supabase.from("containers").insert({
       id: containerId,
       name: "Test Container",
@@ -78,7 +83,7 @@ describe("Delete Organization Tests", () => {
     });
 
     // 4. Add an equipment item
-    const equipmentId = "00000000-0000-0000-0000-000000000003";
+    const equipmentId = generateUUID();
     await supabase.from("equipment").insert({
       id: equipmentId,
       name: "Test Equipment",
@@ -136,5 +141,35 @@ describe("Delete Organization Tests", () => {
     expect(memberAfter).toBeNull();
     expect(containerAfter).toBeNull();
     expect(equipmentAfter).toBeNull();
+  });
+  it("only the org manager should be able to delete an organization", async () => {
+    // 1. Create an organization as User 1
+    const orgName = `Manager_Only_Delete_${Math.random().toString(36).substring(7)}`;
+    const {
+      data: { user: user1 },
+    } = await supabase.auth.getUser();
+    const { id: orgId } = await organizationService.createOrganization(
+      orgName,
+      user1!.id,
+    );
+
+    // 2. Register and Login as User 2
+    const user2Email = `user2_${Math.random().toString(36).substring(7)}@test.com`;
+    await authService.register(user2Email, "User Two", "password123");
+    await authService.login(user2Email, "password123");
+
+    // 3. Try to delete the organization
+    await expect(organizationService.deleteOrganization(orgId)).rejects.toThrow(
+      "Only managers can delete organizations.",
+    );
+
+    // 4. Verify organization still exists
+    const { data: orgAfter } = await supabase
+      .from("organizations")
+      .select("id")
+      .eq("id", orgId)
+      .maybeSingle();
+
+    expect(orgAfter).not.toBeNull();
   });
 });

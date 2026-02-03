@@ -48,9 +48,9 @@ describe("Equipment RLS Permission Tests", () => {
     } = await supabase.auth.getUser();
     memberId = member!.id;
 
-    // Add Member to Org via Owner
+    // Member joins the Org (Self-service per new RLS)
     await authService.logout();
-    await authService.login(ownerEmail, ownerPassword);
+    await authService.login(memberEmail, memberPassword);
     await supabase.from("org_memberships").insert({
       organization_id: orgId,
       user_id: memberId,
@@ -58,6 +58,9 @@ describe("Equipment RLS Permission Tests", () => {
     });
 
     // Create Equipment (Owner does it)
+    await authService.logout();
+    await authService.login(ownerEmail, ownerPassword);
+
     const { data: equipData } = await supabase
       .from("equipment")
       .insert({

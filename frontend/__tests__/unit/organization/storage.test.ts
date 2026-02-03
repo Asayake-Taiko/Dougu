@@ -4,8 +4,12 @@ import { supabase } from "../../../src/lib/supabase/supabase";
 
 describe("Create Storage Tests", () => {
   beforeEach(async () => {
+    const timestamp = Date.now();
+    const email = `testuser_${timestamp}@example.com`;
+    const password = "password123";
+
     await authService.logout();
-    await authService.login("testuser1@gmail.com", "password1");
+    await authService.register(email, "Test User", password);
   });
 
   it("create storage with valid orgId should succeed", async () => {
@@ -57,6 +61,63 @@ describe("Create Storage Tests", () => {
         "default",
         "details",
       ),
-    ).rejects.toThrow("Organization not found");
+    ).rejects.toThrow("Only managers can create storage.");
+  });
+
+  it("only managers should be able to create storages", async () => {
+    // 1. User 1 creates an organization
+    const orgName = `Manager_Only_Storage_${Math.random().toString(36).substring(7)}`;
+    const {
+      data: { user: user1 },
+    } = await supabase.auth.getUser();
+    const { id: orgId } = await organizationService.createOrganization(
+      orgName,
+      user1!.id,
+    );
+
+    // 2. Register and Login as User 2
+    const user2Email = `user2_${Math.random().toString(36).substring(7)}@test.com`;
+    await authService.register(user2Email, "User Two", "password123");
+    await authService.login(user2Email, "password123");
+
+    // 3. Try to create storage for User 1's org
+    await expect(
+      organizationService.createStorage(
+        orgId,
+        "Hacked Storage",
+        "default",
+        "details",
+      ),
+    ).rejects.toThrow("Only managers can create storage.");
+  });
+
+  it("create a storage for a valid organization you are not a part of should fail", async () => {
+    // 1. User 1 creates an organization
+    const orgName = `Not_Part_Of_Org_${Math.random().toString(36).substring(7)}`;
+    const {
+      data: { user: user1 },
+    } = await supabase.auth.getUser();
+    const { id: orgId } = await organizationService.createOrganization(
+      orgName,
+      user1!.id,
+    );
+
+    // 2. Register and Login as User 2
+    const user2Email = `user2_${Math.random().toString(36).substring(7)}@test.com`;
+    await authService.register(user2Email, "User Two", "password123");
+    await authService.login(user2Email, "password123");
+
+    // 3. Try to create storage for User 1's org
+    // We expect this to fail because User 2 is not a manager (they aren't even a member)
+    await expect(
+      organizationService.createStorage(
+        orgId,
+        "Hacked Storage",
+        "default",
+        "details",
+      ),
+    ).rejects.toThrow("Only managers can create storage.");
   });
 });
+
+// only managers should be able to create storages

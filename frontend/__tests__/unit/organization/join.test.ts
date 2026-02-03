@@ -66,7 +66,7 @@ describe("Join Organization Tests", () => {
     const invalidUserId = "invalid-user-id";
     await expect(
       organizationService.joinOrganization(testOrgCode, invalidUserId),
-    ).rejects.toThrow("Invalid user id!");
+    ).rejects.toThrow("Invalid ID format.");
   });
 
   it("joining an organization the user is already a member of should fail", async () => {

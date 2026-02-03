@@ -4,6 +4,7 @@ import { EquipmentRecord, ContainerRecord } from "../../types/db";
 import { Equipment, Container } from "../../types/models";
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
 import { Queries } from "../powersync/queries";
+import { handleSupabaseError } from "./util";
 
 export interface IEquipmentService {
   deleteEquipment(equipment: Equipment): Promise<void>;
@@ -33,7 +34,7 @@ export class EquipmentService implements IEquipmentService {
   async deleteEquipment(equipment: Equipment): Promise<void> {
     const ids = equipment.records.map((r) => r.id);
     const { error } = await supabase.from("equipment").delete().in("id", ids);
-    if (error) throw error;
+    if (error) handleSupabaseError(error);
   }
 
   async deleteContainer(container: Container): Promise<void> {
@@ -41,7 +42,7 @@ export class EquipmentService implements IEquipmentService {
       .from("containers")
       .delete()
       .eq("id", container.id);
-    if (conError) throw conError;
+    if (conError) handleSupabaseError(conError);
   }
 
   async createEquipment(
@@ -56,7 +57,7 @@ export class EquipmentService implements IEquipmentService {
     }));
 
     const { error } = await supabase.from("equipment").insert(items);
-    if (error) throw error;
+    if (error) handleSupabaseError(error);
   }
 
   async createContainer(
@@ -71,7 +72,7 @@ export class EquipmentService implements IEquipmentService {
     }));
 
     const { error } = await supabase.from("containers").insert(items);
-    if (error) throw error;
+    if (error) handleSupabaseError(error);
   }
 
   async reassignEquipment(

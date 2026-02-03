@@ -1,5 +1,5 @@
-import React from "react";
-import { Text, View, Alert, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { Text, View, StyleSheet } from "react-native";
 import { MemberProfileScreenProps } from "../../types/navigation";
 import ProfileDisplay from "../../components/ProfileDisplay";
 import { ProfileStyles } from "../../styles/ProfileStyles";
@@ -9,6 +9,7 @@ import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
 import { useNavigation } from "@react-navigation/native";
+import ConfirmationModal from "../../components/member/ConfirmationModal";
 
 export default function MemberProfileScreen({
   route,
@@ -19,59 +20,72 @@ export default function MemberProfileScreen({
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
 
+  const [modalConfig, setModalConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => Promise<void>;
+    isDestructive?: boolean;
+    confirmText?: string;
+  }>({
+    visible: false,
+    title: "",
+    message: "",
+    onConfirm: async () => {},
+  });
+
   if (!member || !organization) return null;
 
+  const showKickConfirmation = () => {
+    setModalConfig({
+      visible: true,
+      title: "Kick Member",
+      message: `Are you sure you want to kick ${member.name}? This will delete all equipment and containers assigned to them in this organization.`,
+      confirmText: "Kick",
+      isDestructive: true,
+      onConfirm: handleKick,
+    });
+  };
+
+  const showTransferConfirmation = () => {
+    setModalConfig({
+      visible: true,
+      title: "Transfer Ownership",
+      message: `Are you sure you want to make ${member.name} the manager? You will no longer be the manager.`,
+      confirmText: "Transfer",
+      isDestructive: false,
+      onConfirm: handleTransfer,
+    });
+  };
+
   const handleKick = async () => {
-    Alert.alert(
-      "Kick Member",
-      `Are you sure you want to kick ${member.name}? This will delete all equipment and containers assigned to them in this organization.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Kick",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              showSpinner();
-              await member.delete();
-              setMessage("Member kicked successfully.");
-              navigation.goBack();
-            } catch (error) {
-              Logger.error("Error deleting member:", error);
-              setMessage("Failed to kick member. Please try again.");
-            } finally {
-              hideSpinner();
-            }
-          },
-        },
-      ],
-    );
+    try {
+      showSpinner();
+      await member.delete();
+      setMessage("Member kicked successfully.");
+      navigation.goBack();
+    } catch (error: any) {
+      Logger.error("Error deleting member:", error);
+      setMessage(error.message || "Failed to kick member. Please try again.");
+    } finally {
+      hideSpinner();
+      setModalConfig((prev) => ({ ...prev, visible: false }));
+    }
   };
 
   const handleTransfer = async () => {
-    Alert.alert(
-      "Transfer Ownership",
-      `Are you sure you want to make ${member.name} the manager? You will no longer be the manager.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Transfer",
-          onPress: async () => {
-            try {
-              showSpinner();
-              await organization.transferOwnership(member.userId!);
-              setMessage(`${member.name} is now the manager.`);
-              navigation.goBack();
-            } catch (error) {
-              Logger.error("Error transferring ownership:", error);
-              setMessage("Failed to transfer ownership. Please try again.");
-            } finally {
-              hideSpinner();
-            }
-          },
-        },
-      ],
-    );
+    try {
+      showSpinner();
+      await organization.transferOwnership(member.userId!);
+      setMessage(`${member.name} is now the manager.`);
+      navigation.goBack();
+    } catch (error: any) {
+      Logger.error("Error transferring ownership:", error);
+      setMessage(error.message || "Failed to transfer ownership.");
+    } finally {
+      hideSpinner();
+      setModalConfig((prev) => ({ ...prev, visible: false }));
+    }
   };
 
   return (
@@ -88,17 +102,27 @@ export default function MemberProfileScreen({
         </View>
       )}
       <PressableOpacity
-        onPress={handleTransfer}
+        onPress={showTransferConfirmation}
         style={ProfileStyles.buttonContainer}
       >
         <Text style={ProfileStyles.buttonText}>Make Manager</Text>
       </PressableOpacity>
       <PressableOpacity
-        onPress={handleKick}
+        onPress={showKickConfirmation}
         style={[ProfileStyles.buttonContainer, styles.kickButton]}
       >
         <Text style={ProfileStyles.buttonText}>Kick</Text>
       </PressableOpacity>
+
+      <ConfirmationModal
+        visible={modalConfig.visible}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig((prev) => ({ ...prev, visible: false }))}
+        confirmText={modalConfig.confirmText}
+        isDestructive={modalConfig.isDestructive}
+      />
     </View>
   );
 }

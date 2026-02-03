@@ -92,4 +92,21 @@ describe("Organization Transfer Tests", () => {
       organizationService.transferOwnership(orgId, outsider!.id),
     ).rejects.toThrow();
   });
+
+  it("manager cannot transfer an organization to a storage", async () => {
+    // Create a storage
+    const storageId = generateUUID();
+    await supabase.from("org_memberships").insert({
+      id: storageId,
+      organization_id: orgId,
+      type: "STORAGE",
+      storage_name: "Test Storage",
+    });
+
+    await authService.login(owner.email, "password123");
+
+    await expect(
+      organizationService.transferOwnership(orgId, storageId),
+    ).rejects.toThrow("Only users can be owners.");
+  });
 });

@@ -127,6 +127,20 @@ export class OrganizationService implements IOrganizationService {
     if (!(await isManager(orgId)))
       throw new Error("Only managers can transfer ownership.");
 
+    // Check if the target is a user member of the organization
+    const { data: membership, error: membershipError } = await supabase
+      .from("org_memberships")
+      .select("type")
+      .eq("organization_id", orgId)
+      .or(`user_id.eq.${newManagerId},id.eq.${newManagerId}`)
+      .maybeSingle();
+
+    if (membershipError) handleSupabaseError(membershipError);
+    if (!membership)
+      throw new Error("Target user is not a member of this organization.");
+    if (membership.type === "STORAGE")
+      throw new Error("Only users can be owners.");
+
     const { error } = await supabase
       .from("organizations")
       .update({ manager_id: newManagerId })

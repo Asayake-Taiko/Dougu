@@ -22,7 +22,7 @@ as $$
     select 1
     from org_memberships
     where organization_id = _org_id
-    and user_id = auth.uid()
+    and user_id = (select auth.uid())
   );
 $$;
 
@@ -37,7 +37,7 @@ as $$
     select 1
     from organizations
     where id = _org_id
-    and manager_id = auth.uid()
+    and manager_id = (select auth.uid())
   );
 $$;
 
@@ -108,29 +108,40 @@ BEGIN
 END $$;
 
 
--- 3. POLICIES: PROFILES
-create policy "Users can view own profile"
-on "public"."profiles" for select to authenticated
-using ( auth.uid() = id );
+-- 2.5 INDEXES
+-- Optimize Foreign Key lookups
+CREATE INDEX IF NOT EXISTS idx_containers_organization_id ON public.containers(organization_id);
+CREATE INDEX IF NOT EXISTS idx_containers_assigned_to ON public.containers(assigned_to);
 
-create policy "Users can view profiles of shared org members"
+CREATE INDEX IF NOT EXISTS idx_equipment_organization_id ON public.equipment(organization_id);
+CREATE INDEX IF NOT EXISTS idx_equipment_container_id ON public.equipment(container_id);
+CREATE INDEX IF NOT EXISTS idx_equipment_assigned_to ON public.equipment(assigned_to);
+
+CREATE INDEX IF NOT EXISTS idx_org_memberships_user_id ON public.org_memberships(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_organizations_manager_id ON public.organizations(manager_id);
+
+
+-- 3. POLICIES: PROFILES
+create policy "Users can view accessible profiles"
 on "public"."profiles" for select to authenticated
 using (
-  exists (
+  (select auth.uid()) = id
+  OR EXISTS (
     select 1 from public.org_memberships my_orgs
     join public.org_memberships other_orgs on my_orgs.organization_id = other_orgs.organization_id
-    where my_orgs.user_id = auth.uid()
+    where my_orgs.user_id = (select auth.uid())
     and other_orgs.user_id = profiles.id
   )
 );
 
 create policy "Users can update own profile"
 on "public"."profiles" for update to authenticated
-using ( auth.uid() = id ) with check ( auth.uid() = id );
+using ( (select auth.uid()) = id ) with check ( (select auth.uid()) = id );
 
 create policy "Users can insert own profile"
 on "public"."profiles" for insert to authenticated
-with check ( auth.uid() = id );
+with check ( (select auth.uid()) = id );
 
 
 -- 4. POLICIES: ORGANIZATIONS
@@ -140,11 +151,11 @@ using ( true );
 
 create policy "Users can create organizations as manager"
 on "public"."organizations" for insert to authenticated
-with check ( auth.uid() = manager_id );
+with check ( (select auth.uid()) = manager_id );
 
 create policy "Manager can update organization"
 on "public"."organizations" for update to authenticated
-using ( auth.uid() = manager_id )
+using ( (select auth.uid()) = manager_id )
 with check (
   EXISTS (
     SELECT 1 FROM public.org_memberships m
@@ -155,18 +166,18 @@ with check (
 
 create policy "Manager can delete organization"
 on "public"."organizations" for delete to authenticated
-using ( auth.uid() = manager_id );
+using ( (select auth.uid()) = manager_id );
 
 
 -- 5. POLICIES: ORG MEMBERSHIPS
 create policy "Members can view other members in same org"
 on "public"."org_memberships" for select to authenticated
-using ( public.is_org_member(organization_id) OR user_id = auth.uid() );
+using ( public.is_org_member(organization_id) OR user_id = (select auth.uid()) );
 
 create policy "Users can join or managers create storage"
 on "public"."org_memberships" for insert to authenticated
 with check (
-  (type = 'USER' AND auth.uid() = user_id) OR
+  (type = 'USER' AND (select auth.uid()) = user_id) OR
   (type = 'STORAGE' AND public.is_org_manager(organization_id))
 );
 

@@ -84,9 +84,9 @@ export default function CreateEquipmentScreen() {
       onChangeName("");
       onChangeQuantity("");
       onChangeDetails("");
-    } catch (error) {
+    } catch (error: any) {
       Logger.error("Failed to create items", error);
-      setMessage("Failed to create items.");
+      setMessage(error.message || "Failed to create items.");
     } finally {
       hideSpinner();
     }

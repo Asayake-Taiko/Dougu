@@ -42,7 +42,6 @@ export default function CreateStorageScreen() {
 
     try {
       showSpinner();
-
       await organizationService.createStorage(
         organization.id,
         name,
@@ -54,9 +53,11 @@ export default function CreateStorageScreen() {
       onChangeName("");
       onChangeDetails("");
       navigation.goBack();
-    } catch (error) {
+    } catch (error: any) {
       Logger.error("Error creating storage:", error);
-      setMessage("Failed to create storage. Please try again.");
+      setMessage(
+        error.message || "Failed to create storage. Please try again.",
+      );
     } finally {
       hideSpinner();
     }

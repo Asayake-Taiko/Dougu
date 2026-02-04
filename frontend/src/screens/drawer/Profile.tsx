@@ -3,9 +3,9 @@ import { View, Text } from "react-native";
 import { useAuth } from "../../lib/context/AuthContext";
 import { ProfileStyles } from "../../styles/ProfileStyles";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import ProfileDisplay from "../../components/ProfileDisplay";
+import Display from "../../components/Display";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import ProfileOverlay from "../../components/drawer/ProfileOverlay";
+import ImageEditingOverlay from "../../components/ImageEditingOverlay";
 import NameOverlay from "../../components/drawer/NameOverlay";
 import EmailOverlay from "../../components/drawer/EmailOverlay";
 import PasswordOverlay from "../../components/drawer/PasswordOverlay";
@@ -20,6 +20,7 @@ export default function ProfileScreen() {
   const { session, profile } = useAuth();
 
   const [profileImage, setProfileImage] = useState("default");
+  const [profileColor, setProfileColor] = useState("#791111");
   const [profileVisible, setProfileVisible] = useState(false);
   const [nameVisible, setNameVisible] = useState(false);
   const [emailVisible, setEmailVisible] = useState(false);
@@ -31,6 +32,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     if (profile) {
       setProfileImage(profile.profileImage || "default");
+      setProfileColor(profile.color || "#791111");
     }
   }, [profile]);
 
@@ -51,13 +53,26 @@ export default function ProfileScreen() {
     }
   }
 
+  const handleSave = async (newImageKey: string, newColor: string) => {
+    try {
+      showSpinner();
+      await authService.updateProfile(newImageKey, newColor);
+      setMessage("Profile updated successfully");
+    } catch (error: any) {
+      setMessage(error.message || "Failed to update profile");
+      Logger.error(error);
+    } finally {
+      hideSpinner();
+    }
+  };
+
   return (
     <View style={ProfileStyles.container}>
       <PressableOpacity
         style={ProfileStyles.profile}
         onPress={() => setProfileVisible(true)}
       >
-        <ProfileDisplay isMini={false} profileKey={profile?.profileImage} />
+        <Display type="User" isMini={false} imageKey={profile?.profileImage} />
         <View style={ProfileStyles.editButton}>
           <FontAwesome name="pencil" size={20} />
         </View>
@@ -106,11 +121,12 @@ export default function ProfileScreen() {
           <MaterialCommunityIcons name="chevron-right" size={30} />
         </View>
       </PressableOpacity>
-      <ProfileOverlay
+      <ImageEditingOverlay
         visible={profileVisible}
         setVisible={setProfileVisible}
-        profileKey={profileImage}
-        setProfileKey={setProfileImage}
+        currentImageKey={profileImage}
+        currentColor={profileColor}
+        onSave={handleSave}
       />
       <NameOverlay visible={nameVisible} setVisible={setNameVisible} />
       <PasswordOverlay

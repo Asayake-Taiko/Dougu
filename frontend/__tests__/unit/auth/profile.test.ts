@@ -46,7 +46,7 @@ describe("AuthService Profile Update Tests", () => {
 
     // 2. Update profile image
     await expect(
-      authService.updateProfileImage(newImage),
+      authService.updateProfile(newImage, "default"),
     ).resolves.not.toThrow();
 
     // 3. Verify image update in DB

@@ -7,12 +7,11 @@ import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { PressableOpacity } from "../../components/PressableOpacity";
-import EquipmentDisplay from "../../components/member/EquipmentDisplay";
-import ContainerDisplay from "../../components/member/ContainerDisplay";
+import Display from "../../components/Display";
 import { Colors } from "../../styles/global";
 import { OrgMembershipRecord } from "../../types/db";
 import { Hex } from "../../types/other";
-import EquipmentImageOverlay from "../../components/organization/EquipmentImageOverlay";
+import ImageEditingOverlay from "../../components/ImageEditingOverlay";
 import { Logger } from "../../lib/utils/Logger";
 import { equipmentService } from "../../lib/services/equipment";
 
@@ -92,38 +91,31 @@ export default function CreateEquipmentScreen() {
     }
   };
 
+  const handleSaveImage = async (newImageKey: string, newColor: string) => {
+    setImageKey(newImageKey);
+    setItemColor(newColor as Hex);
+    return Promise.resolve();
+  };
+
   return (
     <View style={styles.container}>
-      <EquipmentImageOverlay
+      <ImageEditingOverlay
         visible={overlayVisible}
         setVisible={setOverlayVisible}
-        setImageKey={setImageKey}
-        color={itemColor}
-        setColor={setItemColor}
-        displayComponent={
-          <>
-            {index === 0 ? (
-              <EquipmentDisplay
-                color={itemColor}
-                imageKey={imageKey}
-                isMini={false}
-              />
-            ) : (
-              <ContainerDisplay color={itemColor} />
-            )}
-          </>
-        }
-        isContainer={index === 1}
+        currentImageKey={imageKey}
+        currentColor={itemColor}
+        onSave={handleSaveImage}
       />
       <View style={styles.topRow}>
         {index === 0 ? (
-          <EquipmentDisplay
+          <Display
+            type="Item"
             color={itemColor}
             imageKey={imageKey}
             isMini={false}
           />
         ) : (
-          <ContainerDisplay color={itemColor} />
+          <Display type="Item" color={itemColor} isMini={false} />
         )}
       </View>
       <View style={styles.centerContainer}>

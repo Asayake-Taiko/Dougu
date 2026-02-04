@@ -81,10 +81,10 @@ VALUES
 );
 
 -- 2. Create Organizations
-INSERT INTO public.organizations (id, name, access_code, manager_id, image)
+INSERT INTO public.organizations (id, name, access_code, manager_id, image, color)
 VALUES
-  ('c3333333-3333-3333-3333-333333333333', 'Asayake_Taiko', 'ASAYAKE_2026', 'a1111111-1111-1111-1111-111111111111', 'asayake'),
-  ('d4444444-4444-4444-4444-444444444444', 'Kyodo Taiko', 'KYODO_2026', 'a2222222-2222-2222-2222-222222222222', 'default');
+  ('c3333333-3333-3333-3333-333333333333', 'Asayake_Taiko', 'ASAYAKE_2026', 'a1111111-1111-1111-1111-111111111111', 'asayake', '#791111'),
+  ('d4444444-4444-4444-4444-444444444444', 'Kyodo Taiko', 'KYODO_2026', 'a2222222-2222-2222-2222-222222222222', 'default', '#791111');
 
 -- 3. Add Additional Memberships
 INSERT INTO public.org_memberships (id, organization_id, user_id, type, details)

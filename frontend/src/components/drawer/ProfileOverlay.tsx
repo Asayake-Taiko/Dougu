@@ -1,6 +1,6 @@
 import React from "react";
 import { profileMapping } from "../../lib/utils/ImageMapping";
-import ProfileDisplay from "../ProfileDisplay";
+import Display from "../Display";
 import { authService } from "../../lib/services/auth";
 import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
@@ -49,7 +49,7 @@ export default function ProfileOverlay({
       setVisible={setVisible}
       onSave={handleUpdateProfile}
       displayComponent={
-        <ProfileDisplay isMini={false} profileKey={profileKey} />
+        <Display type="User" isMini={false} imageKey={profileKey} />
       }
       iconMenuData={profileMapping}
       handleSet={(profileData) => setProfileKey(profileData)}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { MemberProfileScreenProps } from "../../types/navigation";
-import ProfileDisplay from "../../components/ProfileDisplay";
+import Display from "../../components/Display";
 import { ProfileStyles } from "../../styles/ProfileStyles";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useMembership } from "../../lib/context/MembershipContext";
@@ -31,7 +31,7 @@ export default function MemberProfileScreen({
     visible: false,
     title: "",
     message: "",
-    onConfirm: async () => {},
+    onConfirm: async () => { },
   });
 
   if (!member || !organization) return null;
@@ -91,7 +91,7 @@ export default function MemberProfileScreen({
   return (
     <View style={ProfileStyles.container}>
       <View style={ProfileStyles.profile}>
-        <ProfileDisplay isMini={false} profileKey={member.profile} />
+        <Display type="User" isMini={false} imageKey={member.profile} />
       </View>
       <View style={ProfileStyles.centerRow}>
         <Text style={ProfileStyles.text}>{member.name}</Text>

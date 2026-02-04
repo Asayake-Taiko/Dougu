@@ -7,7 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { OrgMembership } from "../../types/models";
 import { ProfileStackParamList } from "../../types/navigation";
-import ProfileDisplay from "../ProfileDisplay";
+import Display from "../Display";
 import { PressableOpacity } from "../PressableOpacity";
 
 /* 
@@ -31,7 +31,7 @@ export default function MemberRow({ item }: { item: OrgMembership }) {
   return (
     <View style={userStorage.row}>
       <View style={userStorage.profile}>
-        <ProfileDisplay isMini={true} profileKey={item.profile} />
+        <Display type="User" isMini={true} imageKey={item.profile} />
       </View>
       <View style={userStorage.nameRow}>
         <Text style={userStorage.name}>{item.name}</Text>

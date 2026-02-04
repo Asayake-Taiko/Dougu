@@ -4,9 +4,10 @@ import { Image } from "expo-image";
 import { AntDesign } from "@expo/vector-icons";
 import { InfoScreenProps } from "../../types/navigation";
 import { useMembership } from "../../lib/context/MembershipContext";
-import OrgImageOverlay from "../../components/organization/OrgImageOverlay";
+import ImageEditingOverlay from "../../components/ImageEditingOverlay";
 import { orgMapping } from "../../lib/utils/ImageMapping";
 import { DisplayStyles } from "../../styles/Display";
+import { useModal } from "../../lib/context/ModalContext";
 
 /*
   InfoScreen displays the organization's name, access code, and offers
@@ -15,12 +16,29 @@ import { DisplayStyles } from "../../styles/Display";
 */
 export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
   const { organization } = useMembership();
+  const { setMessage } = useModal();
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [imageKey, setImageKey] = useState("default");
+  const [color, setColor] = useState("#791111");
 
   useEffect(() => {
-    if (organization) setImageKey(organization.image);
+    if (organization) {
+      setImageKey(organization.image);
+      setColor(organization.color);
+    }
   }, [organization]);
+
+  const handleSave = async (newImageKey: string, newColor: string) => {
+    try {
+      if (!organization) return;
+      await organization.updateImage(newImageKey, newColor);
+      setImageKey(newImageKey);
+      setColor(newColor);
+      setMessage("Organization updated successfully");
+    } catch (error: any) {
+      setMessage(error.message || "Failed to update organization");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -28,7 +46,12 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
         onPress={() => setOverlayVisible(true)}
         style={styles.imageContainer}
       >
-        <Image source={orgMapping[imageKey]} style={DisplayStyles.image} />
+        <TouchableOpacity
+          onPress={() => setOverlayVisible(true)}
+          style={styles.imageContainer}
+        >
+          <Image source={orgMapping[imageKey]} style={DisplayStyles.image} />
+        </TouchableOpacity>
       </TouchableOpacity>
       <View style={styles.row}>
         <Text style={[styles.rowHeader, { flex: 2 }]}>Name</Text>
@@ -85,11 +108,12 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
         <Text style={styles.deleteText}>Delete Org</Text>
       </TouchableOpacity>
 
-      <OrgImageOverlay
+      <ImageEditingOverlay
         visible={overlayVisible}
         setVisible={setOverlayVisible}
-        imageKey={imageKey}
-        setImageKey={setImageKey}
+        currentImageKey={imageKey}
+        currentColor={color}
+        onSave={handleSave}
       />
     </View>
   );

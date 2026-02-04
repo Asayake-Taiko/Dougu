@@ -140,4 +140,14 @@ const orgMapping: { [key: string]: ImageSourcePropType } = new Proxy(
   },
 );
 
-export { iconMapping, profileMapping, orgMapping };
+export {
+  iconMapping,
+  profileMapping,
+  orgMapping,
+  drums,
+  stands,
+  clothing,
+  other,
+  baseProfileMapping,
+  baseOrgMapping,
+};

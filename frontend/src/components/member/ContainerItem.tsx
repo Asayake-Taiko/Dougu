@@ -5,7 +5,7 @@ import { Container } from "../../types/models";
 import { Item } from "../../types/other";
 import { chunkArray } from "../../lib/utils/EquipmentUtils";
 import { ItemStyles } from "../../styles/ItemStyles";
-import EquipmentDisplay from "./EquipmentDisplay";
+import Display from "../Display";
 import { useEquipment } from "../../lib/context/EquipmentContext";
 
 /*
@@ -61,7 +61,8 @@ export default function ContainerItem({
                     key={equip.id}
                     style={ItemStyles.equipmentItemContainer}
                   >
-                    <EquipmentDisplay
+                    <Display
+                      type="Item"
                       imageKey={equip.image}
                       isMini={true}
                       color={equip.color}

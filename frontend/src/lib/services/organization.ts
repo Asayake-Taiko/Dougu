@@ -20,7 +20,11 @@ export interface IOrganizationService {
   ): Promise<void>;
   deleteMembership(orgId: string, membershipId: string): Promise<void>;
   transferOwnership(orgId: string, newManagerId: string): Promise<void>;
-  updateOrganizationImage(orgId: string, imageKey: string): Promise<void>;
+  updateOrganizationImage(
+    orgId: string,
+    imageKey: string,
+    color: string,
+  ): Promise<void>;
 }
 
 export class OrganizationService implements IOrganizationService {
@@ -45,6 +49,7 @@ export class OrganizationService implements IOrganizationService {
       access_code: code,
       manager_id: userId,
       image: "default",
+      color: "#791111",
       created_at: new Date().toISOString(),
     });
 
@@ -152,13 +157,14 @@ export class OrganizationService implements IOrganizationService {
   async updateOrganizationImage(
     orgId: string,
     imageKey: string,
+    color: string,
   ): Promise<void> {
     if (!(await isManager(orgId)))
       throw new Error("Only managers can update organization images.");
 
     const { error } = await supabase
       .from("organizations")
-      .update({ image: imageKey })
+      .update({ image: imageKey, color })
       .eq("id", orgId);
     if (error) handleSupabaseError(error);
   }

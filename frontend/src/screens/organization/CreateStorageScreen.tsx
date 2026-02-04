@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { ProfileStyles } from "../../styles/ProfileStyles";
-import ProfileDisplay from "../../components/ProfileDisplay";
+import Display from "../../components/Display";
 import ProfileOverlay from "../../components/drawer/ProfileOverlay";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
@@ -69,7 +69,7 @@ export default function CreateStorageScreen() {
         style={ProfileStyles.profile}
         onPress={() => setProfileVisible(true)}
       >
-        <ProfileDisplay isMini={false} profileKey={profileKey} />
+        <Display type="User" isMini={false} imageKey={profileKey} />
         <View style={ProfileStyles.editButton}>
           <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
         </View>

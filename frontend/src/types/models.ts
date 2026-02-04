@@ -180,9 +180,12 @@ export class Organization {
   get image() {
     return this.organization.image;
   }
+  get color() {
+    return this.organization.color;
+  }
 
-  async updateImage(newImage: string) {
-    await organizationService.updateOrganizationImage(this.id, newImage);
+  async updateImage(newImage: string, color: string) {
+    await organizationService.updateOrganizationImage(this.id, newImage, color);
   }
 
   async delete() {
@@ -256,6 +259,9 @@ export class Profile {
   }
   get profileImage() {
     return this.data.profile_image;
+  }
+  get color() {
+    return this.data.color;
   }
 
   getRecord() {

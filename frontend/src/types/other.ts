@@ -9,3 +9,6 @@ export interface OrgOwnership {
   membership: OrgMembership;
   items: Item[];
 }
+
+// the type of an iamge
+export type DisplayType = "User" | "Org" | "Item";

@@ -10,14 +10,20 @@ npx supabase link
 Start the backend
 ```
 npx supabase start -x vector // supabase backend
-docker compose up            // powersync
+docker compose up -d           // powersync
 ```
 
 # Closing
 Close supabase and powersync
 ```
 npx supabase stop
-docker compose down
+docker compose down --remove-orphans -v
+```
+
+# Cleanup
+If you encounter "No such container" or other Docker state issues, run:
+```
+./cleanup.sh
 ```
 
 # Other

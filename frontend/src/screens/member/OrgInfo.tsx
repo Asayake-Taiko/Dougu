@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Image } from "expo-image";
+import Display from "../../components/Display";
+import { useModal } from "../../lib/context/ModalContext";
 import { AntDesign } from "@expo/vector-icons";
 import { InfoScreenProps } from "../../types/navigation";
 import { useMembership } from "../../lib/context/MembershipContext";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
-import { orgMapping } from "../../lib/utils/ImageMapping";
-import { DisplayStyles } from "../../styles/Display";
-import { useModal } from "../../lib/context/ModalContext";
 
 /*
   InfoScreen displays the organization's name, access code, and offers
@@ -42,17 +40,15 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => setOverlayVisible(true)}
-        style={styles.imageContainer}
-      >
-        <TouchableOpacity
+      <View style={styles.imageContainer}>
+        <Display
+          type="Org"
+          imageKey={imageKey}
+          color={color}
+          isMini={false}
           onPress={() => setOverlayVisible(true)}
-          style={styles.imageContainer}
-        >
-          <Image source={orgMapping[imageKey]} style={DisplayStyles.image} />
-        </TouchableOpacity>
-      </TouchableOpacity>
+        />
+      </View>
       <View style={styles.row}>
         <Text style={[styles.rowHeader, { flex: 2 }]}>Name</Text>
         <Text style={{ flex: 3 }}>{organization?.name}</Text>

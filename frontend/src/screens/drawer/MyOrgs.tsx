@@ -6,14 +6,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Image } from "expo-image";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Colors } from "../../styles/global/colors";
+import Display from "../../components/Display";
 import { MyOrgsScreenNavigationProp } from "../../types/navigation";
 import { useAuth } from "../../lib/context/AuthContext";
 import { useQuery } from "@powersync/react-native";
 import { OrganizationRecord } from "../../types/db";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Colors } from "../../styles/global/colors";
-import { orgMapping } from "../../lib/utils/ImageMapping";
 import { Queries } from "../../lib/powersync/queries";
 
 /*
@@ -45,7 +44,12 @@ export default function MyOrgsScreen({
       style={styles.orgContainer}
       activeOpacity={0.7}
     >
-      <Image source={orgMapping[item.image]} style={styles.orgIconContainer} />
+      <Display
+        type="Org"
+        imageKey={item.image}
+        color={item.color as any}
+        isMini={true}
+      />
       <View style={styles.orgInfo}>
         <Text style={styles.orgName}>{item.name}</Text>
         <Text style={styles.orgCode}>Code: {item.access_code}</Text>

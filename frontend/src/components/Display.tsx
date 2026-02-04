@@ -19,11 +19,13 @@ export default function Display({
   imageKey,
   color,
   isMini,
+  onPress,
 }: {
   type: DisplayType;
   imageKey?: string;
   color?: string;
   isMini?: boolean;
+  onPress?: () => void;
 }) {
   const [imageSource, setImageSource] = useState<ImageSourcePropType>(
     iconMapping["default"],
@@ -61,6 +63,38 @@ export default function Display({
     return <Image source={imageSource} style={styles} />;
   }
 
+  // Handle Org
+  if (type === "Org") {
+    const containerStyles = isMini ? DisplayStyles.orgMini : DisplayStyles.org;
+    const imageStyles = isMini
+      ? DisplayStyles.orgImageMini
+      : DisplayStyles.orgImage;
+
+    return (
+      <Pressable
+        onPress={onPress}
+        disabled={!onPress}
+        pointerEvents={onPress ? "auto" : "none"}
+        style={({ pressed }) => [
+          {
+            opacity: pressed ? 0.7 : 1,
+            backgroundColor: color || "#ddd",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+          containerStyles,
+        ]}
+      >
+        <Image
+          style={imageStyles}
+          source={imageSource}
+          contentFit="contain"
+          placeholder={orgMapping["default"]}
+        />
+      </Pressable>
+    );
+  }
+
   // Handle Equipment/Item/Container
   const sizeStyles = isMini ? ItemStyles.sizeMini : ItemStyles.size;
   const radius = isMini
@@ -69,6 +103,9 @@ export default function Display({
 
   return (
     <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      pointerEvents={onPress ? "auto" : "none"}
       style={({ pressed }) => [
         {
           opacity: pressed ? 0.7 : 1,

@@ -4,7 +4,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { ProfileStyles } from "../../styles/ProfileStyles";
 import Display from "../../components/Display";
-import ProfileOverlay from "../../components/drawer/ProfileOverlay";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
@@ -12,6 +11,9 @@ import { Logger } from "../../lib/utils/Logger";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useNavigation } from "@react-navigation/native";
 import { organizationService } from "../../lib/services/organization";
+
+import ImageEditingOverlay from "../../components/ImageEditingOverlay";
+import { Hex } from "../../types/other";
 
 /*
   Create storage screen allows a manager to create storage.
@@ -24,6 +26,7 @@ export default function CreateStorageScreen() {
   const { setMessage } = useModal();
 
   const [profileKey, setProfileKey] = useState<string>("default");
+  const [profileColor, setProfileColor] = useState<Hex>("#791111");
   const [profileVisible, setProfileVisible] = useState(false);
   const [name, onChangeName] = useState("");
   const [details, onChangeDetails] = useState("");
@@ -63,13 +66,23 @@ export default function CreateStorageScreen() {
     }
   };
 
+  const handleSaveImage = async (newImageKey: string, newColor: string) => {
+    setProfileKey(newImageKey);
+    setProfileColor(newColor as Hex);
+  };
+
   return (
     <View style={ProfileStyles.container}>
       <PressableOpacity
         style={ProfileStyles.profile}
         onPress={() => setProfileVisible(true)}
       >
-        <Display type="User" isMini={false} imageKey={profileKey} />
+        <Display
+          type="User"
+          isMini={false}
+          imageKey={profileKey}
+          color={profileColor}
+        />
         <View style={ProfileStyles.editButton}>
           <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
         </View>
@@ -106,11 +119,12 @@ export default function CreateStorageScreen() {
       <PressableOpacity style={styles.createBtn} onPress={handleCreate}>
         <Text style={styles.createBtnTxt}> Create </Text>
       </PressableOpacity>
-      <ProfileOverlay
+      <ImageEditingOverlay
         visible={profileVisible}
         setVisible={setProfileVisible}
-        profileKey={profileKey}
-        setProfileKey={setProfileKey}
+        currentImageKey={profileKey}
+        currentColor={profileColor}
+        onSave={handleSaveImage}
       />
     </View>
   );

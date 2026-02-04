@@ -8,7 +8,7 @@ import {
   ScrollView,
   ImageSourcePropType,
 } from "react-native";
-import { Image } from "expo-image";
+import Display from "./Display";
 import { Colors } from "../styles/global";
 import { PressableOpacity } from "./PressableOpacity";
 import ColorSelect from "./organization/ColorSelect";
@@ -20,7 +20,6 @@ import {
   other,
   baseProfileMapping,
   baseOrgMapping,
-  iconMapping,
 } from "../lib/utils/ImageMapping";
 
 interface ImageEditingOverlayProps {
@@ -72,10 +71,11 @@ export default function ImageEditingOverlay({
             ]}
             onPress={() => setSelectedImageKey(key)}
           >
-            <Image
-              source={source}
-              style={styles.gridImage}
-              contentFit="contain"
+            <Display
+              type={getDisplayType(key)}
+              imageKey={key}
+              isMini={true}
+              color={selectedColor}
             />
           </PressableOpacity>
         ))}
@@ -83,14 +83,11 @@ export default function ImageEditingOverlay({
     </View>
   );
 
-  // Decide which image source to show in preview
-  // We check profile and org mappings first, fall back to icon mapping
-  const getPreviewSource = () => {
-    if (baseProfileMapping[selectedImageKey])
-      return baseProfileMapping[selectedImageKey];
-    if (baseOrgMapping[selectedImageKey])
-      return baseOrgMapping[selectedImageKey];
-    return iconMapping[selectedImageKey] || iconMapping["default"];
+  // Helper to determine DisplayType based on key
+  const getDisplayType = (key: string) => {
+    if (baseProfileMapping[key]) return "User";
+    if (baseOrgMapping[key]) return "Org";
+    return "Item";
   };
 
   return (
@@ -108,10 +105,11 @@ export default function ImageEditingOverlay({
             <View
               style={[styles.previewCircle, { borderColor: selectedColor }]}
             >
-              <Image
-                source={getPreviewSource()}
-                style={styles.previewImage}
-                contentFit="contain"
+              <Display
+                type={getDisplayType(selectedImageKey)}
+                imageKey={selectedImageKey}
+                color={selectedColor}
+                isMini={false}
               />
             </View>
           </View>

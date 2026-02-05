@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { supabase } from "../utils/rls_utils";
 import { generateTestUser } from "../utils/user";
+import { createCleanupTracker, cleanupTestData, trackUser, trackOrganization } from "../utils/cleanup";
 
 describe("Membership RLS Permission Tests", () => {
   let owner: any;
@@ -8,12 +9,17 @@ describe("Membership RLS Permission Tests", () => {
   let outsider: any;
   let orgId: string;
   let otherOrgId: string;
+  const cleanup = createCleanupTracker();
 
   beforeAll(async () => {
     // Setup users
     owner = await generateTestUser("Org Owner");
     member = await generateTestUser("Org Member");
     outsider = await generateTestUser("Org Outsider");
+
+    trackUser(cleanup, owner.user.id);
+    trackUser(cleanup, member.user.id);
+    trackUser(cleanup, outsider.user.id);
 
     // Create Main Org
     const { data: orgData } = await owner.client
@@ -26,9 +32,11 @@ describe("Membership RLS Permission Tests", () => {
       .select()
       .single();
     orgId = orgData!.id;
+    trackOrganization(cleanup, orgId);
 
     // Create Other Org
     const otherOwner = await generateTestUser("Other Owner");
+    trackUser(cleanup, otherOwner.user.id);
     const { data: otherOrgData } = await otherOwner.client
       .from("organizations")
       .insert({
@@ -39,6 +47,7 @@ describe("Membership RLS Permission Tests", () => {
       .select()
       .single();
     otherOrgId = otherOrgData!.id;
+    trackOrganization(cleanup, otherOrgId);
 
     // member joins Main Org
     await member.client.from("org_memberships").insert({
@@ -46,6 +55,10 @@ describe("Membership RLS Permission Tests", () => {
       user_id: member.user.id,
       type: "USER"
     });
+  });
+
+  afterAll(async () => {
+    await cleanupTestData(cleanup);
   });
 
   // CREATE
@@ -61,6 +74,7 @@ describe("Membership RLS Permission Tests", () => {
 
   it("an authenticated user should be able to create a membership (join self)", async () => {
     const newUser = await generateTestUser("Self Joiner");
+    trackUser(cleanup, newUser.user.id);
     const { error } = await newUser.client.from("org_memberships").insert({
       organization_id: orgId,
       user_id: newUser.user.id,
@@ -71,6 +85,7 @@ describe("Membership RLS Permission Tests", () => {
 
   it("an authenticated user should not be able to create a membership with an invalid organization id", async () => {
     const newUser = await generateTestUser("Invalid Org");
+    trackUser(cleanup, newUser.user.id);
     const { error } = await newUser.client.from("org_memberships").insert({
       organization_id: "00000000-0000-0000-0000-000000000000",
       user_id: newUser.user.id,
@@ -82,6 +97,8 @@ describe("Membership RLS Permission Tests", () => {
   it("an authenticated user should not be able to create a membership with an invalid user id (someone else)", async () => {
     const newUser = await generateTestUser("Impersonator");
     const victim = await generateTestUser("Victim");
+    trackUser(cleanup, newUser.user.id);
+    trackUser(cleanup, victim.user.id);
     const { error } = await newUser.client.from("org_memberships").insert({
       organization_id: orgId,
       user_id: victim.user.id,
@@ -92,6 +109,7 @@ describe("Membership RLS Permission Tests", () => {
 
   it("an authenticated user should not be able to create a membership with an invalid type (STORAGE as non-manager)", async () => {
     const newUser = await generateTestUser("Fake Storage");
+    trackUser(cleanup, newUser.user.id);
     const { error } = await newUser.client.from("org_memberships").insert({
       organization_id: orgId,
       type: "STORAGE",

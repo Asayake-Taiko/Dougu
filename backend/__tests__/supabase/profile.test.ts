@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { supabase } from "../utils/rls_utils";
 import { generateTestUser } from "../utils/user";
+import { createCleanupTracker, cleanupTestData, trackUser, trackOrganization } from "../utils/cleanup";
 
 describe("Profile RLS Permission Tests", () => {
   let userA: any; // In Org 1
@@ -8,11 +9,16 @@ describe("Profile RLS Permission Tests", () => {
   let userC: any; // In Org 2
   let org1Id: string;
   let org2Id: string;
+  const cleanup = createCleanupTracker();
 
   beforeAll(async () => {
     userA = await generateTestUser("User A");
     userB = await generateTestUser("User B");
     userC = await generateTestUser("User C");
+
+    trackUser(cleanup, userA.user.id);
+    trackUser(cleanup, userB.user.id);
+    trackUser(cleanup, userC.user.id);
 
     // Create Org 1 (User A owner)
     const { data: org1 } = await userA.client
@@ -25,6 +31,7 @@ describe("Profile RLS Permission Tests", () => {
       .select()
       .single();
     org1Id = org1.id;
+    trackOrganization(cleanup, org1Id);
 
     // User B joins Org 1
     await userB.client.from("org_memberships").insert({
@@ -44,6 +51,11 @@ describe("Profile RLS Permission Tests", () => {
       .select()
       .single();
     org2Id = org2.id;
+    trackOrganization(cleanup, org2Id);
+  });
+
+  afterAll(async () => {
+    await cleanupTestData(cleanup);
   });
 
   // CREATE

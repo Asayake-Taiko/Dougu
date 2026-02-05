@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { generateTestUser } from "../utils/user";
+import { createCleanupTracker, cleanupTestData, trackUser, trackOrganization } from "../utils/cleanup";
 
 describe("Equipment RLS Permission Tests", () => {
   let owner: any;
@@ -7,12 +8,17 @@ describe("Equipment RLS Permission Tests", () => {
   let outsider: any;
   let orgId: string;
   let equipmentId: string;
+  const cleanup = createCleanupTracker();
 
   beforeAll(async () => {
     // Setup users
     owner = await generateTestUser("Equip Owner");
     member = await generateTestUser("Equip Member");
     outsider = await generateTestUser("Equip Outsider");
+
+    trackUser(cleanup, owner.user.id);
+    trackUser(cleanup, member.user.id);
+    trackUser(cleanup, outsider.user.id);
 
     // Create Org
     const { data: orgData } = await owner.client
@@ -25,6 +31,7 @@ describe("Equipment RLS Permission Tests", () => {
       .select()
       .single();
     orgId = orgData!.id;
+    trackOrganization(cleanup, orgId);
 
     // Member joins the Org
     const { error: joinError } = await member.client.from("org_memberships").insert({
@@ -44,6 +51,10 @@ describe("Equipment RLS Permission Tests", () => {
       .select()
       .single();
     equipmentId = equipData!.id;
+  });
+
+  afterAll(async () => {
+    await cleanupTestData(cleanup);
   });
 
   // CREATE

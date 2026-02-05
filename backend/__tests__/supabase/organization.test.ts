@@ -1,18 +1,24 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { supabase } from "../utils/rls_utils";
 import { generateTestUser } from "../utils/user";
+import { createCleanupTracker, cleanupTestData, trackUser, trackOrganization } from "../utils/cleanup";
 
 describe("Organization RLS Permission Tests", () => {
   let owner: any;
   let member: any;
   let outsider: any;
   let orgId: string;
+  const cleanup = createCleanupTracker();
 
   beforeAll(async () => {
     // Register Users
     owner = await generateTestUser("Owner");
     member = await generateTestUser("Member");
     outsider = await generateTestUser("Outsider");
+
+    trackUser(cleanup, owner.user.id);
+    trackUser(cleanup, member.user.id);
+    trackUser(cleanup, outsider.user.id);
 
     // Create Organization (Owner does this)
     const { data: orgData, error: orgError } = await owner.client
@@ -27,6 +33,7 @@ describe("Organization RLS Permission Tests", () => {
 
     if (orgError) throw orgError;
     orgId = orgData.id;
+    trackOrganization(cleanup, orgId);
 
     // Member joins Org
     const { error: joinError } = await member.client.from("org_memberships").insert({
@@ -35,6 +42,10 @@ describe("Organization RLS Permission Tests", () => {
       type: "USER",
     });
     if (joinError) throw joinError;
+  });
+
+  afterAll(async () => {
+    await cleanupTestData(cleanup);
   });
 
   // CREATE
@@ -52,6 +63,7 @@ describe("Organization RLS Permission Tests", () => {
 
   it("an authenticated user should be able to create an organization", async () => {
     const newUser = await generateTestUser("New Creator");
+    trackUser(cleanup, newUser.user.id);
     const { data, error } = await newUser.client
       .from("organizations")
       .insert({
@@ -64,10 +76,12 @@ describe("Organization RLS Permission Tests", () => {
 
     expect(error).toBeNull();
     expect(data.name).toBe("Auth Org");
+    trackOrganization(cleanup, data.id);
   });
 
   it("an authenticated user should not be able to create an org for someone else", async () => {
     const newUser = await generateTestUser("New Creator");
+    trackUser(cleanup, newUser.user.id);
     const { error } = await newUser.client
       .from("organizations")
       .insert({
@@ -132,6 +146,7 @@ describe("Organization RLS Permission Tests", () => {
 
   it("Owner should NOT be able to transfer manager role to a non-member", async () => {
     const nonMember = await generateTestUser("Non Member");
+    trackUser(cleanup, nonMember.user.id);
 
     const { error } = await owner.client
       .from("organizations")

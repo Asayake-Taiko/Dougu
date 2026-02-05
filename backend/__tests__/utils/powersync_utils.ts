@@ -1,6 +1,6 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { PowerSyncDatabase } from "@powersync/node";
-import { AppSchema } from "@dougu/shared";
+import { AppSchema } from "./schema";
 import { SUPABASE_KEY, SUPABASE_URL, POWERSYNC_URL } from "./env";
 
 // Export factory for tests to use if needed

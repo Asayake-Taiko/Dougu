@@ -45,23 +45,32 @@ describe("Organization Image Tests", () => {
   it("only managers should be able to update organization image", async () => {
     await authService.login(member.email, "password123");
     await expect(
-      organizationService.updateOrganizationImage(orgId, "new_image_url"),
+      organizationService.updateOrganizationImage(
+        orgId,
+        "new_image_url",
+        "#000000",
+      ),
     ).rejects.toThrow("Only managers can update organization images.");
   });
 
   it("successfully update organization image", async () => {
     await authService.login(owner.email, "password123");
     await expect(
-      organizationService.updateOrganizationImage(orgId, "new_image_url"),
+      organizationService.updateOrganizationImage(
+        orgId,
+        "new_image_url",
+        "#123456",
+      ),
     ).resolves.not.toThrow();
 
     const { data } = await supabase
       .from("organizations")
-      .select("image")
+      .select("image, color")
       .eq("id", orgId)
       .single();
     expect(data).not.toBeNull();
     expect(data!.image).toBe("new_image_url");
+    expect(data!.color).toBe("#123456");
   });
 
   it("manager cannot update image for a different organization", async () => {
@@ -88,7 +97,11 @@ describe("Organization Image Tests", () => {
     await authService.login(owner.email, "password123");
     // Try to update image for otherOrgId
     await expect(
-      organizationService.updateOrganizationImage(otherOrgId, "new_image_url"),
+      organizationService.updateOrganizationImage(
+        otherOrgId,
+        "new_image_url",
+        "#000000",
+      ),
     ).rejects.toThrow("Only managers can update organization images.");
   });
 });

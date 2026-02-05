@@ -11,7 +11,7 @@ import {
 import { Colors } from "../styles/global";
 import { PressableOpacity } from "./PressableOpacity";
 import ColorSelect from "./organization/ColorSelect";
-import { DisplayType, Hex } from "../types/other";
+import { Hex } from "../types/other";
 import {
   baseProfileMapping,
   baseOrgMapping,
@@ -25,6 +25,7 @@ interface ImageEditingOverlayProps {
   currentImageKey: string;
   currentColor: string;
   onSave: (imageKey: string, color: string) => Promise<void>;
+  hideImagePicker?: boolean;
 }
 
 export default function ImageEditingOverlay({
@@ -33,6 +34,7 @@ export default function ImageEditingOverlay({
   currentImageKey,
   currentColor,
   onSave,
+  hideImagePicker = false,
 }: ImageEditingOverlayProps) {
   const [selectedImageKey, setSelectedImageKey] = useState(currentImageKey);
   const [selectedColor, setSelectedColor] = useState<Hex>(currentColor as Hex);
@@ -42,9 +44,9 @@ export default function ImageEditingOverlay({
     if (visible) {
       setSelectedImageKey(currentImageKey);
       setSelectedColor(currentColor as Hex);
-      setActiveTab("image");
+      setActiveTab(hideImagePicker ? "color" : "image");
     }
-  }, [visible, currentImageKey, currentColor]);
+  }, [visible, currentImageKey, currentColor, hideImagePicker]);
 
   const handleSave = async () => {
     await onSave(selectedImageKey, selectedColor);
@@ -53,7 +55,7 @@ export default function ImageEditingOverlay({
 
   // Helper to render a group of images
   const renderImageGroup = (
-    title: DisplayType,
+    title: string,
     mapping: { [key: string]: ImageSourcePropType },
   ) => (
     <View style={styles.groupContainer} key={title}>
@@ -68,11 +70,7 @@ export default function ImageEditingOverlay({
             ]}
             onPress={() => setSelectedImageKey(key)}
           >
-            <DisplayImage
-              type={title}
-              imageKey={key}
-              style={{ width: 50, height: 50 }}
-            />
+            <DisplayImage imageKey={key} style={styles.fill} />
           </PressableOpacity>
         ))}
       </View>
@@ -94,51 +92,51 @@ export default function ImageEditingOverlay({
             <View
               style={[styles.previewCircle, { borderColor: selectedColor }]}
             >
-              <DisplayImage
-                type="Item"
-                imageKey={selectedImageKey}
-                style={{ width: 100, height: 100 }}
-              />
+              {!hideImagePicker && (
+                <DisplayImage imageKey={selectedImageKey} style={styles.fill} />
+              )}
             </View>
           </View>
 
           {/* Tabs */}
-          <View style={styles.tabContainer}>
-            <PressableOpacity
-              style={[styles.tab, activeTab === "image" && styles.activeTab]}
-              onPress={() => setActiveTab("image")}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === "image" && styles.activeTabText,
-                ]}
+          {!hideImagePicker && (
+            <View style={styles.tabContainer}>
+              <PressableOpacity
+                style={[styles.tab, activeTab === "image" && styles.activeTab]}
+                onPress={() => setActiveTab("image")}
               >
-                Image
-              </Text>
-            </PressableOpacity>
-            <PressableOpacity
-              style={[styles.tab, activeTab === "color" && styles.activeTab]}
-              onPress={() => setActiveTab("color")}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === "color" && styles.activeTabText,
-                ]}
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === "image" && styles.activeTabText,
+                  ]}
+                >
+                  Image
+                </Text>
+              </PressableOpacity>
+              <PressableOpacity
+                style={[styles.tab, activeTab === "color" && styles.activeTab]}
+                onPress={() => setActiveTab("color")}
               >
-                Color
-              </Text>
-            </PressableOpacity>
-          </View>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === "color" && styles.activeTabText,
+                  ]}
+                >
+                  Color
+                </Text>
+              </PressableOpacity>
+            </View>
+          )}
 
           {/* Content */}
           <View style={styles.contentContainer}>
-            {activeTab === "image" ? (
+            {activeTab === "image" && !hideImagePicker ? (
               <ScrollView showsVerticalScrollIndicator={false}>
-                {renderImageGroup("User", baseProfileMapping)}
-                {renderImageGroup("Org", baseOrgMapping)}
-                {renderImageGroup("Item", iconMapping)}
+                {renderImageGroup("Profiles", baseProfileMapping)}
+                {renderImageGroup("Organizations", baseOrgMapping)}
+                {renderImageGroup("Items", iconMapping)}
               </ScrollView>
             ) : (
               <View style={styles.colorPickerContainer}>
@@ -247,7 +245,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+    columnGap: "2.6%",
   },
   imageItem: {
     width: "23%", // 4 columns
@@ -255,7 +254,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 2,
     borderColor: "transparent",
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 5,
     backgroundColor: "#f9f9f9",
     justifyContent: "center",
@@ -280,5 +279,9 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  fill: {
+    width: "100%",
+    height: "100%",
   },
 });

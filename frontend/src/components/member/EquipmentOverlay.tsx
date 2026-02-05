@@ -1,10 +1,9 @@
 import React from "react";
 import { Text, StyleSheet, Pressable, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useEquipment } from "../../lib/context/EquipmentContext";
 import { Colors } from "../../styles/global/colors";
-import { Spacing } from "../../styles/global";
+import EquipmentChecklist from "./EquipmentChecklist";
 
 export default function EquipmentOverlay() {
   const { setSelectedEquipment, selectedEquipment: item } = useEquipment();
@@ -30,49 +29,22 @@ export default function EquipmentOverlay() {
     >
       <View style={styles.header}>
         <Text style={styles.title}>{item.name}</Text>
-        <View style={styles.headerButtons}>
-          <Pressable onPress={handleSelectAll} style={styles.selectAllButton}>
-            <Text style={styles.selectAllText}>Select All</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setSelectedEquipment(null)}
-            style={styles.closeButton}
-          >
-            <Text style={styles.closeButtonText}>Close</Text>
-          </Pressable>
-        </View>
+        <Pressable
+          onPress={() => setSelectedEquipment(null)}
+          style={styles.closeButton}
+        >
+          <Text style={styles.closeButtonText}>Close</Text>
+        </Pressable>
       </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {item.records.map((record, index) => {
-          const isSelected = item.selectedIndices.has(index);
-          return (
-            <Pressable
-              key={record.id}
-              style={[styles.card, isSelected && styles.selectedCard]}
-              onPress={() => handleToggle(index)}
-            >
-              <View style={styles.cardHeader}>
-                <Text
-                  style={[styles.recordId, isSelected && styles.selectedText]}
-                >
-                  {item.name} {isSelected ? "✓" : ""}
-                </Text>
-                <View
-                  style={[styles.colorBadge, { backgroundColor: record.color }]}
-                />
-              </View>
-              <Text style={styles.details}>
-                {record.details || "No details provided."}
-              </Text>
-              <Text style={styles.date}>
-                Last updated:{" "}
-                {new Date(record.last_updated_date).toLocaleDateString()}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      <View style={styles.checklistContainer}>
+        <EquipmentChecklist
+          records={item.records}
+          selectedIndices={item.selectedIndices}
+          itemName={item.name}
+          onToggle={handleToggle}
+          onSelectAll={handleSelectAll}
+        />
+      </View>
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
@@ -102,24 +74,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
-  headerButtons: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: Colors.dark,
-  },
-  selectAllButton: {
-    padding: 8,
-    backgroundColor: Colors.gray200,
-    borderRadius: 6,
-  },
-  selectAllText: {
-    color: Colors.dark,
-    fontWeight: "bold",
-    fontSize: 14,
   },
   closeButton: {
     padding: 8,
@@ -128,52 +86,6 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: "bold",
     fontSize: 16,
-  },
-  scrollContent: {
-    padding: 20,
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#1f1e1eff",
-  },
-  selectedCard: {
-    borderColor: Colors.primary,
-    borderWidth: 2,
-    backgroundColor: "#f0f0ff",
-  },
-  selectedText: {
-    color: Colors.primary,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  recordId: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: Colors.gray500,
-  },
-  colorBadge: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  details: {
-    fontSize: 15,
-    color: Colors.gray500,
-    lineHeight: 22,
-    marginBottom: 12,
-  },
-  date: {
-    fontSize: 12,
-    color: Colors.gray400,
-    textAlign: "right",
   },
   footer: {
     padding: 20,
@@ -186,5 +98,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: Colors.dark,
     textAlign: "center",
+  },
+  checklistContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+    marginBottom: 10,
   },
 });

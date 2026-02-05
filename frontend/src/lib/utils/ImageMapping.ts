@@ -45,6 +45,8 @@ import iconDefault from "../../assets/equipment/default.png";
 import orgDefault from "../../assets/organization/default.png";
 import asayake from "../../assets/organization/asayake.png";
 
+import defaultImage from "../../assets/default.png";
+
 const baseProfileMapping: { [key: string]: ImageSourcePropType } = {
   miku,
   zote,
@@ -140,10 +142,18 @@ const orgMapping: { [key: string]: ImageSourcePropType } = new Proxy(
   },
 );
 
+const allMappings: { [key: string]: ImageSourcePropType } = {
+  ...iconMapping,
+  ...profileMapping,
+  ...orgMapping,
+  default_image: defaultImage,
+};
+
 export {
   iconMapping,
   profileMapping,
   orgMapping,
+  allMappings,
   drums,
   stands,
   clothing,

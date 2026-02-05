@@ -28,6 +28,11 @@ export interface IEquipmentService {
     container: Container,
     targetMemberId: string,
   ): Promise<void>;
+  updateEquipment(
+    ids: string[],
+    updates: Partial<EquipmentRecord>,
+  ): Promise<void>;
+  updateContainer(id: string, updates: Partial<ContainerRecord>): Promise<void>;
 }
 
 export class EquipmentService implements IEquipmentService {
@@ -135,6 +140,36 @@ export class EquipmentService implements IEquipmentService {
         container.id,
       ]);
     });
+  }
+
+  async updateEquipment(
+    ids: string[],
+    updates: Partial<EquipmentRecord>,
+  ): Promise<void> {
+    const timestamp = new Date().toISOString();
+    const data = { ...updates, last_updated_date: timestamp };
+
+    const { error } = await supabase
+      .from("equipment")
+      .update(data)
+      .in("id", ids);
+
+    if (error) handleSupabaseError(error);
+  }
+
+  async updateContainer(
+    id: string,
+    updates: Partial<ContainerRecord>,
+  ): Promise<void> {
+    const timestamp = new Date().toISOString();
+    const data = { ...updates, last_updated_date: timestamp };
+
+    const { error } = await supabase
+      .from("containers")
+      .update(data)
+      .eq("id", id);
+
+    if (error) handleSupabaseError(error);
   }
 }
 

@@ -42,7 +42,6 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
     <View style={styles.container}>
       <View style={styles.imageContainer}>
         <EditImage
-          type="Org"
           imageKey={imageKey}
           color={color}
           onPress={() => setOverlayVisible(true)}

@@ -25,7 +25,7 @@ export default function EquipmentDisplay({
         ...radius,
       }}
     >
-      <DisplayImage type="Item" imageKey={imageKey} style={sizeStyles} />
+      <DisplayImage imageKey={imageKey} style={sizeStyles} />
     </PressableOpacity>
   );
 }

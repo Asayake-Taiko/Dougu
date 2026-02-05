@@ -68,7 +68,6 @@ export default function ProfileScreen() {
   return (
     <View style={ProfileStyles.container}>
       <EditImage
-        type="User"
         imageKey={profileImage}
         color={profileColor}
         onPress={() => setProfileVisible(true)}

@@ -46,6 +46,7 @@ export type ProfileStackParamList = {
   CreateStorage: undefined;
   ItemImage: { index: number };
   MemberProfile: { member: OrgMembership };
+  EditEquipment: { itemId: string };
 };
 
 // Navigation props for Auth screens
@@ -111,3 +112,4 @@ export type CreateEquipmentScreenProps =
 export type CreateStorageScreenProps = ProfileStackScreenProps<"CreateStorage">;
 export type ItemImageScreenProps = ProfileStackScreenProps<"ItemImage">;
 export type MemberProfileScreenProps = ProfileStackScreenProps<"MemberProfile">;
+export type EditEquipmentScreenProps = ProfileStackScreenProps<"EditEquipment">;

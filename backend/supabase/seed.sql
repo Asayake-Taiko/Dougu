@@ -116,7 +116,7 @@ BEGIN
 
     -- Insert a Container for Kane Li
     INSERT INTO public.containers (id, name, organization_id, assigned_to, color, details)
-    VALUES ('aaaa1111-aaaa-1111-aaaa-111111111111', 'Sample Container', 'c3333333-3333-3333-3333-333333333333', kane_asayake_id, '#791111', 'Container with 3 items');
+    VALUES ('aaaa1111-aaaa-1111-aaaa-111111111111', 'Sample Container', 'c3333333-3333-3333-3333-333333333333', kane_asayake_id, '#ddd', 'Container with 3 items');
 
     -- Insert 3 items into the container
     INSERT INTO public.equipment (name, organization_id, assigned_to, container_id, image, color, details)

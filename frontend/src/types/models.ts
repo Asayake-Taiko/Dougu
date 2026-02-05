@@ -35,9 +35,19 @@ export class Container {
   get count() {
     return 1;
   }
+  get details() {
+    return this.container.details;
+  }
+  get image() {
+    return null;
+  }
 
   getContainer() {
     return this.container;
+  }
+
+  async update(updates: Partial<ContainerRecord>) {
+    await equipmentService.updateContainer(this.id, updates);
   }
 
   getEquipment() {
@@ -129,6 +139,14 @@ export class Equipment {
   }
   get organizationId() {
     return this.selectedRecord.organization_id;
+  }
+  get details() {
+    return this.selectedRecord.details;
+  }
+
+  async update(updates: Partial<EquipmentRecord>) {
+    const ids = Array.from(this.selectedIndices).map((i) => this.records[i].id);
+    await equipmentService.updateEquipment(ids, updates);
   }
 
   getEquipment() {

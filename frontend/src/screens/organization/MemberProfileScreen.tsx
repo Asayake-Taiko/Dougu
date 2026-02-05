@@ -92,11 +92,7 @@ export default function MemberProfileScreen({
   return (
     <View style={ProfileStyles.container}>
       <View style={ProfileStyles.profile}>
-        <DisplayImage
-          type="User"
-          imageKey={member.profile}
-          style={DisplayStyles.profile}
-        />
+        <DisplayImage imageKey={member.profile} style={DisplayStyles.profile} />
       </View>
       <View style={ProfileStyles.centerRow}>
         <Text style={ProfileStyles.text}>{member.name}</Text>

@@ -72,7 +72,6 @@ export default function CreateStorageScreen() {
   return (
     <View style={ProfileStyles.container}>
       <EditImage
-        type="User"
         imageKey={profileKey}
         color={profileColor}
         onPress={() => setProfileVisible(true)}

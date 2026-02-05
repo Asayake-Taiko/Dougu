@@ -11,6 +11,7 @@ import EquipmentDisplay from "../../components/member/EquipmentDisplay";
 import EquipmentChecklist from "../../components/member/EquipmentChecklist";
 import { ItemStyles } from "../../styles/ItemStyles";
 import { Hex, Item } from "../../types/other";
+import { Equipment } from "../../types/models";
 import { Logger } from "../../lib/utils/Logger";
 import { useModal } from "../../lib/context/ModalContext";
 
@@ -41,7 +42,9 @@ export default function EditEquipmentScreen({
 
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [localSelectedIndices, setLocalSelectedIndices] = useState<Set<number>>(
-    new Set(),
+    initialItem?.type === "equipment"
+      ? new Set(initialItem.selectedIndices)
+      : new Set(),
   );
   const [activeTab, setActiveTab] = useState<"details" | "records">("details");
 
@@ -80,8 +83,10 @@ export default function EditEquipmentScreen({
       const updates: any = { name, details, color: itemColor };
       if (initialItem.type === "equipment") {
         updates.image = imageKey;
+        await (initialItem as Equipment).update(updates, localSelectedIndices);
+      } else {
+        await initialItem.update(updates);
       }
-      await initialItem.update(updates);
       navigation.goBack();
     } catch (e: any) {
       Logger.error(e);

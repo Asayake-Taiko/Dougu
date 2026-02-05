@@ -151,4 +151,71 @@ describe("Equipment Delete Tests", () => {
       .maybeSingle();
     expect(existingEquipment).not.toBeNull();
   });
+
+  it("should only delete selected equipment records from a batch", async () => {
+    // 1. Create a batch of equipment (3 items)
+    const timestamp = new Date().toISOString();
+    const batchItems = [
+      {
+        id: generateUUID(),
+        name: "Item 1",
+        organization_id: orgId,
+        assigned_to: memberId,
+        image: "default",
+        color: "red",
+        last_updated_date: timestamp,
+      },
+      {
+        id: generateUUID(),
+        name: "Item 2",
+        organization_id: orgId,
+        assigned_to: memberId,
+        image: "default",
+        color: "blue",
+        last_updated_date: timestamp,
+      },
+      {
+        id: generateUUID(),
+        name: "Item 3",
+        organization_id: orgId,
+        assigned_to: memberId,
+        image: "default",
+        color: "green",
+        last_updated_date: timestamp,
+      },
+    ];
+
+    await supabase.from("equipment").insert(batchItems);
+
+    // Create Equipment object with all 3 records
+    const { data: records } = await supabase
+      .from("equipment")
+      .select("*")
+      .in(
+        "id",
+        batchItems.map((i) => i.id),
+      );
+
+    const equipment = new Equipment(records![0]);
+    equipment.addRecord(records![1]);
+    equipment.addRecord(records![2]);
+
+    // Select only Item 1 and Item 3 (indices 0 and 2)
+    equipment.selectedIndices = new Set([0, 2]);
+
+    // 2. Delete selected equipment
+    await equipmentService.deleteEquipment(equipment);
+
+    // 3. Verify Item 1 and Item 3 are gone, but Item 2 remains
+    const { data: remainingItems } = await supabase
+      .from("equipment")
+      .select("id, name")
+      .in(
+        "id",
+        batchItems.map((i) => i.id),
+      );
+
+    expect(remainingItems).toHaveLength(1);
+    expect(remainingItems![0].name).toBe("Item 2");
+  });
 });

@@ -144,8 +144,9 @@ export class Equipment {
     return this.selectedRecord.details;
   }
 
-  async update(updates: Partial<EquipmentRecord>) {
-    const ids = Array.from(this.selectedIndices).map((i) => this.records[i].id);
+  async update(updates: Partial<EquipmentRecord>, indices?: Set<number>) {
+    const targetIndices = indices || this.selectedIndices;
+    const ids = Array.from(targetIndices).map((i) => this.records[i].id);
     await equipmentService.updateEquipment(ids, updates);
   }
 

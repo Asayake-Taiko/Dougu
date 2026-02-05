@@ -34,7 +34,7 @@ describe("AuthService Profile Update Tests", () => {
 
     expect(error).toBeNull();
     expect(profile?.name).toBe(newName);
-    expect(profile?.profile_image).toBe("default");
+    expect(profile?.profile_image).toBe("default_profile");
   });
 
   it("updateProfileImage should update the image in the database", async () => {

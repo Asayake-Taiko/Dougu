@@ -105,22 +105,44 @@ describe("Equipment RLS Permission Tests", () => {
     expect(data).toEqual([]);
   });
 
-  it("Member SHOULD be able to update equipment", async () => {
+  it("Member should be able to update assigned_to field", async () => {
     await authService.login(memberEmail, memberPassword);
-    // User requested "members can update equipment" (relaxed rule)
+
+    // Get member's membership ID
+    const { data: membershipData } = await supabase
+      .from("org_memberships")
+      .select("id")
+      .eq("user_id", memberId)
+      .eq("organization_id", orgId)
+      .single();
+    const memberMembershipId = membershipData!.id;
+
     const { error } = await supabase
       .from("equipment")
-      .update({ name: "Drill (Updated by Member)" })
+      .update({ assigned_to: memberMembershipId })
       .eq("id", equipmentId);
     expect(error).toBeNull();
 
     // Verify
     const { data } = await supabase
       .from("equipment")
-      .select("name")
+      .select("assigned_to")
       .eq("id", equipmentId)
       .single();
-    expect(data?.name).toBe("Drill (Updated by Member)");
+    expect(data?.assigned_to).toBe(memberMembershipId);
+  });
+
+  it("Member should NOT be able to update fields other than assigned_to", async () => {
+    await authService.login(memberEmail, memberPassword);
+    const { error } = await supabase
+      .from("equipment")
+      .update({ name: "Drill (Updated by Member)" })
+      .eq("id", equipmentId);
+
+    expect(error).not.toBeNull();
+    expect(error?.message).toContain(
+      "Only managers can update equipment details.",
+    );
   });
 
   it("Member should NOT be able to delete equipment", async () => {

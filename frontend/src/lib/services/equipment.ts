@@ -41,7 +41,9 @@ export class EquipmentService implements IEquipmentService {
       throw new Error("Only managers can delete equipment.");
     }
 
-    const ids = equipment.records.map((r) => r.id);
+    const ids = Array.from(equipment.selectedIndices).map(
+      (index) => equipment.records[index].id,
+    );
     const { error } = await supabase.from("equipment").delete().in("id", ids);
     if (error) handleSupabaseError(error);
   }
@@ -149,12 +151,16 @@ export class EquipmentService implements IEquipmentService {
     const timestamp = new Date().toISOString();
     const data = { ...updates, last_updated_date: timestamp };
 
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("equipment")
       .update(data)
-      .in("id", ids);
+      .in("id", ids)
+      .select();
 
     if (error) handleSupabaseError(error);
+    if (!updated || updated.length !== ids.length) {
+      throw new Error("Permission denied or Resource not found.");
+    }
   }
 
   async updateContainer(
@@ -164,12 +170,16 @@ export class EquipmentService implements IEquipmentService {
     const timestamp = new Date().toISOString();
     const data = { ...updates, last_updated_date: timestamp };
 
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("containers")
       .update(data)
-      .eq("id", id);
+      .eq("id", id)
+      .select();
 
     if (error) handleSupabaseError(error);
+    if (!updated || updated.length === 0) {
+      throw new Error("Permission denied or Resource not found.");
+    }
   }
 }
 

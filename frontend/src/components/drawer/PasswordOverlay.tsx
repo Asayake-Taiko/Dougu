@@ -100,9 +100,4 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontWeight: "bold",
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-  },
 });

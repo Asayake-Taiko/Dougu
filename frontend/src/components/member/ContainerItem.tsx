@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { Container } from "../../types/models";
 import { Item } from "../../types/other";
@@ -7,6 +7,7 @@ import { chunkArray } from "../../lib/utils/EquipmentUtils";
 import { ItemStyles } from "../../styles/ItemStyles";
 import EquipmentDisplay from "./EquipmentDisplay";
 import { useEquipment } from "../../lib/context/EquipmentContext";
+import { PressableOpacity } from "../PressableOpacity";
 
 /*
   ContainerItem is a component that displays a container object with its name and
@@ -44,14 +45,11 @@ export default function ContainerItem({
   return (
     <GestureDetector gesture={tapGesture}>
       <View style={[ItemStyles.container, { opacity: isDragging ? 0 : 1 }]}>
-        <Pressable
-          style={({ pressed }) => [
-            {
-              opacity: pressed ? 0.7 : 1,
-              backgroundColor: containerData.color || "#ddd",
-            },
-            ItemStyles.containerItem,
-          ]}
+        <PressableOpacity
+          style={{
+            backgroundColor: containerData.color || "#ddd",
+            ...ItemStyles.containerItem,
+          }}
         >
           <View style={ItemStyles.table}>
             {chunkedData.map((row, index) => (
@@ -71,7 +69,7 @@ export default function ContainerItem({
               </View>
             ))}
           </View>
-        </Pressable>
+        </PressableOpacity>
         <Text style={ItemStyles.text} numberOfLines={1}>
           {containerData.name}
         </Text>

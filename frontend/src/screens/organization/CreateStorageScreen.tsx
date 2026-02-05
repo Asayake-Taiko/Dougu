@@ -1,10 +1,7 @@
 import { Text, View, TextInput, StyleSheet } from "react-native";
 import React, { useState } from "react";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { ProfileStyles } from "../../styles/ProfileStyles";
-import ProfileDisplay from "../../components/ProfileDisplay";
-import ProfileOverlay from "../../components/drawer/ProfileOverlay";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
@@ -12,6 +9,9 @@ import { Logger } from "../../lib/utils/Logger";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useNavigation } from "@react-navigation/native";
 import { organizationService } from "../../lib/services/organization";
+import EditImage from "../../components/EditImage";
+import ImageEditingOverlay from "../../components/ImageEditingOverlay";
+import { Hex } from "../../types/other";
 
 /*
   Create storage screen allows a manager to create storage.
@@ -23,7 +23,8 @@ export default function CreateStorageScreen() {
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
 
-  const [profileKey, setProfileKey] = useState<string>("default");
+  const [profileKey, setProfileKey] = useState<string>("default_profile");
+  const [profileColor, setProfileColor] = useState<Hex>("#791111");
   const [profileVisible, setProfileVisible] = useState(false);
   const [name, onChangeName] = useState("");
   const [details, onChangeDetails] = useState("");
@@ -42,11 +43,11 @@ export default function CreateStorageScreen() {
 
     try {
       showSpinner();
-
       await organizationService.createStorage(
         organization.id,
         name,
         profileKey,
+        profileColor,
         details,
       );
 
@@ -54,25 +55,28 @@ export default function CreateStorageScreen() {
       onChangeName("");
       onChangeDetails("");
       navigation.goBack();
-    } catch (error) {
+    } catch (error: any) {
       Logger.error("Error creating storage:", error);
-      setMessage("Failed to create storage. Please try again.");
+      setMessage(
+        error.message || "Failed to create storage. Please try again.",
+      );
     } finally {
       hideSpinner();
     }
   };
 
+  const handleSaveImage = async (newImageKey: string, newColor: string) => {
+    setProfileKey(newImageKey);
+    setProfileColor(newColor as Hex);
+  };
+
   return (
     <View style={ProfileStyles.container}>
-      <PressableOpacity
-        style={ProfileStyles.profile}
+      <EditImage
+        imageKey={profileKey}
+        color={profileColor}
         onPress={() => setProfileVisible(true)}
-      >
-        <ProfileDisplay isMini={false} profileKey={profileKey} />
-        <View style={ProfileStyles.editButton}>
-          <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
-        </View>
-      </PressableOpacity>
+      />
       <View style={styles.rowContainer}>
         <View style={styles.row1}>
           <Text style={styles.rowHeader}>Name</Text>
@@ -105,11 +109,12 @@ export default function CreateStorageScreen() {
       <PressableOpacity style={styles.createBtn} onPress={handleCreate}>
         <Text style={styles.createBtnTxt}> Create </Text>
       </PressableOpacity>
-      <ProfileOverlay
+      <ImageEditingOverlay
         visible={profileVisible}
         setVisible={setProfileVisible}
-        profileKey={profileKey}
-        setProfileKey={setProfileKey}
+        currentImageKey={profileKey}
+        currentColor={profileColor}
+        onSave={handleSaveImage}
       />
     </View>
   );

@@ -1,4 +1,5 @@
 import { authService } from "../../../src/lib/services/auth";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("AuthService Register Tests", () => {
   beforeEach(async () => {
@@ -6,7 +7,7 @@ describe("AuthService Register Tests", () => {
   });
 
   it("register with valid credentials should succeed", async () => {
-    const randomStr = Math.random().toString(36).substring(7);
+    const randomStr = generateUUID();
     const email = `test-${randomStr}@example.com`;
     const password = "password123";
     const name = `Test User ${randomStr}`;

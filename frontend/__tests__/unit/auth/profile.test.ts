@@ -1,8 +1,9 @@
 import { authService } from "../../../src/lib/services/auth";
 import { supabase } from "../../../src/lib/supabase/supabase";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("AuthService Profile Update Tests", () => {
-  const randomStr = Math.random().toString(36).substring(7);
+  const randomStr = generateUUID();
   const email = `name-update-${randomStr}@example.com`;
   const password = "password123";
   const oldName = `Old Name ${randomStr}`;
@@ -33,7 +34,7 @@ describe("AuthService Profile Update Tests", () => {
 
     expect(error).toBeNull();
     expect(profile?.name).toBe(newName);
-    expect(profile?.profile_image).toBe("default");
+    expect(profile?.profile_image).toBe("default_profile");
   });
 
   it("updateProfileImage should update the image in the database", async () => {
@@ -45,7 +46,7 @@ describe("AuthService Profile Update Tests", () => {
 
     // 2. Update profile image
     await expect(
-      authService.updateProfileImage(newImage),
+      authService.updateProfile(newImage, "default"),
     ).resolves.not.toThrow();
 
     // 3. Verify image update in DB

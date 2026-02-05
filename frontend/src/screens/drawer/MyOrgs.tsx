@@ -6,15 +6,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Image } from "expo-image";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Colors } from "../../styles/global/colors";
 import { MyOrgsScreenNavigationProp } from "../../types/navigation";
 import { useAuth } from "../../lib/context/AuthContext";
 import { useQuery } from "@powersync/react-native";
 import { OrganizationRecord } from "../../types/db";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Colors } from "../../styles/global/colors";
-import { orgMapping } from "../../lib/utils/ImageMapping";
 import { Queries } from "../../lib/powersync/queries";
+import DisplayImage from "../../components/DisplayImage";
 
 /*
   This screen will display the organizations that the user is a part of.
@@ -45,7 +44,11 @@ export default function MyOrgsScreen({
       style={styles.orgContainer}
       activeOpacity={0.7}
     >
-      <Image source={orgMapping[item.image]} style={styles.orgIconContainer} />
+      <DisplayImage
+        imageKey={item.image}
+        style={styles.orgIconContainer}
+        color={item.color}
+      />
       <View style={styles.orgInfo}>
         <Text style={styles.orgName}>{item.name}</Text>
         <Text style={styles.orgCode}>Code: {item.access_code}</Text>

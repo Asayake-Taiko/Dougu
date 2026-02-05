@@ -81,10 +81,10 @@ VALUES
 );
 
 -- 2. Create Organizations
-INSERT INTO public.organizations (id, name, access_code, manager_id, image)
+INSERT INTO public.organizations (id, name, access_code, manager_id, image, color)
 VALUES
-  ('c3333333-3333-3333-3333-333333333333', 'Asayake_Taiko', 'ASAYAKE_2026', 'a1111111-1111-1111-1111-111111111111', 'asayake'),
-  ('d4444444-4444-4444-4444-444444444444', 'Kyodo Taiko', 'KYODO_2026', 'a2222222-2222-2222-2222-222222222222', 'default');
+  ('c3333333-3333-3333-3333-333333333333', 'Asayake_Taiko', 'ASAYAKE_2026', 'a1111111-1111-1111-1111-111111111111', 'asayake', '#791111'),
+  ('d4444444-4444-4444-4444-444444444444', 'Kyodo Taiko', 'KYODO_2026', 'a2222222-2222-2222-2222-222222222222', 'default_org', '#791111');
 
 -- 3. Add Additional Memberships
 INSERT INTO public.org_memberships (id, organization_id, user_id, type, details)
@@ -113,4 +113,15 @@ BEGIN
         INSERT INTO public.equipment (name, organization_id, assigned_to, image, color, details)
         VALUES ('Old Chu', 'c3333333-3333-3333-3333-333333333333', enak_asayake_id, 'chu', '#ab2020', 'Vintage condition');
     END LOOP;
+
+    -- Insert a Container for Kane Li
+    INSERT INTO public.containers (id, name, organization_id, assigned_to, color, details)
+    VALUES ('aaaa1111-aaaa-1111-aaaa-111111111111', 'Sample Container', 'c3333333-3333-3333-3333-333333333333', kane_asayake_id, '#ddd', 'Container with 3 items');
+
+    -- Insert 3 items into the container
+    INSERT INTO public.equipment (name, organization_id, assigned_to, container_id, image, color, details)
+    VALUES 
+      ('Item 1', 'c3333333-3333-3333-3333-333333333333', kane_asayake_id, 'aaaa1111-aaaa-1111-aaaa-111111111111', 'bachi', '#ff7373', 'Item inside container'),
+      ('Item 2', 'c3333333-3333-3333-3333-333333333333', kane_asayake_id, 'aaaa1111-aaaa-1111-aaaa-111111111111', 'kane', '#ff7373', 'Item inside container'),
+      ('Item 3', 'c3333333-3333-3333-3333-333333333333', kane_asayake_id, 'aaaa1111-aaaa-1111-aaaa-111111111111', 'bells', '#ff7373', 'Item inside container');
 END $$;

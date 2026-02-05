@@ -1,5 +1,6 @@
 # Include syntax requires Docker compose > 2.20.3
 # https://docs.docker.com/compose/release-notes/#2203
+name: dougu
 include:
   # Creates the internal MongoDB replica set
   - path: ./services/mongo.yaml
@@ -7,6 +8,7 @@ include:
 services:
   # Extend PowerSync with Mongo healthchecks
   powersync:
+    container_name: dougu_powersync
     extends:
       file: ./services/powersync.yaml
       service: powersync

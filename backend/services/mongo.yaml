@@ -1,6 +1,7 @@
 services:
   # MongoDB Service used internally
   mongo:
+    container_name: dougu_mongo
     image: mongo:7.0
     command: --replSet rs0 --bind_ip_all --quiet
     restart: unless-stopped
@@ -11,6 +12,7 @@ services:
 
   # Initializes the MongoDB replica set. This service will not usually be actively running
   mongo-rs-init:
+    container_name: dougu_mongo_rs_init
     image: mongo:7.0
     depends_on:
       - mongo
@@ -18,7 +20,12 @@ services:
     entrypoint:
       - bash
       - -c
-      - 'mongosh --host mongo:27017 --eval ''try{rs.status().ok && quit(0)} catch {} rs.initiate({_id: "rs0", version: 1, members: [{ _id: 0, host : "mongo:27017" }]})'''
+      - |
+        until mongosh --host mongo:27017 --eval 'db.runCommand("ping").ok' > /dev/null 2>&1; do
+          echo "Waiting for MongoDB to be ready..."
+          sleep 2
+        done
+        mongosh --host mongo:27017 --eval 'try { if (rs.status().ok) { console.log("Replica set already initialized"); quit(0); } } catch (e) {} rs.initiate({_id: "rs0", version: 1, members: [{ _id: 0, host : "mongo:27017" }]}); console.log("Replica set initialized");'
 
 volumes:
   mongo_storage:

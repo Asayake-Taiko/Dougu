@@ -10,14 +10,20 @@ npx supabase link
 Start the backend
 ```
 npx supabase start -x vector // supabase backend
-docker compose up            // powersync
+docker compose up -d           // powersync
 ```
 
 # Closing
 Close supabase and powersync
 ```
 npx supabase stop
-docker compose down
+docker compose down --remove-orphans -v
+```
+
+# Cleanup
+If you encounter "No such container" or other Docker state issues, run:
+```
+./cleanup.sh
 ```
 
 # Other
@@ -29,4 +35,9 @@ npx supabase db pull --db-url "postgresql://postgres.letoghfwotjbrzwgocpc:[YOUR-
 Reset Data to Default:
 ```
 npx supabase db reset
+```
+
+To test the backend:
+```
+npm test
 ```

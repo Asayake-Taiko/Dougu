@@ -5,6 +5,7 @@ export interface ProfileRecord {
   id: string;
   name: string;
   profile_image: string;
+  color: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -18,6 +19,7 @@ export interface OrganizationRecord {
   access_code: string;
   manager_id: string;
   image: string;
+  color: string;
   created_at?: string;
 }
 
@@ -31,6 +33,7 @@ export interface OrgMembershipRecord {
   user_id?: string; // Present if type === 'USER'
   storage_name?: string; // Present if type === 'STORAGE'
   profile_image?: string; // Present if type === 'STORAGE'
+  color?: string;
   details?: string;
 }
 

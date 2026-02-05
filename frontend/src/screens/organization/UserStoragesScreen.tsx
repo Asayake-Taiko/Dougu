@@ -27,8 +27,7 @@ export default function UserStoragesScreen({
   navigation,
 }: UserStoragesScreenProps) {
   const { organization } = useMembership();
-  const { tabParam } = route.params;
-  const [tab, setTab] = useState(tabParam);
+  const [tab, setTab] = useState("Members");
   const { ownerships } = useEquipment();
 
   const members = useMemo(() => {

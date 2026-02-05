@@ -1,11 +1,12 @@
 import { organizationService } from "../../../src/lib/services/organization";
 import { authService } from "../../../src/lib/services/auth";
 import { supabase } from "../../../src/lib/supabase/supabase";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("Join Organization Tests", () => {
   let testOrgCode: string;
   let joinerId: string;
-  const randomStr = Math.random().toString(36).substring(7);
+  const randomStr = generateUUID();
 
   beforeAll(async () => {
     await authService.logout();
@@ -19,7 +20,7 @@ describe("Join Organization Tests", () => {
       data: { user: creator },
     } = await supabase.auth.getUser();
     const { code } = await organizationService.createOrganization(
-      `Shared_Join_Org_${randomStr}`,
+      `Org_${randomStr.substring(0, 20)}`,
       creator!.id,
     );
     testOrgCode = code;
@@ -66,7 +67,7 @@ describe("Join Organization Tests", () => {
     const invalidUserId = "invalid-user-id";
     await expect(
       organizationService.joinOrganization(testOrgCode, invalidUserId),
-    ).rejects.toThrow("Invalid user id!");
+    ).rejects.toThrow("Invalid ID format.");
   });
 
   it("joining an organization the user is already a member of should fail", async () => {

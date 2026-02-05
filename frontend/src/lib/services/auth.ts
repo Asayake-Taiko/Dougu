@@ -11,7 +11,7 @@ export interface IAuthService {
     password: string,
     newPassword: string,
   ): Promise<void>;
-  updateProfileImage(profileImage: string): Promise<void>;
+  updateProfile(profileImage: string, color: string): Promise<void>;
   updateName(name: string): Promise<void>;
   sendEmailUpdateCode(email: string): Promise<void>;
   confirmEmailUpdate(email: string, code: string): Promise<void>;
@@ -37,7 +37,7 @@ export class AuthService implements IAuthService {
       options: {
         data: {
           name,
-          profile_image: "default",
+          profile_image: "default_profile",
         },
       },
     });
@@ -100,7 +100,7 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async updateProfileImage(profileImage: string): Promise<void> {
+  async updateProfile(profileImage: string, color: string): Promise<void> {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -113,6 +113,7 @@ export class AuthService implements IAuthService {
       .from("profiles")
       .update({
         profile_image: profileImage,
+        color,
         updated_at: now,
       })
       .eq("id", user.id);

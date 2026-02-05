@@ -4,6 +4,7 @@ import {
   findLatestEmail,
   extractCodeFromEmail,
 } from "../../utils/mailpit";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 
 describe("AuthService Password Reset Tests", () => {
   beforeEach(async () => {
@@ -12,8 +13,7 @@ describe("AuthService Password Reset Tests", () => {
   });
 
   it("failing reset password flow", async () => {
-    const randomStr = Math.random().toString(36).substring(7);
-    const email = `reset-fail-${randomStr}@example.com`;
+    const email = `reset-fail-${generateUUID()}@example.com`;
     const password = "password123";
     const name = "Reset User";
     const newPassword = "newpassword123";
@@ -53,8 +53,7 @@ describe("AuthService Password Reset Tests", () => {
   });
 
   it("successful reset password flow", async () => {
-    const randomStr = Math.random().toString(36).substring(7);
-    const email = `reset-success-${randomStr}@example.com`;
+    const email = `reset-success-${generateUUID()}@example.com`;
     const password = "password123";
     const name = "Reset User";
     const newPassword = "newpassword123";

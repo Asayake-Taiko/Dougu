@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { MemberProfileScreenProps } from "../../types/navigation";
-import Display from "../../components/Display";
+import DisplayImage from "../../components/DisplayImage";
 import { ProfileStyles } from "../../styles/ProfileStyles";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useMembership } from "../../lib/context/MembershipContext";
@@ -10,6 +10,7 @@ import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
 import { useNavigation } from "@react-navigation/native";
 import ConfirmationModal from "../../components/member/ConfirmationModal";
+import { DisplayStyles } from "../../styles/Display";
 
 export default function MemberProfileScreen({
   route,
@@ -91,7 +92,11 @@ export default function MemberProfileScreen({
   return (
     <View style={ProfileStyles.container}>
       <View style={ProfileStyles.profile}>
-        <Display type="User" isMini={false} imageKey={member.profile} />
+        <DisplayImage
+          type="User"
+          imageKey={member.profile}
+          style={DisplayStyles.profile}
+        />
       </View>
       <View style={ProfileStyles.centerRow}>
         <Text style={ProfileStyles.text}>{member.name}</Text>

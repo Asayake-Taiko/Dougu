@@ -37,7 +37,7 @@ export class AuthService implements IAuthService {
       options: {
         data: {
           name,
-          profile_image: "default",
+          profile_image: "default_profile",
         },
       },
     });

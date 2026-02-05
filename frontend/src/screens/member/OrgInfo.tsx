@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Display from "../../components/Display";
 import { useModal } from "../../lib/context/ModalContext";
 import { AntDesign } from "@expo/vector-icons";
 import { InfoScreenProps } from "../../types/navigation";
 import { useMembership } from "../../lib/context/MembershipContext";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
+import EditImage from "../../components/EditImage";
 
 /*
   InfoScreen displays the organization's name, access code, and offers
@@ -16,7 +16,7 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
   const { organization } = useMembership();
   const { setMessage } = useModal();
   const [overlayVisible, setOverlayVisible] = useState(false);
-  const [imageKey, setImageKey] = useState("default");
+  const [imageKey, setImageKey] = useState("default_org");
   const [color, setColor] = useState("#791111");
 
   useEffect(() => {
@@ -41,11 +41,10 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Display
+        <EditImage
           type="Org"
           imageKey={imageKey}
           color={color}
-          isMini={false}
           onPress={() => setOverlayVisible(true)}
         />
       </View>

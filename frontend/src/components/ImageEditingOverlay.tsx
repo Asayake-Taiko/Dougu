@@ -8,19 +8,16 @@ import {
   ScrollView,
   ImageSourcePropType,
 } from "react-native";
-import Display from "./Display";
 import { Colors } from "../styles/global";
 import { PressableOpacity } from "./PressableOpacity";
 import ColorSelect from "./organization/ColorSelect";
-import { Hex } from "../types/other";
+import { DisplayType, Hex } from "../types/other";
 import {
-  drums,
-  stands,
-  clothing,
-  other,
   baseProfileMapping,
   baseOrgMapping,
+  iconMapping,
 } from "../lib/utils/ImageMapping";
+import DisplayImage from "./DisplayImage";
 
 interface ImageEditingOverlayProps {
   visible: boolean;
@@ -56,7 +53,7 @@ export default function ImageEditingOverlay({
 
   // Helper to render a group of images
   const renderImageGroup = (
-    title: string,
+    title: DisplayType,
     mapping: { [key: string]: ImageSourcePropType },
   ) => (
     <View style={styles.groupContainer} key={title}>
@@ -71,24 +68,16 @@ export default function ImageEditingOverlay({
             ]}
             onPress={() => setSelectedImageKey(key)}
           >
-            <Display
-              type={getDisplayType(key)}
+            <DisplayImage
+              type={title}
               imageKey={key}
-              isMini={true}
-              color={selectedColor}
+              style={{ width: 50, height: 50 }}
             />
           </PressableOpacity>
         ))}
       </View>
     </View>
   );
-
-  // Helper to determine DisplayType based on key
-  const getDisplayType = (key: string) => {
-    if (baseProfileMapping[key]) return "User";
-    if (baseOrgMapping[key]) return "Org";
-    return "Item";
-  };
 
   return (
     <Modal
@@ -105,11 +94,10 @@ export default function ImageEditingOverlay({
             <View
               style={[styles.previewCircle, { borderColor: selectedColor }]}
             >
-              <Display
-                type={getDisplayType(selectedImageKey)}
+              <DisplayImage
+                type="Item"
                 imageKey={selectedImageKey}
-                color={selectedColor}
-                isMini={false}
+                style={{ width: 100, height: 100 }}
               />
             </View>
           </View>
@@ -148,12 +136,9 @@ export default function ImageEditingOverlay({
           <View style={styles.contentContainer}>
             {activeTab === "image" ? (
               <ScrollView showsVerticalScrollIndicator={false}>
-                {renderImageGroup("Profile", baseProfileMapping)}
-                {renderImageGroup("Organization", baseOrgMapping)}
-                {renderImageGroup("Drums", drums)}
-                {renderImageGroup("Stands", stands)}
-                {renderImageGroup("Clothing", clothing)}
-                {renderImageGroup("Other", other)}
+                {renderImageGroup("User", baseProfileMapping)}
+                {renderImageGroup("Org", baseOrgMapping)}
+                {renderImageGroup("Item", iconMapping)}
               </ScrollView>
             ) : (
               <View style={styles.colorPickerContainer}>

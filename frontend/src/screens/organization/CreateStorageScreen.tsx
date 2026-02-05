@@ -1,9 +1,7 @@
 import { Text, View, TextInput, StyleSheet } from "react-native";
 import React, { useState } from "react";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { ProfileStyles } from "../../styles/ProfileStyles";
-import Display from "../../components/Display";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
@@ -11,7 +9,7 @@ import { Logger } from "../../lib/utils/Logger";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useNavigation } from "@react-navigation/native";
 import { organizationService } from "../../lib/services/organization";
-
+import EditImage from "../../components/EditImage";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
 import { Hex } from "../../types/other";
 
@@ -25,7 +23,7 @@ export default function CreateStorageScreen() {
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
 
-  const [profileKey, setProfileKey] = useState<string>("default");
+  const [profileKey, setProfileKey] = useState<string>("default_profile");
   const [profileColor, setProfileColor] = useState<Hex>("#791111");
   const [profileVisible, setProfileVisible] = useState(false);
   const [name, onChangeName] = useState("");
@@ -73,20 +71,12 @@ export default function CreateStorageScreen() {
 
   return (
     <View style={ProfileStyles.container}>
-      <PressableOpacity
-        style={ProfileStyles.profile}
+      <EditImage
+        type="User"
+        imageKey={profileKey}
+        color={profileColor}
         onPress={() => setProfileVisible(true)}
-      >
-        <Display
-          type="User"
-          isMini={false}
-          imageKey={profileKey}
-          color={profileColor}
-        />
-        <View style={ProfileStyles.editButton}>
-          <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
-        </View>
-      </PressableOpacity>
+      />
       <View style={styles.rowContainer}>
         <View style={styles.row1}>
           <Text style={styles.rowHeader}>Name</Text>

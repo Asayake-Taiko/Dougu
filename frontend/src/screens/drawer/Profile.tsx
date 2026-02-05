@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { View, Text } from "react-native";
 import { useAuth } from "../../lib/context/AuthContext";
 import { ProfileStyles } from "../../styles/ProfileStyles";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import Display from "../../components/Display";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
 import NameOverlay from "../../components/drawer/NameOverlay";
@@ -15,11 +13,12 @@ import { useModal } from "../../lib/context/ModalContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
 import { authService } from "../../lib/services/auth";
+import EditImage from "../../components/EditImage";
 
 export default function ProfileScreen() {
   const { session, profile } = useAuth();
 
-  const [profileImage, setProfileImage] = useState("default");
+  const [profileImage, setProfileImage] = useState("default_profile");
   const [profileColor, setProfileColor] = useState("#791111");
   const [profileVisible, setProfileVisible] = useState(false);
   const [nameVisible, setNameVisible] = useState(false);
@@ -31,7 +30,7 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     if (profile) {
-      setProfileImage(profile.profileImage || "default");
+      setProfileImage(profile.profileImage || "default_profile");
       setProfileColor(profile.color || "#791111");
     }
   }, [profile]);
@@ -68,15 +67,12 @@ export default function ProfileScreen() {
 
   return (
     <View style={ProfileStyles.container}>
-      <PressableOpacity
-        style={ProfileStyles.profile}
+      <EditImage
+        type="User"
+        imageKey={profileImage}
+        color={profileColor}
         onPress={() => setProfileVisible(true)}
-      >
-        <Display type="User" isMini={false} imageKey={profile?.profileImage} />
-        <View style={ProfileStyles.editButton}>
-          <FontAwesome name="pencil" size={20} />
-        </View>
-      </PressableOpacity>
+      />
       <PressableOpacity
         style={ProfileStyles.row}
         onPress={() => setNameVisible(true)}

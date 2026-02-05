@@ -48,7 +48,7 @@ export class OrganizationService implements IOrganizationService {
       name,
       access_code: code,
       manager_id: userId,
-      image: "default",
+      image: "default_org",
       color: "#791111",
       created_at: new Date().toISOString(),
     });

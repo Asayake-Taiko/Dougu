@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { Equipment } from "../../types/models";
 import { Item } from "../../types/other";
-import Display from "../Display";
+import EquipmentDisplay from "./EquipmentDisplay";
 import { ItemStyles } from "../../styles/ItemStyles";
 import { useEquipment } from "../../lib/context/EquipmentContext";
 
@@ -48,8 +48,7 @@ export default function EquipmentItem({
         style={[ItemStyles.container, { opacity: displayCount === 0 ? 0 : 1 }]}
       >
         <View>
-          <Display
-            type="Item"
+          <EquipmentDisplay
             imageKey={repRecord.image}
             isMini={false}
             color={repRecord.color}

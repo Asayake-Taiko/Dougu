@@ -55,14 +55,14 @@ const baseProfileMapping: { [key: string]: ImageSourcePropType } = {
   saitama,
   redTaiko,
   blueTaiko,
-  default: profileDefault,
+  default_profile: profileDefault,
 };
 
 const profileMapping: { [key: string]: ImageSourcePropType } = new Proxy(
   baseProfileMapping,
   {
     get(target, prop: string) {
-      return target[prop] ?? target.default;
+      return target[prop] ?? target.default_profile;
     },
   },
 );
@@ -114,20 +114,20 @@ const taiko: { [key: string]: ImageSourcePropType } = {
 
 const baseIconMapping: { [key: string]: ImageSourcePropType } = {
   ...taiko,
-  default: iconDefault,
+  default_equipment: iconDefault,
 };
 
 const iconMapping: { [key: string]: ImageSourcePropType } = new Proxy(
   baseIconMapping,
   {
     get(target, prop: string) {
-      return target[prop] ?? target.default;
+      return target[prop] ?? target.default_equipment;
     },
   },
 );
 
 const baseOrgMapping: { [key: string]: ImageSourcePropType } = {
-  default: orgDefault,
+  default_org: orgDefault,
   asayake,
 };
 
@@ -135,7 +135,7 @@ const orgMapping: { [key: string]: ImageSourcePropType } = new Proxy(
   baseOrgMapping,
   {
     get(target, prop: string) {
-      return target[prop] ?? target.default;
+      return target[prop] ?? target.default_org;
     },
   },
 );

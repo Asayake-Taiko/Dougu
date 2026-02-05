@@ -1,9 +1,20 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { generateTestUser, createPowerSyncClient, createClient } from "../utils/powersync_utils";
+import { createPowerSyncClient, createClient } from "../utils/powersync_utils";
+import { generateTestUser } from "../utils/user";
 import { randomUUID } from "node:crypto";
-import * as fs from "node:fs";
-import * as path from "node:path";
+import { existsSync, mkdirSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
+
+async function waitFor(predicate: () => Promise<boolean>, timeout = 15000, interval = 500) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (await predicate()) return;
+    await new Promise(resolve => setTimeout(resolve, interval));
+  }
+  throw new Error(`Timeout waiting for condition after ${timeout}ms`);
+}
+
 
 // Helper to create an organization via Supabase client (acting as owner)
 async function createOrganization(accessToken: string, orgName: string) {
@@ -62,17 +73,17 @@ async function joinOrg(userAccessToken: string, orgId: string, userId: string) {
 describe("PowerSync Sync Rules", () => {
   let dbA: any;
   let dbB: any;
-  const tempDir = path.join(__dirname, ".temp");
-  const dbFilenameA = path.join(tempDir, "test_user_a.db");
-  const dbFilenameB = path.join(tempDir, "test_user_b.db");
+  const tempDir = join(__dirname, ".temp");
+  const dbFilenameA = join(tempDir, "test_user_a.db");
+  const dbFilenameB = join(tempDir, "test_user_b.db");
 
   async function cleanup() {
     if (dbA) await dbA.disconnect().catch(() => { });
     if (dbB) await dbB.disconnect().catch(() => { });
 
     // Ensure temp dir exists
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
+    if (!existsSync(tempDir)) {
+      mkdirSync(tempDir, { recursive: true });
     }
 
     // precise cleanup
@@ -82,8 +93,8 @@ describe("PowerSync Sync Rules", () => {
     ];
 
     files.forEach(f => {
-      if (fs.existsSync(f)) {
-        try { fs.unlinkSync(f); } catch (e) { console.warn("Could not delete", f); }
+      if (existsSync(f)) {
+        try { unlinkSync(f); } catch (e) { console.warn("Could not delete", f); }
       }
     });
   }
@@ -117,12 +128,17 @@ describe("PowerSync Sync Rules", () => {
     // 7. Start PowerSync Client for User A
     dbA = await createPowerSyncClient(userA.token, dbFilenameA);
 
-    // Wait for sync
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // Wait for sync using polling
+    await waitFor(async () => {
+      const result = await dbA.getAll('SELECT * FROM organizations WHERE id = ?', [orgA.id]);
+      return result.length > 0;
+    });
+
 
     // 8. Verify User A sees Org A and Container A1
     const resultOrgA = await dbA.getAll('SELECT * FROM organizations');
     expect(resultOrgA.find((o: any) => o.id === orgA.id)).toBeDefined();
+
 
     const resultContainerA = await dbA.getAll('SELECT * FROM containers');
     expect(resultContainerA.find((c: any) => c.id === containerA1.id)).toBeDefined();
@@ -138,8 +154,12 @@ describe("PowerSync Sync Rules", () => {
     // 11. Start PowerSync Client for User B
     dbB = await createPowerSyncClient(userB.token, dbFilenameB);
 
-    // Wait for sync
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // Wait for sync using polling
+    await waitFor(async () => {
+      const result = await dbB.getAll('SELECT * FROM organizations WHERE id = ?', [orgA.id]);
+      return result.length > 0;
+    });
+
 
     // 12. Verify User B sees Org A and Container A1 (now that they are a member)
     const resultOrgB = await dbB.getAll('SELECT * FROM organizations');
@@ -152,7 +172,12 @@ describe("PowerSync Sync Rules", () => {
     // RECONNECT A to force refresh of parameters
     await dbA.disconnect();
     dbA = await createPowerSyncClient(userA.token, dbFilenameA);
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Wait for reconnection and sync
+    await waitFor(async () => {
+      const result = await dbA.getAll('SELECT * FROM org_memberships WHERE user_id = ?', [userB.user.id]);
+      return result.length > 0;
+    });
+
 
     // Check memberships first
     const membershipsA = await dbA.getAll('SELECT * FROM org_memberships');

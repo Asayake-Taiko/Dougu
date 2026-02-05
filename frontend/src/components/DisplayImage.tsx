@@ -10,10 +10,12 @@ import { ImageSourcePropType, StyleProp, ImageStyle } from "react-native";
 export default function DisplayImage({
   imageKey,
   style,
+  color,
   uri,
 }: {
   imageKey: string | undefined;
   style?: StyleProp<ImageStyle>;
+  color?: string;
   uri?: string;
 }) {
   const [imageSource, setImageSource] = useState<ImageSourcePropType>(
@@ -21,8 +23,14 @@ export default function DisplayImage({
   );
 
   useEffect(() => {
-    setImageSource(allMappings[imageKey ?? "default_image"]);
-  }, [imageKey]);
+    if (uri) {
+      setImageSource({ uri });
+    } else {
+      setImageSource(allMappings[imageKey ?? "default_image"]);
+    }
+  }, [imageKey, uri]);
 
-  return <Image source={imageSource} style={style} />;
+  return (
+    <Image source={imageSource} style={[style, { backgroundColor: color }]} />
+  );
 }

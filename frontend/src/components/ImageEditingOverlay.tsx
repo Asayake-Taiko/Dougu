@@ -89,14 +89,13 @@ export default function ImageEditingOverlay({
         <View style={styles.modalView}>
           {/* Header / Preview */}
           <View style={styles.previewContainer}>
-            <View
-              style={[
-                styles.previewCircle,
-                { borderColor: selectedColor, backgroundColor: selectedColor },
-              ]}
-            >
+            <View style={styles.previewCircle}>
               {!hideImagePicker && (
-                <DisplayImage imageKey={selectedImageKey} style={styles.fill} />
+                <DisplayImage
+                  imageKey={selectedImageKey}
+                  style={styles.fill}
+                  color={selectedColor}
+                />
               )}
             </View>
           </View>
@@ -195,7 +194,6 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    borderWidth: 4,
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",

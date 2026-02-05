@@ -17,7 +17,11 @@ export default function EditImage({
 }) {
   return (
     <PressableOpacity style={ProfileStyles.profile} onPress={onPress}>
-      <DisplayImage imageKey={imageKey} style={DisplayStyles.profile} />
+      <DisplayImage
+        imageKey={imageKey}
+        style={DisplayStyles.profile}
+        color={color}
+      />
       <View style={ProfileStyles.editButton}>
         <FontAwesome name="pencil" size={16} color={Colors.black} />
       </View>

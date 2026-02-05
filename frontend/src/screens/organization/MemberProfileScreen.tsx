@@ -11,6 +11,9 @@ import { Logger } from "../../lib/utils/Logger";
 import { useNavigation } from "@react-navigation/native";
 import ConfirmationModal from "../../components/member/ConfirmationModal";
 import { DisplayStyles } from "../../styles/Display";
+import EditImage from "../../components/EditImage";
+import ImageEditingOverlay from "../../components/ImageEditingOverlay";
+import { useAuth } from "../../lib/context/AuthContext";
 
 export default function MemberProfileScreen({
   route,
@@ -20,6 +23,11 @@ export default function MemberProfileScreen({
   const { organization } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
+  const { session } = useAuth();
+
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const [imageKey, setImageKey] = useState(member.profile);
+  const [color, setColor] = useState(member.color || "#791111");
 
   const [modalConfig, setModalConfig] = useState<{
     visible: boolean;
@@ -89,10 +97,40 @@ export default function MemberProfileScreen({
     }
   };
 
+  const handleSave = async (newImageKey: string, newColor: string) => {
+    try {
+      showSpinner();
+      await member.updateImage(newImageKey, newColor);
+      setImageKey(newImageKey);
+      setColor(newColor);
+      setMessage("Storage updated successfully.");
+    } catch (error: any) {
+      Logger.error("Error updating storage:", error);
+      setMessage(error.message || "Failed to update storage.");
+    } finally {
+      hideSpinner();
+    }
+  };
+
+  const isManager = organization.managerId === session?.user.id;
+  const isStorage = member.membershipType === "STORAGE";
+
   return (
     <View style={ProfileStyles.container}>
       <View style={ProfileStyles.profile}>
-        <DisplayImage imageKey={member.profile} style={DisplayStyles.profile} />
+        {isManager && isStorage ? (
+          <EditImage
+            imageKey={imageKey}
+            color={color}
+            onPress={() => setOverlayVisible(true)}
+          />
+        ) : (
+          <DisplayImage
+            imageKey={imageKey}
+            style={DisplayStyles.profile}
+            color={color}
+          />
+        )}
       </View>
       <View style={ProfileStyles.centerRow}>
         <Text style={ProfileStyles.text}>{member.name}</Text>
@@ -102,17 +140,21 @@ export default function MemberProfileScreen({
           <Text style={styles.detailsText}>{member.details}</Text>
         </View>
       )}
-      <PressableOpacity
-        onPress={showTransferConfirmation}
-        style={ProfileStyles.buttonContainer}
-      >
-        <Text style={ProfileStyles.buttonText}>Make Manager</Text>
-      </PressableOpacity>
+      {!isStorage && (
+        <PressableOpacity
+          onPress={showTransferConfirmation}
+          style={ProfileStyles.buttonContainer}
+        >
+          <Text style={ProfileStyles.buttonText}>Make Manager</Text>
+        </PressableOpacity>
+      )}
       <PressableOpacity
         onPress={showKickConfirmation}
         style={[ProfileStyles.buttonContainer, styles.kickButton]}
       >
-        <Text style={ProfileStyles.buttonText}>Kick</Text>
+        <Text style={ProfileStyles.buttonText}>
+          {isStorage ? "Delete" : "Kick"}
+        </Text>
       </PressableOpacity>
 
       <ConfirmationModal
@@ -123,6 +165,14 @@ export default function MemberProfileScreen({
         onCancel={() => setModalConfig((prev) => ({ ...prev, visible: false }))}
         confirmText={modalConfig.confirmText}
         isDestructive={modalConfig.isDestructive}
+      />
+
+      <ImageEditingOverlay
+        visible={overlayVisible}
+        setVisible={setOverlayVisible}
+        currentImageKey={imageKey}
+        currentColor={color}
+        onSave={handleSave}
       />
     </View>
   );

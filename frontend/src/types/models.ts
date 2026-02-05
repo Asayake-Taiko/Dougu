@@ -221,15 +221,18 @@ export class OrgMembership {
   membership: OrgMembershipRecord;
   userName?: string;
   userProfile?: string;
+  userColor?: string;
 
   constructor(
     membership: OrgMembershipRecord,
     userName?: string,
     userProfile?: string,
+    userColor?: string,
   ) {
     this.membership = membership;
     this.userName = userName;
     this.userProfile = userProfile;
+    this.userColor = userColor;
   }
 
   get id() {
@@ -257,6 +260,18 @@ export class OrgMembership {
   }
   get details() {
     return this.membership.details;
+  }
+  get color() {
+    return this.userColor || this.membership.color || "#791111";
+  }
+
+  async updateImage(newImage: string, color: string) {
+    await organizationService.updateMembershipImage(
+      this.organizationId,
+      this.id,
+      newImage,
+      color,
+    );
   }
 
   async delete() {

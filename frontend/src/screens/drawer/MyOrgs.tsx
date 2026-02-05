@@ -45,9 +45,9 @@ export default function MyOrgsScreen({
       activeOpacity={0.7}
     >
       <DisplayImage
-        type="Org"
         imageKey={item.image}
         style={styles.orgIconContainer}
+        color={item.color}
       />
       <View style={styles.orgInfo}>
         <Text style={styles.orgName}>{item.name}</Text>

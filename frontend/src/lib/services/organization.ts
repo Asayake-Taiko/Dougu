@@ -16,12 +16,19 @@ export interface IOrganizationService {
     orgId: string,
     name: string,
     image: string,
+    color: string,
     details: string,
   ): Promise<void>;
   deleteMembership(orgId: string, membershipId: string): Promise<void>;
   transferOwnership(orgId: string, newManagerId: string): Promise<void>;
   updateOrganizationImage(
     orgId: string,
+    imageKey: string,
+    color: string,
+  ): Promise<void>;
+  updateMembershipImage(
+    orgId: string,
+    membershipId: string,
     imageKey: string,
     color: string,
   ): Promise<void>;
@@ -103,6 +110,7 @@ export class OrganizationService implements IOrganizationService {
     orgId: string,
     name: string,
     image: string,
+    color: string,
     details: string,
   ): Promise<void> {
     if (!(await isManager(orgId)))
@@ -114,6 +122,7 @@ export class OrganizationService implements IOrganizationService {
       type: "STORAGE",
       storage_name: name,
       profile_image: image,
+      color: color,
       details: details,
     });
     if (error) handleSupabaseError(error);
@@ -166,6 +175,22 @@ export class OrganizationService implements IOrganizationService {
       .from("organizations")
       .update({ image: imageKey, color })
       .eq("id", orgId);
+    if (error) handleSupabaseError(error);
+  }
+
+  async updateMembershipImage(
+    orgId: string,
+    membershipId: string,
+    imageKey: string,
+    color: string,
+  ): Promise<void> {
+    if (!(await isManager(orgId)))
+      throw new Error("Only managers can update membership images.");
+
+    const { error } = await supabase
+      .from("org_memberships")
+      .update({ profile_image: imageKey, color })
+      .eq("id", membershipId);
     if (error) handleSupabaseError(error);
   }
 

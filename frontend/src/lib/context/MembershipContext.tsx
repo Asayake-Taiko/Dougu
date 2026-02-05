@@ -64,7 +64,11 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
 
   // Reactive queries
   const { data: membershipData, isLoading: loadingMembership } = useQuery<
-    OrgMembershipRecord & { name?: string; user_profile?: string }
+    OrgMembershipRecord & {
+      name?: string;
+      user_profile?: string;
+      user_color?: string;
+    }
   >(Queries.Membership.getDetailsByOrgAndUser, [
     organizationId,
     session?.user.id,
@@ -78,7 +82,9 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
   // Derive models and state
   const membership = useMemo(() => {
     const data = membershipData[0];
-    return data ? new OrgMembership(data, data.name, data.user_profile) : null;
+    return data
+      ? new OrgMembership(data, data.name, data.user_profile, data.user_color)
+      : null;
   }, [membershipData]);
 
   const organization = useMemo(

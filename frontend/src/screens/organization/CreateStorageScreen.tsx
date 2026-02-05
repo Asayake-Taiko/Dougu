@@ -47,6 +47,7 @@ export default function CreateStorageScreen() {
         organization.id,
         name,
         profileKey,
+        profileColor,
         details,
       );
 

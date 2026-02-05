@@ -19,13 +19,12 @@ export default function EquipmentDisplay({
   return (
     <PressableOpacity
       style={{
-        backgroundColor: color || "#ddd",
         ...ItemStyles.equipment,
         ...sizeStyles,
         ...radius,
       }}
     >
-      <DisplayImage imageKey={imageKey} style={sizeStyles} />
+      <DisplayImage imageKey={imageKey} style={sizeStyles} color={color} />
     </PressableOpacity>
   );
 }

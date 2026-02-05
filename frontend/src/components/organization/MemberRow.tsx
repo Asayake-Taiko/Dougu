@@ -31,7 +31,11 @@ export default function MemberRow({ item }: { item: OrgMembership }) {
   return (
     <View style={userStorage.row}>
       <View style={userStorage.profile}>
-        <DisplayImage imageKey={item.profile} style={userStorage.profileMini} />
+        <DisplayImage
+          imageKey={item.profile}
+          style={userStorage.profileMini}
+          color={item.color}
+        />
       </View>
       <View style={userStorage.nameRow}>
         <Text style={userStorage.name}>{item.name}</Text>

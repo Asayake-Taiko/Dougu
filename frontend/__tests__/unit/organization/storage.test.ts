@@ -33,6 +33,7 @@ describe("Create Storage Tests", () => {
         orgId,
         storageName,
         storageImage,
+        "#894567",
         storageDetails,
       ),
     ).resolves.not.toThrow();
@@ -49,6 +50,7 @@ describe("Create Storage Tests", () => {
     expect(storage).not.toBeNull();
     expect(storage?.storage_name).toBe(storageName);
     expect(storage?.profile_image).toBe(storageImage);
+    expect(storage?.color).toBe("#894567");
     expect(storage?.details).toBe(storageDetails);
   });
 
@@ -59,6 +61,7 @@ describe("Create Storage Tests", () => {
         invalidOrgId,
         "Fail Storage",
         "default",
+        "#123123",
         "details",
       ),
     ).rejects.toThrow("Only managers can create storage.");
@@ -86,6 +89,7 @@ describe("Create Storage Tests", () => {
         orgId,
         "Hacked Storage",
         "default",
+        "#123123",
         "details",
       ),
     ).rejects.toThrow("Only managers can create storage.");
@@ -114,6 +118,7 @@ describe("Create Storage Tests", () => {
         orgId,
         "Hacked Storage",
         "default",
+        "#123123",
         "details",
       ),
     ).rejects.toThrow("Only managers can create storage.");

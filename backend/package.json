@@ -8,7 +8,8 @@
     "better-sqlite3": "^12.6.2",
     "dotenv": "^17.2.3",
     "supabase": "^2.72.1",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "@dougu/shared": "file:../shared"
   },
   "overrides": {
     "supabase": {

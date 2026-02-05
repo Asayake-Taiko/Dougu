@@ -1,6 +1,6 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { generateTestUser, createPowerSyncClient, createClient } from "./test_utils";
+import { generateTestUser, createPowerSyncClient, createClient } from "../utils/powersync_utils";
 import { randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -106,7 +106,6 @@ describe("PowerSync Sync Rules", () => {
     const orgA = await createOrganization(userA.token, "Org A");
 
     // 4. User A creates Container A1 in Org A
-    console.log("Creating Container in Org A...");
     const containerA1 = await createContainer(userA.token, orgA.id, "Container A1");
 
     // 5. User B creates Organization B
@@ -116,11 +115,9 @@ describe("PowerSync Sync Rules", () => {
     const containerB1 = await createContainer(userB.token, orgB.id, "Container B1");
 
     // 7. Start PowerSync Client for User A
-    console.log("Starting PowerSync Client for User A...");
     dbA = await createPowerSyncClient(userA.token, dbFilenameA);
 
     // Wait for sync
-    console.log("Waiting for sync...");
     await new Promise(resolve => setTimeout(resolve, 5000));
 
     // 8. Verify User A sees Org A and Container A1
@@ -135,16 +132,13 @@ describe("PowerSync Sync Rules", () => {
     expect(resultContainerA.find((c: any) => c.id === containerB1.id)).toBeUndefined();
 
     // 10. Add User B to Org A
-    console.log("User B joining Org A...");
     // Use User B's token to self-join
     await joinOrg(userB.token, orgA.id, userB.user.id);
 
     // 11. Start PowerSync Client for User B
-    console.log("Starting PowerSync Client for User B...");
     dbB = await createPowerSyncClient(userB.token, dbFilenameB);
 
     // Wait for sync
-    console.log("Waiting for User B sync...");
     await new Promise(resolve => setTimeout(resolve, 5000));
 
     // 12. Verify User B sees Org A and Container A1 (now that they are a member)
@@ -155,10 +149,7 @@ describe("PowerSync Sync Rules", () => {
     expect(resultContainerB.find((c: any) => c.id === containerA1.id)).toBeDefined();
 
     // 13. Verify Profile Sync (Profiles via Shared Org)
-    console.log("Verifying Profile Sync...");
-
     // RECONNECT A to force refresh of parameters
-    console.log("Reconnecting User A to force parameter refresh...");
     await dbA.disconnect();
     dbA = await createPowerSyncClient(userA.token, dbFilenameA);
     await new Promise(resolve => setTimeout(resolve, 3000));
@@ -179,7 +170,6 @@ describe("PowerSync Sync Rules", () => {
     expect(resultProfilesB.find((p: any) => p.id === userB.user.id)).toBeDefined();
 
     // 14. Verify Isolation (User C)
-    console.log("Verifying Isolation (User C)...");
     const userC = await generateTestUser();
     // Give it a moment to sync potential changes
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -187,7 +177,5 @@ describe("PowerSync Sync Rules", () => {
     const resultProfilesA_Final = await dbA.getAll('SELECT * FROM profiles');
     // A should NOT see C
     expect(resultProfilesA_Final.find((p: any) => p.id === userC.user.id)).toBeUndefined();
-
-    console.log("Test Complete!");
   });
 });

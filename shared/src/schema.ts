@@ -1,7 +1,7 @@
-import { column, Schema, Table } from "@powersync/react-native";
+import { column, Schema, Table } from "@powersync/common";
 
 /**
- * Very simple initial schema for PowerSync.
+ * Shared PowerSync Schema between frontend and backend.
  */
 export const AppSchema = new Schema({
   profiles: new Table({

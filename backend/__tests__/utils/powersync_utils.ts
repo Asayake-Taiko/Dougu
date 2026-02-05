@@ -1,7 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { PowerSyncDatabase } from "@powersync/node";
 import 'dotenv/config';
-import { AppSchema } from "./schema";
+import { AppSchema } from "@dougu/shared";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "http://127.0.0.1:54321";
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "";

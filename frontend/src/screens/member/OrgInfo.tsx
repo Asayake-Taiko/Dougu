@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text } from "react-native";
 import { useModal } from "../../lib/context/ModalContext";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { InfoScreenProps } from "../../types/navigation";
 import { useMembership } from "../../lib/context/MembershipContext";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
 import EditImage from "../../components/EditImage";
+import { ProfileStyles } from "../../styles/ProfileStyles";
+import { PressableOpacity } from "../../components/PressableOpacity";
+import { Colors } from "../../styles/global";
 
 /*
   InfoScreen displays the organization's name, access code, and offers
@@ -39,68 +42,68 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.imageContainer}>
-        <EditImage
-          imageKey={imageKey}
-          color={color}
-          onPress={() => setOverlayVisible(true)}
-        />
+    <View style={ProfileStyles.container}>
+      <EditImage
+        imageKey={imageKey}
+        color={color}
+        onPress={() => setOverlayVisible(true)}
+      />
+
+      <View style={ProfileStyles.row}>
+        <Text style={ProfileStyles.text}>Name</Text>
+        <View style={ProfileStyles.changeBtn}>
+          <Text style={ProfileStyles.text}>{organization?.name}</Text>
+        </View>
       </View>
-      <View style={styles.row}>
-        <Text style={[styles.rowHeader, { flex: 2 }]}>Name</Text>
-        <Text style={{ flex: 3 }}>{organization?.name}</Text>
+
+      <View style={ProfileStyles.row}>
+        <Text style={ProfileStyles.text}>Access Code</Text>
+        <View style={ProfileStyles.changeBtn}>
+          <Text style={ProfileStyles.text}>{organization?.accessCode}</Text>
+        </View>
       </View>
-      <View style={styles.row}>
-        <Text style={[styles.rowHeader, { flex: 2 }]}>Access Code</Text>
-        <Text style={{ flex: 3 }}>{organization?.accessCode}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.rowHeader}>Members</Text>
-        <TouchableOpacity
-          style={styles.rightArrow}
-          onPress={() =>
-            navigation.navigate("UserStorages", { tabParam: "Members" })
-          }
-        >
-          <Text>View Members</Text>
-          <AntDesign name="right" size={20} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.rowHeader}>Storages</Text>
-        <TouchableOpacity
-          style={styles.rightArrow}
-          onPress={() =>
-            navigation.navigate("UserStorages", { tabParam: "Storages" })
-          }
-        >
-          <Text>View Storages</Text>
-          <AntDesign name="right" size={20} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.rowHeader}>Equipment</Text>
-        <TouchableOpacity
-          style={styles.rightArrow}
-          onPress={() => navigation.navigate("Sheet")}
-        >
-          <Text>View Sheet</Text>
-          <AntDesign name="right" size={20} />
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        style={styles.equipmentBtn}
+
+      <PressableOpacity
+        style={ProfileStyles.row}
+        onPress={() => navigation.navigate("UserStorages")}
+      >
+        <Text style={ProfileStyles.text}>Members</Text>
+        <View style={ProfileStyles.changeBtn}>
+          <MaterialCommunityIcons name="chevron-right" size={30} />
+        </View>
+      </PressableOpacity>
+
+      <PressableOpacity
+        style={ProfileStyles.row}
+        onPress={() => navigation.navigate("Sheet")}
+      >
+        <Text style={ProfileStyles.text}>Equipment Sheet</Text>
+        <View style={ProfileStyles.changeBtn}>
+          <MaterialCommunityIcons name="chevron-right" size={30} />
+        </View>
+      </PressableOpacity>
+
+      <PressableOpacity
+        style={ProfileStyles.row}
         onPress={() => navigation.navigate("ManageEquipment")}
       >
-        <Text style={styles.eBtnText}>Manage Equipment</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.equipmentBtn}
+        <Text style={ProfileStyles.text}>Manage Equipment</Text>
+        <View style={ProfileStyles.changeBtn}>
+          <MaterialCommunityIcons name="chevron-right" size={30} />
+        </View>
+      </PressableOpacity>
+
+      <PressableOpacity
+        style={ProfileStyles.row}
         onPress={() => navigation.navigate("DeleteOrg")}
       >
-        <Text style={styles.deleteText}>Delete Org</Text>
-      </TouchableOpacity>
+        <Text style={[ProfileStyles.text, { color: Colors.primary }]}>
+          Delete Organization
+        </Text>
+        <View style={ProfileStyles.changeBtn}>
+          <MaterialCommunityIcons name="chevron-right" size={30} />
+        </View>
+      </PressableOpacity>
 
       <ImageEditingOverlay
         visible={overlayVisible}
@@ -112,48 +115,3 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  imageContainer: {
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  deleteText: {
-    alignSelf: "center",
-    fontWeight: "bold",
-    color: "red",
-  },
-  equipmentBtn: {
-    backgroundColor: "#EEEEEE",
-    height: 50,
-    width: "50%",
-    justifyContent: "center",
-    borderRadius: 10,
-    marginTop: 20,
-  },
-  eBtnText: {
-    alignSelf: "center",
-    fontWeight: "bold",
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "90%",
-    margin: 15,
-  },
-  rowHeader: {
-    fontWeight: "bold",
-    flex: 2,
-  },
-  rightArrow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "50%",
-    flex: 3,
-  },
-});

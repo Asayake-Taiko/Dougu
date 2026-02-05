@@ -251,7 +251,9 @@ export class OrgMembership {
     return this.membership.user_id;
   }
   get profile() {
-    return this.userProfile || this.membership.profile_image;
+    return (
+      this.userProfile || this.membership.profile_image || "default_profile"
+    );
   }
   get details() {
     return this.membership.details;

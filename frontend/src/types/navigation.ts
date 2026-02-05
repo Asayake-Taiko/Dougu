@@ -38,7 +38,7 @@ export type DrawerStackParamList = {
 // Profile Stack Parameter List (Overlays everything)
 export type ProfileStackParamList = {
   DrawerRoot: undefined;
-  UserStorages: { tabParam: "Members" | "Storages" };
+  UserStorages: undefined;
   Sheet: undefined;
   ManageEquipment: undefined;
   DeleteOrg: undefined;

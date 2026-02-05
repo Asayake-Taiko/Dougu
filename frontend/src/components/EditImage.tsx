@@ -1,3 +1,4 @@
+import { Colors } from "../styles/global";
 import { ProfileStyles } from "../styles/ProfileStyles";
 import { PressableOpacity } from "./PressableOpacity";
 import { View } from "react-native";
@@ -18,7 +19,7 @@ export default function EditImage({
     <PressableOpacity style={ProfileStyles.profile} onPress={onPress}>
       <DisplayImage imageKey={imageKey} style={DisplayStyles.profile} />
       <View style={ProfileStyles.editButton}>
-        <FontAwesome name="pencil" size={20} />
+        <FontAwesome name="pencil" size={16} color={Colors.black} />
       </View>
     </PressableOpacity>
   );

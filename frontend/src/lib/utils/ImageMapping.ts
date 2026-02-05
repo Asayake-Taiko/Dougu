@@ -154,10 +154,6 @@ export {
   profileMapping,
   orgMapping,
   allMappings,
-  drums,
-  stands,
-  clothing,
-  other,
   baseProfileMapping,
   baseOrgMapping,
 };

@@ -90,7 +90,10 @@ export default function ImageEditingOverlay({
           {/* Header / Preview */}
           <View style={styles.previewContainer}>
             <View
-              style={[styles.previewCircle, { borderColor: selectedColor }]}
+              style={[
+                styles.previewCircle,
+                { borderColor: selectedColor, backgroundColor: selectedColor },
+              ]}
             >
               {!hideImagePicker && (
                 <DisplayImage imageKey={selectedImageKey} style={styles.fill} />
@@ -195,7 +198,6 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
     overflow: "hidden",
   },
   tabContainer: {

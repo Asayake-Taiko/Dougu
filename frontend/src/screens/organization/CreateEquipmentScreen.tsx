@@ -106,6 +106,7 @@ export default function CreateEquipmentScreen() {
         currentImageKey={imageKey}
         currentColor={itemColor}
         onSave={handleSaveImage}
+        hideImagePicker={index === 1}
       />
       <View style={styles.topRow}>
         {index === 0 ? (

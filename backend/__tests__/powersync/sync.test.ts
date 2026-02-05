@@ -1,5 +1,5 @@
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { createPowerSyncClient, createClient } from "../utils/powersync_utils";
 import { generateTestUser } from "../utils/user";
 import { randomUUID } from "node:crypto";
@@ -14,7 +14,6 @@ async function waitFor(predicate: () => Promise<boolean>, timeout = 15000, inter
   }
   throw new Error(`Timeout waiting for condition after ${timeout}ms`);
 }
-
 
 // Helper to create an organization via Supabase client (acting as owner)
 async function createOrganization(accessToken: string, orgName: string) {
@@ -55,6 +54,23 @@ async function createContainer(accessToken: string, orgId: string, name: string)
   return data;
 }
 
+// Helper to create equipment in an org
+async function createEquipment(accessToken: string, orgId: string, name: string) {
+  const userClient = createClient(accessToken);
+
+  const { data, error } = await userClient
+    .from('equipment')
+    .insert({
+      name: name,
+      organization_id: orgId
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 // Helper for user to join org
 async function joinOrg(userAccessToken: string, orgId: string, userId: string) {
   const userClient = createClient(userAccessToken);
@@ -70,137 +86,172 @@ async function joinOrg(userAccessToken: string, orgId: string, userId: string) {
   if (error) throw error;
 }
 
+// Helper to remove membership
+async function removeMembership(adminAccessToken: string, orgId: string, userId: string) {
+  const adminClient = createClient(adminAccessToken);
+  const { error } = await adminClient
+    .from('org_memberships')
+    .delete()
+    .eq('organization_id', orgId)
+    .eq('user_id', userId);
+
+  if (error) throw error;
+}
+
 describe("PowerSync Sync Rules", () => {
-  let dbA: any;
-  let dbB: any;
+  let db: any;
   const tempDir = join(__dirname, ".temp");
-  const dbFilenameA = join(tempDir, "test_user_a.db");
-  const dbFilenameB = join(tempDir, "test_user_b.db");
 
-  async function cleanup() {
-    if (dbA) await dbA.disconnect().catch(() => { });
-    if (dbB) await dbB.disconnect().catch(() => { });
+  const getDbPath = (name: string) => join(tempDir, `${name}.db`);
 
-    // Ensure temp dir exists
-    if (!existsSync(tempDir)) {
-      mkdirSync(tempDir, { recursive: true });
-    }
-
-    // precise cleanup
-    const files = [
-      dbFilenameA, `${dbFilenameA}-wal`, `${dbFilenameA}-shm`,
-      dbFilenameB, `${dbFilenameB}-wal`, `${dbFilenameB}-shm`
-    ];
-
+  async function cleanupDb(dbInstance: any, name: string) {
+    if (dbInstance) await dbInstance.disconnect().catch(() => { });
+    const dbPath = getDbPath(name);
+    const files = [dbPath, `${dbPath}-wal`, `${dbPath}-shm`];
     files.forEach(f => {
       if (existsSync(f)) {
-        try { unlinkSync(f); } catch (e) { console.warn("Could not delete", f); }
+        try { unlinkSync(f); } catch (e) { }
       }
     });
   }
 
-  beforeAll(async () => {
-    await cleanup();
+  beforeAll(() => {
+    if (!existsSync(tempDir)) {
+      mkdirSync(tempDir, { recursive: true });
+    }
   });
 
   afterAll(async () => {
-    await cleanup();
+    if (db) await db.disconnect().catch(() => { });
   });
 
-  it("should sync organization data only to members", async () => {
-    // 1. Create User A
+  beforeEach(async () => {
+    if (db) {
+      await db.disconnect().catch(() => { });
+      db = null;
+    }
+  });
+
+  it("User has data of (equipment/container/membership/profile) of an organization they are a part of", async () => {
+    const user = await generateTestUser();
+    const org = await createOrganization(user.token, "My Org");
+    const container = await createContainer(user.token, org.id, "My Container");
+    const equipment = await createEquipment(user.token, org.id, "My Equipment");
+
+    db = await createPowerSyncClient(user.token, getDbPath("test_member"));
+
+    // Wait for org to sync
+    await waitFor(async () => {
+      const results = await db.getAll('SELECT * FROM organizations WHERE id = ?', [org.id]);
+      return results.length > 0;
+    });
+
+    const containers = await db.getAll('SELECT * FROM containers WHERE id = ?', [container.id]);
+    const equipments = await db.getAll('SELECT * FROM equipment WHERE id = ?', [equipment.id]);
+    const memberships = await db.getAll('SELECT * FROM org_memberships WHERE organization_id = ? AND user_id = ?', [org.id, user.user.id]);
+    const profiles = await db.getAll('SELECT * FROM profiles WHERE id = ?', [user.user.id]);
+
+    expect(containers.length).toBeGreaterThan(0);
+    expect(equipments.length).toBeGreaterThan(0);
+    expect(memberships.length).toBeGreaterThan(0);
+    expect(profiles.length).toBeGreaterThan(0);
+  });
+
+  it("User does not have data of (equipment/container/membership/profile) of an organization they are not a part of", async () => {
     const userA = await generateTestUser();
-    // 2. Create User B 
     const userB = await generateTestUser();
 
-    // 3. User A creates Organization A
-    const orgA = await createOrganization(userA.token, "Org A");
-
-    // 4. User A creates Container A1 in Org A
-    const containerA1 = await createContainer(userA.token, orgA.id, "Container A1");
-
-    // 5. User B creates Organization B
+    // Org B owned by User B
     const orgB = await createOrganization(userB.token, "Org B");
+    const containerB = await createContainer(userB.token, orgB.id, "Container B");
+    const equipmentB = await createEquipment(userB.token, orgB.id, "Equipment B");
 
-    // 6. User B creates Container B1 in Org B
-    const containerB1 = await createContainer(userB.token, orgB.id, "Container B1");
+    db = await createPowerSyncClient(userA.token, getDbPath("test_non_member"));
 
-    // 7. Start PowerSync Client for User A
-    dbA = await createPowerSyncClient(userA.token, dbFilenameA);
+    // Wait a bit to ensure nothing syncs
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // Wait for sync using polling
-    await waitFor(async () => {
-      const result = await dbA.getAll('SELECT * FROM organizations WHERE id = ?', [orgA.id]);
-      return result.length > 0;
-    });
+    const orgs = await db.getAll('SELECT * FROM organizations WHERE id = ?', [orgB.id]);
+    const containers = await db.getAll('SELECT * FROM containers WHERE id = ?', [containerB.id]);
+    const equipments = await db.getAll('SELECT * FROM equipment WHERE id = ?', [equipmentB.id]);
+    // Profiles check: A should not see B if they have no shared orgs
+    const profiles = await db.getAll('SELECT * FROM profiles WHERE id = ?', [userB.user.id]);
 
+    expect(orgs.length).toBe(0);
+    expect(containers.length).toBe(0);
+    expect(equipments.length).toBe(0);
+    expect(profiles.length).toBe(0);
+  });
 
-    // 8. Verify User A sees Org A and Container A1
-    const resultOrgA = await dbA.getAll('SELECT * FROM organizations');
-    expect(resultOrgA.find((o: any) => o.id === orgA.id)).toBeDefined();
+  it("User can join an org and gain new access", async () => {
+    const userA = await generateTestUser();
+    const userB = await generateTestUser();
 
+    const orgA = await createOrganization(userA.token, "Org A");
+    const containerA = await createContainer(userA.token, orgA.id, "Container A");
 
-    const resultContainerA = await dbA.getAll('SELECT * FROM containers');
-    expect(resultContainerA.find((c: any) => c.id === containerA1.id)).toBeDefined();
+    db = await createPowerSyncClient(userB.token, getDbPath("test_join"));
 
-    // 9. Verify User A does NOT see Org B or Container B1
-    expect(resultOrgA.find((o: any) => o.id === orgB.id)).toBeUndefined();
-    expect(resultContainerA.find((c: any) => c.id === containerB1.id)).toBeUndefined();
+    // Initially no access
+    const resultsInitial = await db.getAll('SELECT * FROM organizations WHERE id = ?', [orgA.id]);
+    expect(resultsInitial.length).toBe(0);
 
-    // 10. Add User B to Org A
-    // Use User B's token to self-join
+    // Join org
     await joinOrg(userB.token, orgA.id, userB.user.id);
 
-    // 11. Start PowerSync Client for User B
-    dbB = await createPowerSyncClient(userB.token, dbFilenameB);
-
-    // Wait for sync using polling
+    // Wait for sync
     await waitFor(async () => {
-      const result = await dbB.getAll('SELECT * FROM organizations WHERE id = ?', [orgA.id]);
-      return result.length > 0;
+      const results = await db.getAll('SELECT * FROM organizations WHERE id = ?', [orgA.id]);
+      return results.length > 0;
     });
 
+    const containers = await db.getAll('SELECT * FROM containers WHERE id = ?', [containerA.id]);
+    expect(containers.length).toBeGreaterThan(0);
+  });
 
-    // 12. Verify User B sees Org A and Container A1 (now that they are a member)
-    const resultOrgB = await dbB.getAll('SELECT * FROM organizations');
-    expect(resultOrgB.find((o: any) => o.id === orgA.id)).toBeDefined();
+  it("User has access to data of multiple organizations they are a part of", async () => {
+    const user = await generateTestUser();
+    const org1 = await createOrganization(user.token, "Org 1");
+    const org2 = await createOrganization(user.token, "Org 2");
 
-    const resultContainerB = await dbB.getAll('SELECT * FROM containers');
-    expect(resultContainerB.find((c: any) => c.id === containerA1.id)).toBeDefined();
+    db = await createPowerSyncClient(user.token, getDbPath("test_multiple_orgs"));
 
-    // 13. Verify Profile Sync (Profiles via Shared Org)
-    // RECONNECT A to force refresh of parameters
-    await dbA.disconnect();
-    dbA = await createPowerSyncClient(userA.token, dbFilenameA);
-    // Wait for reconnection and sync
     await waitFor(async () => {
-      const result = await dbA.getAll('SELECT * FROM org_memberships WHERE user_id = ?', [userB.user.id]);
-      return result.length > 0;
+      const results1 = await db.getAll('SELECT * FROM organizations WHERE id = ?', [org1.id]);
+      const results2 = await db.getAll('SELECT * FROM organizations WHERE id = ?', [org2.id]);
+      return results1.length > 0 && results2.length > 0;
     });
 
+    expect(true).toBe(true); // If we reached here, both synced
+  });
 
-    // Check memberships first
-    const membershipsA = await dbA.getAll('SELECT * FROM org_memberships');
-    const userBMembership = membershipsA.find((m: any) => m.user_id === userB.user.id);
-    expect(userBMembership).toBeDefined();
+  it("User's membership is deleted and loses access to data", async () => {
+    const userA = await generateTestUser();
+    const userB = await generateTestUser();
 
-    const resultProfilesA = await dbA.getAll('SELECT * FROM profiles');
-    // NOTE: Shared profile sync via View may be latent or require trigger-based updates in PowerSync.
-    // We verified membership sync above, which confirms A has access to B's existence in the Org.
-    // expect(resultProfilesA.find((p: any) => p.id === userB.user.id)).toBeDefined();
-    expect(resultProfilesA.find((p: any) => p.id === userA.user.id)).toBeDefined();
+    const orgA = await createOrganization(userA.token, "Org A");
+    const containerA = await createContainer(userA.token, orgA.id, "Container A");
 
-    const resultProfilesB = await dbB.getAll('SELECT * FROM profiles');
-    // expect(resultProfilesB.find((p: any) => p.id === userA.user.id)).toBeDefined();
-    expect(resultProfilesB.find((p: any) => p.id === userB.user.id)).toBeDefined();
+    await joinOrg(userB.token, orgA.id, userB.user.id);
 
-    // 14. Verify Isolation (User C)
-    const userC = await generateTestUser();
-    // Give it a moment to sync potential changes
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    db = await createPowerSyncClient(userB.token, getDbPath("test_leave"));
 
-    const resultProfilesA_Final = await dbA.getAll('SELECT * FROM profiles');
-    // A should NOT see C
-    expect(resultProfilesA_Final.find((p: any) => p.id === userC.user.id)).toBeUndefined();
+    // Confirm access first
+    await waitFor(async () => {
+      const results = await db.getAll('SELECT * FROM organizations WHERE id = ?', [orgA.id]);
+      return results.length > 0;
+    });
+
+    // Remove membership
+    await removeMembership(userA.token, orgA.id, userB.user.id);
+
+    // Wait for data to DISAPPEAR
+    await waitFor(async () => {
+      const results = await db.getAll('SELECT * FROM organizations WHERE id = ?', [orgA.id]);
+      return results.length === 0;
+    }, 20000); // Might take longer for PowerSync to process deletion sync
+
+    const containers = await db.getAll('SELECT * FROM containers WHERE id = ?', [containerA.id]);
+    expect(containers.length).toBe(0);
   });
 });

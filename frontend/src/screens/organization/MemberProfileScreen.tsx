@@ -32,7 +32,7 @@ export default function MemberProfileScreen({
     visible: false,
     title: "",
     message: "",
-    onConfirm: async () => { },
+    onConfirm: async () => {},
   });
 
   if (!member || !organization) return null;

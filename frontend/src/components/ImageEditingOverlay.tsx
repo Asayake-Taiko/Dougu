@@ -200,10 +200,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     overflow: "hidden",
   },
-  previewImage: {
-    width: "80%",
-    height: "80%",
-  },
   tabContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
@@ -268,10 +264,6 @@ const styles = StyleSheet.create({
   selectedImageItem: {
     borderColor: Colors.primary,
     backgroundColor: "#fff0f0",
-  },
-  gridImage: {
-    width: "100%",
-    height: "100%",
   },
   footer: {
     padding: 20,

@@ -197,7 +197,7 @@ export class OrganizationService implements IOrganizationService {
   // Helpers
   private async generateUniqueCode(): Promise<string> {
     while (true) {
-      const code = this.generateRandomString(7);
+      const code = this.generateRandomString(8);
       const { data: existing, error } = await supabase
         .from("organizations")
         .select("id")

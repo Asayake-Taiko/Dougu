@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { generateTestUser } from "../utils/user";
+import { generateTestUser } from "../utils/helper";
 import { createCleanupTracker, cleanupTestData, trackUser, trackOrganization } from "../utils/cleanup";
 
 describe("Containers RLS Permission Tests", () => {

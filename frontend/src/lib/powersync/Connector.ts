@@ -1,9 +1,9 @@
 import {
   PowerSyncBackendConnector,
   AbstractPowerSyncDatabase,
-  UpdateType,
 } from "@powersync/react-native";
 import { supabase } from "../supabase/supabase";
+import { uploadToSupabase } from "./SupabaseUploader";
 import { Logger } from "../utils/Logger";
 
 /**
@@ -39,30 +39,7 @@ export class Connector implements PowerSyncBackendConnector {
     }
 
     try {
-      for (const op of transaction.crud) {
-        const table = op.table;
-        const record = op.opData || {};
-        const id = op.id;
-
-        // The data that needs to be changed in the remote db
-        switch (op.op) {
-          case UpdateType.PUT:
-            // Instruct supabase to CREATE or UPDATE a record
-            await supabase.from(table).upsert({ ...record, id });
-            break;
-          case UpdateType.PATCH:
-            // Instruct supabase to PATCH a record
-            await supabase.from(table).update(record).eq("id", id);
-            break;
-          case UpdateType.DELETE:
-            // Instruct supabase to DELETE a record
-            await supabase.from(table).delete().eq("id", id);
-            break;
-        }
-      }
-
-      // Completes the transaction and moves onto the next one
-      await transaction.complete();
+      await uploadToSupabase(supabase, transaction);
     } catch (error) {
       Logger.error("Error uploading data to Supabase:", error);
       throw error;

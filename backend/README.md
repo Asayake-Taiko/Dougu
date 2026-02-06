@@ -36,8 +36,3 @@ Reset Data to Default:
 ```
 npx supabase db reset
 ```
-
-To test the backend:
-```
-npm test
-```

@@ -57,8 +57,42 @@ describe("Organization Table Tests", () => {
 
   // CREATE
   /* ------------------------------------------------------------------- */
-  // create with an invalid manager_id should fail
-  // creating an org should automatically create an org_membership for the manager
+  it("create with an invalid manager_id should fail", async () => {
+    const newUser = await generateTestUser("Invalid Manager");
+    trackUser(cleanup, newUser.user.id);
+    const { error } = await newUser.client.from("organizations").insert({
+      name: "Invalid Manager Org",
+      access_code: "INV_" + Math.random().toString(36).substring(7),
+      manager_id: "00000000-0000-0000-0000-000000000000",
+    });
+    expect(error).not.toBeNull();
+  });
+
+  it("creating an org should automatically create an org_membership for the manager", async () => {
+    const newUser = await generateTestUser("Auto Member");
+    trackUser(cleanup, newUser.user.id);
+    const { data: orgData } = await newUser.client
+      .from("organizations")
+      .insert({
+        name: "Auto Member Org",
+        access_code: "AUTO_" + Math.random().toString(36).substring(7),
+        manager_id: newUser.user.id,
+      })
+      .select()
+      .single();
+
+    trackOrganization(cleanup, orgData!.id);
+
+    // Check if membership was automatically created
+    const { data: membership } = await newUser.client
+      .from("org_memberships")
+      .select("*")
+      .eq("organization_id", orgData!.id)
+      .eq("user_id", newUser.user.id);
+
+    expect(membership?.length).toBe(1);
+  });
+
   it("a non-authenticated user should not be able to create an organization", async () => {
     const { error } = await supabase.from("organizations").insert({
       name: "Anon Org",
@@ -120,7 +154,27 @@ describe("Organization Table Tests", () => {
 
   // UPDATE
   /* ------------------------------------------------------------------- */
-  // owner should not be able to transfer ownership to a storage type membership
+  it("owner should not be able to transfer ownership to a storage type membership", async () => {
+    // Create a storage membership
+    const { data: storageMembership } = await owner.client
+      .from("org_memberships")
+      .insert({
+        organization_id: orgId,
+        type: "STORAGE",
+        storage_name: "Storage Location",
+      })
+      .select()
+      .single();
+
+    // Try to transfer ownership to storage (using storage's user_id which should be null)
+    const { error } = await owner.client
+      .from("organizations")
+      .update({ manager_id: storageMembership!.user_id })
+      .eq("id", orgId);
+
+    expect(error).not.toBeNull();
+  });
+
   it("Member should NOT be able to update organization details", async () => {
     await member.client
       .from("organizations")
@@ -185,8 +239,101 @@ describe("Organization Table Tests", () => {
 
   // DELETE
   /* ------------------------------------------------------------------- */
-  // deleting an org causes a cascading delete of org_memberships, containers, and equipment
-  // outsider should not be able to delete org
+  it("outsider should not be able to delete org", async () => {
+    await outsider.client.from("organizations").delete().eq("id", orgId);
+
+    const { data } = await owner.client
+      .from("organizations")
+      .select("id")
+      .eq("id", orgId);
+    expect(data?.length).toBe(1);
+  });
+
+  it("deleting an org causes a cascading delete of org_memberships, containers, and equipment", async () => {
+    // Create a new org for this test
+    const testOwner = await generateTestUser("Cascade Test Owner");
+    trackUser(cleanup, testOwner.user.id);
+
+    const { data: testOrg } = await testOwner.client
+      .from("organizations")
+      .insert({
+        name: "Cascade Test Org",
+        access_code: "CASCADE_" + Math.random().toString(36).substring(7),
+        manager_id: testOwner.user.id,
+      })
+      .select()
+      .single();
+
+    trackOrganization(cleanup, testOrg!.id);
+
+    // Get the auto-created membership
+    const { data: membershipData } = await testOwner.client
+      .from("org_memberships")
+      .select("id")
+      .eq("organization_id", testOrg!.id)
+      .eq("user_id", testOwner.user.id)
+      .single();
+
+    // Create a container
+    const { data: containerData } = await testOwner.client
+      .from("containers")
+      .insert({
+        name: "Cascade Container",
+        organization_id: testOrg!.id,
+      })
+      .select()
+      .single();
+
+    // Create equipment
+    const { data: equipmentData } = await testOwner.client
+      .from("equipment")
+      .insert({
+        name: "Cascade Equipment",
+        organization_id: testOrg!.id,
+      })
+      .select()
+      .single();
+
+    const membershipId = membershipData!.id;
+    const containerId = containerData!.id;
+    const equipmentId = equipmentData!.id;
+
+    // Delete the organization
+    const { error } = await testOwner.client
+      .from("organizations")
+      .delete()
+      .eq("id", testOrg!.id);
+    expect(error).toBeNull();
+
+    // Verify org was deleted
+    const { data: orgCheck } = await testOwner.client
+      .from("organizations")
+      .select("id")
+      .eq("id", testOrg!.id);
+    expect(orgCheck?.length).toBe(0);
+
+    // Verify membership was cascade deleted
+    const { data: membershipCheck } = await testOwner.client
+      .from("org_memberships")
+      .select("id")
+      .eq("id", membershipId);
+    expect(membershipCheck?.length).toBe(0);
+
+    // Verify container was cascade deleted
+    const { data: containerCheck } = await testOwner.client
+      .from("containers")
+      .select("id")
+      .eq("id", containerId);
+    expect(containerCheck?.length).toBe(0);
+
+    // Verify equipment was cascade deleted
+    const { data: equipmentCheck } = await testOwner.client
+      .from("equipment")
+      .select("id")
+      .eq("id", equipmentId);
+    expect(equipmentCheck?.length).toBe(0);
+  });
+
   it("Member should NOT be able to delete organization", async () => {
     await member.client.from("organizations").delete().eq("id", orgId);
 

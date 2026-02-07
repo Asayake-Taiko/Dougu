@@ -147,9 +147,6 @@ describe("Profile Table Tests", () => {
       .update({ name: "Hacked B" })
       .eq("id", userB.user.id);
 
-    // Should verify it wasn't updated.
-    // RLS often silently denies updates (modifies 0 rows) rather than throwing error.
-
     const { data } = await userB.client
       .from("profiles")
       .select("name")

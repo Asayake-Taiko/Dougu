@@ -183,7 +183,45 @@ describe("Containers Table Tests", () => {
 
   // DELETE
   /* ------------------------------------------------------------------- */
-  // containers should cascade delete equipment
+  it("deleting a container should cascade delete equipment", async () => {
+    // Create a container with equipment
+    const { data: testContainer } = await owner.client
+      .from("containers")
+      .insert({
+        name: "Container for Cascade Test",
+        organization_id: orgId,
+      })
+      .select()
+      .single();
+
+    // Create equipment in the container
+    const { data: equipmentData } = await owner.client
+      .from("equipment")
+      .insert({
+        name: "Equipment to be deleted",
+        organization_id: orgId,
+        container_id: testContainer!.id,
+      })
+      .select()
+      .single();
+
+    const equipmentId = equipmentData!.id;
+
+    // Delete the container
+    const { error } = await owner.client
+      .from("containers")
+      .delete()
+      .eq("id", testContainer!.id);
+    expect(error).toBeNull();
+
+    // Verify equipment was cascade deleted
+    const { data: equipmentCheck } = await owner.client
+      .from("equipment")
+      .select("id")
+      .eq("id", equipmentId);
+    expect(equipmentCheck?.length).toBe(0);
+  });
+
   it("Member should NOT be able to delete containers", async () => {
     await member.client.from("containers").delete().eq("id", containerId);
 

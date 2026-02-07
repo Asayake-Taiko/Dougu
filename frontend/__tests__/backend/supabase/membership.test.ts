@@ -68,7 +68,15 @@ describe("Membership Table Tests", () => {
 
   // CREATE
   /* ------------------------------------------------------------------- */
-  // user should not be able to join an org they are already in
+  it("user should not be able to join an org they are already in", async () => {
+    const { error } = await member.client.from("org_memberships").insert({
+      organization_id: orgId,
+      user_id: member.user.id,
+      type: "USER",
+    });
+    expect(error).not.toBeNull();
+  });
+
   it("a non-authenticated user should not be able to create a membership", async () => {
     const { error } = await supabase.from("org_memberships").insert({
       organization_id: orgId,
@@ -219,9 +227,118 @@ describe("Membership Table Tests", () => {
 
   // DELETE
   /* ------------------------------------------------------------------- */
-  // a member cannot delete their own membership
-  // the org owner should not be able to their own membership
-  // deleting a membership cascade deletes all equipment and containers assigned to that membership
+  it("a member cannot delete their own membership", async () => {
+    const { data: memberMembership } = await member.client
+      .from("org_memberships")
+      .select("id")
+      .eq("user_id", member.user.id)
+      .eq("organization_id", orgId)
+      .single();
+
+    const { data: deleteResult } = await member.client
+      .from("org_memberships")
+      .delete()
+      .eq("id", memberMembership!.id)
+      .select();
+
+    // RLS blocks the delete silently, so no rows are deleted
+    expect(deleteResult?.length).toBe(0);
+
+    // Verify still exists
+    const { data } = await owner.client
+      .from("org_memberships")
+      .select("id")
+      .eq("id", memberMembership!.id);
+    expect(data?.length).toBe(1);
+  });
+
+  it("the org owner should not be able to delete their own membership", async () => {
+    const { data: ownerMembership } = await owner.client
+      .from("org_memberships")
+      .select("id")
+      .eq("user_id", owner.user.id)
+      .eq("organization_id", orgId)
+      .single();
+
+    const { error } = await owner.client
+      .from("org_memberships")
+      .delete()
+      .eq("id", ownerMembership!.id);
+    expect(error).not.toBeNull();
+
+    // Verify still exists
+    const { data } = await owner.client
+      .from("org_memberships")
+      .select("id")
+      .eq("id", ownerMembership!.id);
+    expect(data?.length).toBe(1);
+  });
+
+  it("deleting a membership cascade deletes all equipment and containers assigned to that membership", async () => {
+    // Create a new member to delete
+    const victimUser = await generateTestUser("Victim for Cascade");
+    trackUser(cleanup, victimUser.user.id);
+
+    await victimUser.client.from("org_memberships").insert({
+      organization_id: orgId,
+      user_id: victimUser.user.id,
+      type: "USER",
+    });
+
+    const { data: victimMembership } = await victimUser.client
+      .from("org_memberships")
+      .select("id")
+      .eq("user_id", victimUser.user.id)
+      .eq("organization_id", orgId)
+      .single();
+
+    // Create container assigned to this member
+    const { data: containerData } = await owner.client
+      .from("containers")
+      .insert({
+        name: "Container for Member",
+        organization_id: orgId,
+        assigned_to: victimMembership!.id,
+      })
+      .select()
+      .single();
+
+    // Create equipment assigned to this member
+    const { data: equipmentData } = await owner.client
+      .from("equipment")
+      .insert({
+        name: "Equipment for Member",
+        organization_id: orgId,
+        assigned_to: victimMembership!.id,
+      })
+      .select()
+      .single();
+
+    const containerId = containerData!.id;
+    const equipmentId = equipmentData!.id;
+
+    // Owner deletes the membership
+    const { error } = await owner.client
+      .from("org_memberships")
+      .delete()
+      .eq("id", victimMembership!.id);
+    expect(error).toBeNull();
+
+    // Verify container was cascade deleted
+    const { data: containerCheck } = await owner.client
+      .from("containers")
+      .select("id")
+      .eq("id", containerId);
+    expect(containerCheck?.length).toBe(0);
+
+    // Verify equipment was cascade deleted
+    const { data: equipmentCheck } = await owner.client
+      .from("equipment")
+      .select("id")
+      .eq("id", equipmentId);
+    expect(equipmentCheck?.length).toBe(0);
+  });
+
   it("an outsider should not be able to delete memberships of any members", async () => {
     const { data: mem } = await owner.client
       .from("org_memberships")

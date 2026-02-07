@@ -7,19 +7,19 @@ import {
   trackOrganization,
 } from "../utils/cleanup";
 
-describe("Containers RLS Permission Tests", () => {
+describe("Equipment Table Tests", () => {
   let owner: any;
   let member: any;
   let outsider: any;
   let orgId: string;
-  let containerId: string;
+  let equipmentId: string;
   const cleanup = createCleanupTracker();
 
   beforeAll(async () => {
     // Setup users
-    owner = await generateTestUser("Container Owner");
-    member = await generateTestUser("Container Member");
-    outsider = await generateTestUser("Container Outsider");
+    owner = await generateTestUser("Equip Owner");
+    member = await generateTestUser("Equip Member");
+    outsider = await generateTestUser("Equip Outsider");
 
     trackUser(cleanup, owner.user.id);
     trackUser(cleanup, member.user.id);
@@ -29,8 +29,8 @@ describe("Containers RLS Permission Tests", () => {
     const { data: orgData } = await owner.client
       .from("organizations")
       .insert({
-        name: "Container Test Org",
-        access_code: "CON_" + Math.random().toString(36).substring(7),
+        name: "Equipment Test Org",
+        access_code: "EQP_" + Math.random().toString(36).substring(7),
         manager_id: owner.user.id,
       })
       .select()
@@ -48,16 +48,16 @@ describe("Containers RLS Permission Tests", () => {
       });
     if (joinError) throw joinError;
 
-    // Create Container (Owner does it)
-    const { data: containerData } = await owner.client
-      .from("containers")
+    // Create Equipment (Owner does it)
+    const { data: equipData } = await owner.client
+      .from("equipment")
       .insert({
-        name: "Box A",
+        name: "Drill",
         organization_id: orgId,
       })
       .select()
       .single();
-    containerId = containerData!.id;
+    equipmentId = equipData!.id;
   });
 
   afterAll(async () => {
@@ -66,52 +66,52 @@ describe("Containers RLS Permission Tests", () => {
 
   // CREATE
   /* ------------------------------------------------------------------- */
-  it("member should not be able to create containers", async () => {
-    const { error } = await member.client.from("containers").insert({
-      name: "Member New Box",
+  it("member should not be able to create equipment", async () => {
+    const { error } = await member.client.from("equipment").insert({
+      name: "Member New Gear",
       organization_id: orgId,
     });
     expect(error).not.toBeNull();
   });
 
-  it("outsider should not be able to create containers", async () => {
-    const { error } = await outsider.client.from("containers").insert({
-      name: "Outsider New Box",
+  it("outsider should not be able to create equipment", async () => {
+    const { error } = await outsider.client.from("equipment").insert({
+      name: "Outsider New Gear",
       organization_id: orgId,
     });
     expect(error).not.toBeNull();
   });
 
-  it("owner should be able to create containers", async () => {
+  it("owner should be able to create equipment", async () => {
     const { data, error } = await owner.client
-      .from("containers")
+      .from("equipment")
       .insert({
-        name: "Owner New Box",
+        name: "Owner New Gear",
         organization_id: orgId,
       })
       .select()
       .single();
     expect(error).toBeNull();
-    expect(data.name).toBe("Owner New Box");
+    expect(data.name).toBe("Owner New Gear");
   });
 
   // READ
   /* ------------------------------------------------------------------- */
-  it("Member should be able to read containers", async () => {
+  it("Member should be able to read equipment", async () => {
     const { data, error } = await member.client
-      .from("containers")
+      .from("equipment")
       .select("*")
-      .eq("id", containerId)
+      .eq("id", equipmentId)
       .single();
     expect(error).toBeNull();
-    expect(data.name).toBe("Box A");
+    expect(data.name).toBe("Drill");
   });
 
-  it("Outsider should NOT be able to read containers", async () => {
+  it("Outsider should NOT be able to read equipment", async () => {
     const { data } = await outsider.client
-      .from("containers")
+      .from("equipment")
       .select("*")
-      .eq("id", containerId);
+      .eq("id", equipmentId);
     expect(data).toEqual([]);
   });
 
@@ -127,93 +127,118 @@ describe("Containers RLS Permission Tests", () => {
     const memberMembershipId = membershipData!.id;
 
     const { error } = await member.client
-      .from("containers")
+      .from("equipment")
       .update({ assigned_to: memberMembershipId })
-      .eq("id", containerId);
+      .eq("id", equipmentId);
     expect(error).toBeNull();
 
     const { data } = await member.client
-      .from("containers")
+      .from("equipment")
       .select("assigned_to")
-      .eq("id", containerId)
+      .eq("id", equipmentId)
       .single();
     expect(data?.assigned_to).toBe(memberMembershipId);
   });
 
-  it("outsiders should not be able to update containers", async () => {
-    await outsider.client
+  it("Member should be able to update container_id field", async () => {
+    const { data: containerData } = await owner.client
       .from("containers")
-      .update({ name: "Outsider Hacked Box" })
-      .eq("id", containerId);
-
-    const { data } = await owner.client
-      .from("containers")
-      .select("name")
-      .eq("id", containerId)
+      .insert({
+        name: "Container",
+        organization_id: orgId,
+      })
+      .select()
       .single();
-    expect(data?.name).not.toBe("Outsider Hacked Box");
+    const containerId = containerData!.id;
+
+    const { error } = await member.client
+      .from("equipment")
+      .update({ container_id: containerId })
+      .eq("id", equipmentId);
+    expect(error).toBeNull();
+
+    const { data } = await member.client
+      .from("equipment")
+      .select("container_id")
+      .eq("id", equipmentId)
+      .single();
+    expect(data?.container_id).toBe(containerId);
   });
 
-  it("Member should NOT be able to update fields other than assigned_to", async () => {
+  it("outsiders should not be able to update equipment", async () => {
+    await outsider.client
+      .from("equipment")
+      .update({ name: "Outsider Hacked Drill" })
+      .eq("id", equipmentId);
+
+    const { data } = await owner.client
+      .from("equipment")
+      .select("name")
+      .eq("id", equipmentId)
+      .single();
+    expect(data?.name).not.toBe("Outsider Hacked Drill");
+  });
+
+  it("Member should NOT be able to update fields other than assigned_to and container_id", async () => {
     const { error } = await member.client
-      .from("containers")
-      .update({ name: "Box (Updated by Member)" })
-      .eq("id", containerId);
+      .from("equipment")
+      .update({ name: "Drill (Updated by Member)" })
+      .eq("id", equipmentId);
 
     expect(error).not.toBeNull();
     expect(error?.message).toContain(
-      "Only managers can update container details.",
+      "Only managers can update equipment details.",
     );
   });
 
   it("Owner should be able to update all fields", async () => {
     const { error } = await owner.client
-      .from("containers")
-      .update({ name: "Box (Updated by Owner)" })
-      .eq("id", containerId);
+      .from("equipment")
+      .update({ name: "Drill (Updated by Owner)" })
+      .eq("id", equipmentId);
     expect(error).toBeNull();
 
     const { data } = await owner.client
-      .from("containers")
+      .from("equipment")
       .select("name")
-      .eq("id", containerId)
+      .eq("id", equipmentId)
       .single();
-    expect(data?.name).toBe("Box (Updated by Owner)");
+    expect(data?.name).toBe("Drill (Updated by Owner)");
   });
 
   // DELETE
   /* ------------------------------------------------------------------- */
-  it("Member should NOT be able to delete containers", async () => {
-    await member.client.from("containers").delete().eq("id", containerId);
+  it("Member should NOT be able to delete equipment", async () => {
+    await member.client.from("equipment").delete().eq("id", equipmentId);
 
     const { data } = await owner.client
-      .from("containers")
+      .from("equipment")
       .select("id")
-      .eq("id", containerId);
+      .eq("id", equipmentId);
     expect(data?.length).toBe(1);
   });
 
-  it("Outsider should NOT be able to delete containers", async () => {
-    await outsider.client.from("containers").delete().eq("id", containerId);
+  it("Outsider should NOT be able to delete equipment", async () => {
+    await outsider.client.from("equipment").delete().eq("id", equipmentId);
 
     const { data } = await owner.client
-      .from("containers")
+      .from("equipment")
       .select("id")
-      .eq("id", containerId);
+      .eq("id", equipmentId);
     expect(data?.length).toBe(1);
   });
 
-  it("Owner SHOULD be able to delete containers", async () => {
+  it("Owner SHOULD be able to delete equipment", async () => {
     const { error } = await owner.client
-      .from("containers")
+      .from("equipment")
       .delete()
-      .eq("id", containerId);
+      .eq("id", equipmentId);
     expect(error).toBeNull();
 
     const { data } = await owner.client
-      .from("containers")
+      .from("equipment")
       .select("id")
-      .eq("id", containerId);
+      .eq("id", equipmentId);
     expect(data?.length).toBe(0);
   });
 });

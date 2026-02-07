@@ -1,6 +1,6 @@
-import { authService } from "../../../../src/lib/services/auth";
-import { supabase } from "../../../../src/lib/supabase/supabase";
-import { generateUUID } from "../../../../src/lib/utils/UUID";
+import { authService } from "../../../src/lib/services/auth";
+import { supabase } from "../../../src/lib/supabase/supabase";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 import { describe, it, expect, beforeAll } from "vitest";
 
 describe("AuthService Profile Update Tests", () => {

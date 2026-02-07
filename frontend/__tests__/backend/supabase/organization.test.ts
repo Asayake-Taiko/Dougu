@@ -8,7 +8,7 @@ import {
   trackOrganization,
 } from "../utils/cleanup";
 
-describe("Organization RLS Permission Tests", () => {
+describe("Organization Table Tests", () => {
   let owner: any;
   let member: any;
   let outsider: any;
@@ -57,6 +57,8 @@ describe("Organization RLS Permission Tests", () => {
 
   // CREATE
   /* ------------------------------------------------------------------- */
+  // create with an invalid manager_id should fail
+  // creating an org should automatically create an org_membership for the manager
   it("a non-authenticated user should not be able to create an organization", async () => {
     const { error } = await supabase.from("organizations").insert({
       name: "Anon Org",
@@ -118,6 +120,7 @@ describe("Organization RLS Permission Tests", () => {
 
   // UPDATE
   /* ------------------------------------------------------------------- */
+  // owner should not be able to transfer ownership to a storage type membership
   it("Member should NOT be able to update organization details", async () => {
     await member.client
       .from("organizations")
@@ -182,6 +185,8 @@ describe("Organization RLS Permission Tests", () => {
 
   // DELETE
   /* ------------------------------------------------------------------- */
+  // deleting an org causes a cascading delete of org_memberships, containers, and equipment
+  // outsider should not be able to delete org
   it("Member should NOT be able to delete organization", async () => {
     await member.client.from("organizations").delete().eq("id", orgId);
 

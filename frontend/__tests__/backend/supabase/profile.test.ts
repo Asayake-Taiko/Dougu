@@ -8,7 +8,7 @@ import {
   trackOrganization,
 } from "../utils/cleanup";
 
-describe("Profile RLS Permission Tests", () => {
+describe("Profile Table Tests", () => {
   let userA: any; // In Org 1
   let userB: any; // In Org 1
   let userC: any; // In Org 2

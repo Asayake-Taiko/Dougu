@@ -1,4 +1,4 @@
-import { authService } from "../../../../src/lib/services/auth";
+import { authService } from "../../../src/lib/services/auth";
 import { describe, it, expect, beforeEach } from "vitest";
 
 describe("AuthService Login Tests", () => {

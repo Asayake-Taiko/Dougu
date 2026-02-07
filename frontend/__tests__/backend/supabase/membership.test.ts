@@ -8,7 +8,7 @@ import {
   trackOrganization,
 } from "../utils/cleanup";
 
-describe("Membership RLS Permission Tests", () => {
+describe("Membership Table Tests", () => {
   let owner: any;
   let member: any;
   let outsider: any;
@@ -68,6 +68,7 @@ describe("Membership RLS Permission Tests", () => {
 
   // CREATE
   /* ------------------------------------------------------------------- */
+  // user should not be able to join an org they are already in
   it("a non-authenticated user should not be able to create a membership", async () => {
     const { error } = await supabase.from("org_memberships").insert({
       organization_id: orgId,
@@ -218,6 +219,9 @@ describe("Membership RLS Permission Tests", () => {
 
   // DELETE
   /* ------------------------------------------------------------------- */
+  // a member cannot delete their own membership
+  // the org owner should not be able to their own membership
+  // deleting a membership cascade deletes all equipment and containers assigned to that membership
   it("an outsider should not be able to delete memberships of any members", async () => {
     const { data: mem } = await owner.client
       .from("org_memberships")

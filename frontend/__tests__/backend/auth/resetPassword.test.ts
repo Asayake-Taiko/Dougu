@@ -1,10 +1,10 @@
-import { authService } from "../../../../src/lib/services/auth";
+import { authService } from "../../../src/lib/services/auth";
 import {
   deleteAllMessages,
   findLatestEmail,
   extractCodeFromEmail,
-} from "../../utils/mailpit";
-import { generateUUID } from "../../../../src/lib/utils/UUID";
+} from "../utils/mailpit";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 import { describe, it, expect, beforeEach } from "vitest";
 
 describe("AuthService Password Reset Tests", () => {

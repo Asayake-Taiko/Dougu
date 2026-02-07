@@ -1,5 +1,5 @@
-import { authService } from "../../../../src/lib/services/auth";
-import { generateUUID } from "../../../../src/lib/utils/UUID";
+import { authService } from "../../../src/lib/services/auth";
+import { generateUUID } from "../../../src/lib/utils/UUID";
 import { describe, it, expect, beforeEach } from "vitest";
 
 describe("AuthService Register Tests", () => {

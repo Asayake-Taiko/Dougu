@@ -8,8 +8,6 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test:unit": "vitest run --config vitest.config.ts __tests__/unit",
-    "test:integration": "vitest run --config vitest.config.ts __tests__/integration",
     "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {

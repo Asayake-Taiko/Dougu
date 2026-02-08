@@ -4,7 +4,6 @@ import { EquipmentRecord, ContainerRecord } from "../../types/db";
 import { Equipment, Container } from "../../types/models";
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
 import { Queries } from "../powersync/queries";
-import { handleSupabaseError } from "./util";
 
 export interface IEquipmentService {
   deleteEquipment(equipment: Equipment): Promise<void>;
@@ -41,15 +40,15 @@ export class EquipmentService implements IEquipmentService {
       (index) => equipment.records[index].id,
     );
     const { error } = await supabase.from("equipment").delete().in("id", ids);
-    if (error) handleSupabaseError(error);
+    if (error) throw error;
   }
 
   async deleteContainer(container: Container): Promise<void> {
-    const { error: conError } = await supabase
+    const { error } = await supabase
       .from("containers")
       .delete()
       .eq("id", container.id);
-    if (conError) handleSupabaseError(conError);
+    if (error) throw error;
   }
 
   async createEquipment(
@@ -64,7 +63,7 @@ export class EquipmentService implements IEquipmentService {
     }));
 
     const { error } = await supabase.from("equipment").insert(items);
-    if (error) handleSupabaseError(error);
+    if (error) throw error;
   }
 
   async createContainer(
@@ -79,7 +78,7 @@ export class EquipmentService implements IEquipmentService {
     }));
 
     const { error } = await supabase.from("containers").insert(items);
-    if (error) handleSupabaseError(error);
+    if (error) throw error;
   }
 
   async reassignEquipment(
@@ -135,16 +134,13 @@ export class EquipmentService implements IEquipmentService {
     const timestamp = new Date().toISOString();
     const data = { ...updates, last_updated_date: timestamp };
 
-    const { data: updated, error } = await supabase
+    const { error } = await supabase
       .from("equipment")
       .update(data)
       .in("id", ids)
       .select();
 
-    if (error) handleSupabaseError(error);
-    if (!updated || updated.length !== ids.length) {
-      throw new Error("Permission denied or Resource not found.");
-    }
+    if (error) throw error;
   }
 
   async updateContainer(
@@ -154,16 +150,13 @@ export class EquipmentService implements IEquipmentService {
     const timestamp = new Date().toISOString();
     const data = { ...updates, last_updated_date: timestamp };
 
-    const { data: updated, error } = await supabase
+    const { error } = await supabase
       .from("containers")
       .update(data)
       .eq("id", id)
       .select();
 
-    if (error) handleSupabaseError(error);
-    if (!updated || updated.length === 0) {
-      throw new Error("Permission denied or Resource not found.");
-    }
+    if (error) throw error;
   }
 }
 

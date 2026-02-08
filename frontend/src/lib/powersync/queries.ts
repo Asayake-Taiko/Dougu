@@ -19,13 +19,13 @@ export const Queries = {
   },
   Membership: {
     getAllByOrg: `
-            SELECT m.*, p.name, p.profile_image as user_profile
+            SELECT m.*, p.name, p.profile_image as user_profile, p.color as user_color
             FROM org_memberships m 
             LEFT JOIN profiles p ON m.user_id = p.id
             WHERE m.organization_id = ?
         `,
     getDetailsByOrgAndUser: `
-            SELECT m.*, p.name, p.profile_image as user_profile
+            SELECT m.*, p.name, p.profile_image as user_profile, p.color as user_color
             FROM org_memberships m 
             LEFT JOIN profiles p ON m.user_id = p.id 
             WHERE m.organization_id = ? AND m.user_id = ?`,

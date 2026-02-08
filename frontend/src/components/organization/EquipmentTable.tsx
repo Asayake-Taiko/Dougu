@@ -5,16 +5,16 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  Alert,
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { ProfileStackParamList } from "../../types/navigation";
 
 // project imports
 import { useEquipment } from "../../lib/context/EquipmentContext";
 import { Container } from "../../types/models";
 import { Item, OrgOwnership } from "../../types/other";
-import { useSpinner } from "../../lib/context/SpinnerContext";
-import { useModal } from "../../lib/context/ModalContext";
 
 /*
   Component for displaying all equipment in the organization
@@ -29,37 +29,12 @@ function ItemRow({
   isSubItem?: boolean;
 }) {
   const [openContainer, setOpenContainer] = useState(false);
-  const { showSpinner, hideSpinner } = useSpinner();
-  const { setMessage } = useModal();
 
-  async function handleDelete(selectedItem: Item) {
-    try {
-      showSpinner();
-      await selectedItem.delete();
-    } catch (error: any) {
-      setMessage(error.message || "Failed to delete item");
-    } finally {
-      hideSpinner();
-    }
-  }
+  const navigation =
+    useNavigation<StackNavigationProp<ProfileStackParamList>>();
 
-  async function confirmDelete(selectedItem: Item) {
-    // alert confirmation
-    Alert.alert(
-      "Delete Item",
-      `Are you sure you want to delete ${selectedItem.name}?`,
-      [
-        {
-          text: "Cancel",
-          onPress: () => {},
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          onPress: () => handleDelete(selectedItem),
-        },
-      ],
-    );
+  function handleEdit(selectedItem: Item & { ownerName: string }) {
+    navigation.navigate("EditEquipment", { itemId: selectedItem.id });
   }
 
   return (
@@ -91,10 +66,7 @@ function ItemRow({
         <View style={[styles.cell, { flex: 3, alignItems: "center" }]}>
           <Text style={styles.text}>{item.count}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.icon}
-          onPress={() => confirmDelete(item)}
-        >
+        <TouchableOpacity style={styles.icon} onPress={() => handleEdit(item)}>
           <Entypo name="dots-three-vertical" size={20} />
         </TouchableOpacity>
       </View>

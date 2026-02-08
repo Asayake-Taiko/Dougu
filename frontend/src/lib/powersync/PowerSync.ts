@@ -1,6 +1,6 @@
 import { PowerSyncDatabase } from "@powersync/react-native";
 import { OPSqliteOpenFactory } from "@powersync/op-sqlite";
-import { AppSchema } from "./Schema";
+import { AppSchema } from "./schema";
 import { Connector } from "./Connector";
 
 /**

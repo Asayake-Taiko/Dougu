@@ -35,9 +35,19 @@ export class Container {
   get count() {
     return 1;
   }
+  get details() {
+    return this.container.details;
+  }
+  get image() {
+    return null;
+  }
 
   getContainer() {
     return this.container;
+  }
+
+  async update(updates: Partial<ContainerRecord>) {
+    await equipmentService.updateContainer(this.id, updates);
   }
 
   getEquipment() {
@@ -45,22 +55,7 @@ export class Container {
   }
 
   async reassign(db: AbstractPowerSyncDatabase, targetMemberId: string) {
-    const now = new Date().toISOString();
-    await db.writeTransaction(async (tx) => {
-      // Update container
-      await tx.execute(Queries.Container.updateAssignment, [
-        targetMemberId,
-        now,
-        this.id,
-      ]);
-
-      // Update all equipment in container
-      await tx.execute(Queries.Equipment.updateAssignmentByContainer, [
-        targetMemberId,
-        now,
-        this.id,
-      ]);
-    });
+    await equipmentService.reassignContainer(db, this, targetMemberId);
   }
 
   async delete() {
@@ -145,6 +140,15 @@ export class Equipment {
   get organizationId() {
     return this.selectedRecord.organization_id;
   }
+  get details() {
+    return this.selectedRecord.details;
+  }
+
+  async update(updates: Partial<EquipmentRecord>, indices?: Set<number>) {
+    const targetIndices = indices || this.selectedIndices;
+    const ids = Array.from(targetIndices).map((i) => this.records[i].id);
+    await equipmentService.updateEquipment(ids, updates);
+  }
 
   getEquipment() {
     return this.selectedRecord;
@@ -159,21 +163,12 @@ export class Equipment {
     targetMemberId: string,
     targetContainerId: string | null = null,
   ) {
-    const now = new Date().toISOString();
-    const selectedRecords = Array.from(this.selectedIndices).map(
-      (i) => this.records[i],
+    await equipmentService.reassignEquipment(
+      db,
+      this,
+      targetMemberId,
+      targetContainerId,
     );
-
-    await db.writeTransaction(async (tx) => {
-      for (const record of selectedRecords) {
-        await tx.execute(Queries.Equipment.updateAssignment, [
-          targetMemberId,
-          targetContainerId,
-          now,
-          record.id,
-        ]);
-      }
-    });
   }
 
   async delete() {
@@ -204,9 +199,12 @@ export class Organization {
   get image() {
     return this.organization.image;
   }
+  get color() {
+    return this.organization.color;
+  }
 
-  async updateImage(newImage: string) {
-    await organizationService.updateOrganizationImage(this.id, newImage);
+  async updateImage(newImage: string, color: string) {
+    await organizationService.updateOrganizationImage(this.id, newImage, color);
   }
 
   async delete() {
@@ -223,15 +221,18 @@ export class OrgMembership {
   membership: OrgMembershipRecord;
   userName?: string;
   userProfile?: string;
+  userColor?: string;
 
   constructor(
     membership: OrgMembershipRecord,
     userName?: string,
     userProfile?: string,
+    userColor?: string,
   ) {
     this.membership = membership;
     this.userName = userName;
     this.userProfile = userProfile;
+    this.userColor = userColor;
   }
 
   get id() {
@@ -253,14 +254,28 @@ export class OrgMembership {
     return this.membership.user_id;
   }
   get profile() {
-    return this.userProfile || this.membership.profile_image;
+    return (
+      this.userProfile || this.membership.profile_image || "default_profile"
+    );
   }
   get details() {
     return this.membership.details;
   }
+  get color() {
+    return this.userColor || this.membership.color || "#791111";
+  }
+
+  async updateImage(newImage: string, color: string) {
+    await organizationService.updateMembershipImage(
+      this.organizationId,
+      this.id,
+      newImage,
+      color,
+    );
+  }
 
   async delete() {
-    await organizationService.deleteMembership(this.id);
+    await organizationService.deleteMembership(this.organizationId, this.id);
   }
 }
 
@@ -280,6 +295,9 @@ export class Profile {
   }
   get profileImage() {
     return this.data.profile_image;
+  }
+  get color() {
+    return this.data.color;
   }
 
   getRecord() {

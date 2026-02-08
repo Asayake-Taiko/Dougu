@@ -1,0 +1,62 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm install
+
+      - name: Start Supabase
+        working-directory: ./backend
+        run: |
+          supabase start -x realtime,storage-api,imgproxy,studio,migra,postgres-meta
+          supabase db reset
+
+      - name: Start PowerSync
+        working-directory: ./backend
+        run: |
+          cp .env.example .env
+          docker compose up -d
+          # Wait for services to be ready
+          sleep 30
+
+      - name: Run Backend Tests
+        working-directory: ./backend
+        env:
+          SUPABASE_URL: "http://127.0.0.1:54321"
+          SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH"
+          POWERSYNC_URL: "http://127.0.0.1:8080"
+        run: npm test
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Run Frontend Tests
+        working-directory: ./frontend
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321"
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH"
+          EXPO_PUBLIC_POWERSYNC_URL: "http://127.0.0.1:8080"
+        run: npm test

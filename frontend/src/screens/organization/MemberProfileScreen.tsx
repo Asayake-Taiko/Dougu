@@ -1,7 +1,7 @@
-import React from "react";
-import { Text, View, Alert, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { Text, View, StyleSheet } from "react-native";
 import { MemberProfileScreenProps } from "../../types/navigation";
-import ProfileDisplay from "../../components/ProfileDisplay";
+import DisplayImage from "../../components/DisplayImage";
 import { ProfileStyles } from "../../styles/ProfileStyles";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { useMembership } from "../../lib/context/MembershipContext";
@@ -9,6 +9,11 @@ import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
 import { useNavigation } from "@react-navigation/native";
+import ConfirmationModal from "../../components/member/ConfirmationModal";
+import { DisplayStyles } from "../../styles/Display";
+import EditImage from "../../components/EditImage";
+import ImageEditingOverlay from "../../components/ImageEditingOverlay";
+import { useAuth } from "../../lib/context/AuthContext";
 
 export default function MemberProfileScreen({
   route,
@@ -18,66 +23,114 @@ export default function MemberProfileScreen({
   const { organization } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
+  const { session } = useAuth();
+
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const [imageKey, setImageKey] = useState(member.profile);
+  const [color, setColor] = useState(member.color || "#791111");
+
+  const [modalConfig, setModalConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => Promise<void>;
+    isDestructive?: boolean;
+    confirmText?: string;
+  }>({
+    visible: false,
+    title: "",
+    message: "",
+    onConfirm: async () => {},
+  });
 
   if (!member || !organization) return null;
 
+  const showKickConfirmation = () => {
+    setModalConfig({
+      visible: true,
+      title: "Kick Member",
+      message: `Are you sure you want to kick ${member.name}? This will delete all equipment and containers assigned to them in this organization.`,
+      confirmText: "Kick",
+      isDestructive: true,
+      onConfirm: handleKick,
+    });
+  };
+
+  const showTransferConfirmation = () => {
+    setModalConfig({
+      visible: true,
+      title: "Transfer Ownership",
+      message: `Are you sure you want to make ${member.name} the manager? You will no longer be the manager.`,
+      confirmText: "Transfer",
+      isDestructive: false,
+      onConfirm: handleTransfer,
+    });
+  };
+
   const handleKick = async () => {
-    Alert.alert(
-      "Kick Member",
-      `Are you sure you want to kick ${member.name}? This will delete all equipment and containers assigned to them in this organization.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Kick",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              showSpinner();
-              await member.delete();
-              setMessage("Member kicked successfully.");
-              navigation.goBack();
-            } catch (error) {
-              Logger.error("Error deleting member:", error);
-              setMessage("Failed to kick member. Please try again.");
-            } finally {
-              hideSpinner();
-            }
-          },
-        },
-      ],
-    );
+    try {
+      showSpinner();
+      await member.delete();
+      setMessage("Member kicked successfully.");
+      navigation.goBack();
+    } catch (error: any) {
+      Logger.error("Error deleting member:", error);
+      setMessage(error.message || "Failed to kick member. Please try again.");
+    } finally {
+      hideSpinner();
+      setModalConfig((prev) => ({ ...prev, visible: false }));
+    }
   };
 
   const handleTransfer = async () => {
-    Alert.alert(
-      "Transfer Ownership",
-      `Are you sure you want to make ${member.name} the manager? You will no longer be the manager.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Transfer",
-          onPress: async () => {
-            try {
-              showSpinner();
-              await organization.transferOwnership(member.userId!);
-              setMessage(`${member.name} is now the manager.`);
-              navigation.goBack();
-            } catch (error) {
-              Logger.error("Error transferring ownership:", error);
-              setMessage("Failed to transfer ownership. Please try again.");
-            } finally {
-              hideSpinner();
-            }
-          },
-        },
-      ],
-    );
+    try {
+      showSpinner();
+      await organization.transferOwnership(member.userId!);
+      setMessage(`${member.name} is now the manager.`);
+      navigation.goBack();
+    } catch (error: any) {
+      Logger.error("Error transferring ownership:", error);
+      setMessage(error.message || "Failed to transfer ownership.");
+    } finally {
+      hideSpinner();
+      setModalConfig((prev) => ({ ...prev, visible: false }));
+    }
   };
+
+  const handleSave = async (newImageKey: string, newColor: string) => {
+    try {
+      showSpinner();
+      await member.updateImage(newImageKey, newColor);
+      setImageKey(newImageKey);
+      setColor(newColor);
+      setMessage("Storage updated successfully.");
+    } catch (error: any) {
+      Logger.error("Error updating storage:", error);
+      setMessage(error.message || "Failed to update storage.");
+    } finally {
+      hideSpinner();
+    }
+  };
+
+  const isManager = organization.managerId === session?.user.id;
+  const isStorage = member.membershipType === "STORAGE";
 
   return (
     <View style={ProfileStyles.container}>
       <View style={ProfileStyles.profile}>
-        <ProfileDisplay isMini={false} profileKey={member.profile} />
+        {isManager && isStorage ? (
+          <EditImage
+            imageKey={imageKey}
+            color={color}
+            onPress={() => setOverlayVisible(true)}
+          />
+        ) : (
+          <DisplayImage
+            imageKey={imageKey}
+            style={DisplayStyles.profile}
+            color={color}
+          />
+        )}
       </View>
       <View style={ProfileStyles.centerRow}>
         <Text style={ProfileStyles.text}>{member.name}</Text>
@@ -87,18 +140,40 @@ export default function MemberProfileScreen({
           <Text style={styles.detailsText}>{member.details}</Text>
         </View>
       )}
+      {!isStorage && (
+        <PressableOpacity
+          onPress={showTransferConfirmation}
+          style={ProfileStyles.buttonContainer}
+        >
+          <Text style={ProfileStyles.buttonText}>Make Manager</Text>
+        </PressableOpacity>
+      )}
       <PressableOpacity
-        onPress={handleTransfer}
-        style={ProfileStyles.buttonContainer}
-      >
-        <Text style={ProfileStyles.buttonText}>Make Manager</Text>
-      </PressableOpacity>
-      <PressableOpacity
-        onPress={handleKick}
+        onPress={showKickConfirmation}
         style={[ProfileStyles.buttonContainer, styles.kickButton]}
       >
-        <Text style={ProfileStyles.buttonText}>Kick</Text>
+        <Text style={ProfileStyles.buttonText}>
+          {isStorage ? "Delete" : "Kick"}
+        </Text>
       </PressableOpacity>
+
+      <ConfirmationModal
+        visible={modalConfig.visible}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig((prev) => ({ ...prev, visible: false }))}
+        confirmText={modalConfig.confirmText}
+        isDestructive={modalConfig.isDestructive}
+      />
+
+      <ImageEditingOverlay
+        visible={overlayVisible}
+        setVisible={setOverlayVisible}
+        currentImageKey={imageKey}
+        currentColor={color}
+        onSave={handleSave}
+      />
     </View>
   );
 }

@@ -1,5 +1,6 @@
 import { generateUUID } from "../utils/UUID";
 import { supabase } from "../supabase/supabase";
+import { handleSupabaseError, isManager } from "./util";
 
 export interface IOrganizationService {
   createOrganization(
@@ -15,11 +16,22 @@ export interface IOrganizationService {
     orgId: string,
     name: string,
     image: string,
+    color: string,
     details: string,
   ): Promise<void>;
-  deleteMembership(membershipId: string): Promise<void>;
+  deleteMembership(orgId: string, membershipId: string): Promise<void>;
   transferOwnership(orgId: string, newManagerId: string): Promise<void>;
-  updateOrganizationImage(orgId: string, imageKey: string): Promise<void>;
+  updateOrganizationImage(
+    orgId: string,
+    imageKey: string,
+    color: string,
+  ): Promise<void>;
+  updateMembershipImage(
+    orgId: string,
+    membershipId: string,
+    imageKey: string,
+    color: string,
+  ): Promise<void>;
 }
 
 export class OrganizationService implements IOrganizationService {
@@ -27,7 +39,6 @@ export class OrganizationService implements IOrganizationService {
     name: string,
     userId: string,
   ): Promise<{ id: string; name: string; code: string }> {
-    if (!userId) throw new Error("Couldn't find user ID.");
     if (!name.trim()) throw new Error("Please enter an organization name.");
     const nameRegEx = /^[a-zA-Z0-9-_]{1,40}$/;
     if (!nameRegEx.test(name))
@@ -35,15 +46,7 @@ export class OrganizationService implements IOrganizationService {
         "Invalid name! Use 1-40 alphanumeric characters, no spaces (_ and - allowed).",
       );
 
-    const { data: existingOrg, error: existingOrgError } = await supabase
-      .from("organizations")
-      .select("id")
-      .eq("name", name)
-      .maybeSingle();
-
-    if (existingOrgError) throw existingOrgError;
-    if (existingOrg) throw new Error("Organization name is already taken!");
-
+    // Generate a unique code
     const code = await this.generateUniqueCode();
     const orgId = generateUUID();
 
@@ -52,11 +55,12 @@ export class OrganizationService implements IOrganizationService {
       name,
       access_code: code,
       manager_id: userId,
-      image: "default",
+      image: "default_org",
+      color: "#791111",
       created_at: new Date().toISOString(),
     });
 
-    if (orgError) throw orgError;
+    if (orgError) handleSupabaseError(orgError);
     return { id: orgId, name, code };
   }
 
@@ -67,25 +71,16 @@ export class OrganizationService implements IOrganizationService {
     const trimmedCode = code.trim().toUpperCase();
     if (!trimmedCode) throw new Error("Please enter an access code");
 
+    // find the organization by access code (we still need this to get the ID)
     const { data: org, error: orgError } = await supabase
       .from("organizations")
       .select("*")
       .eq("access_code", trimmedCode)
       .maybeSingle();
-
-    if (orgError) throw orgError;
+    if (orgError) handleSupabaseError(orgError);
     if (!org) throw new Error("Organization not found");
 
-    const { data: existingMemberships, error: membershipError } = await supabase
-      .from("org_memberships")
-      .select("id")
-      .eq("organization_id", org.id)
-      .eq("user_id", userId);
-
-    if (membershipError) throw membershipError;
-    if (existingMemberships && existingMemberships.length > 0)
-      throw new Error("You are already a member of this organization.");
-
+    // create the membership
     const membershipId = generateUUID();
     const { error: insertError } = await supabase
       .from("org_memberships")
@@ -96,64 +91,113 @@ export class OrganizationService implements IOrganizationService {
         user_id: userId,
       });
 
-    if (insertError) throw insertError;
+    if (insertError) handleSupabaseError(insertError);
 
     return { id: org.id, name: org.name };
   }
 
   async deleteOrganization(orgId: string): Promise<void> {
+    if (!(await isManager(orgId)))
+      throw new Error("Only managers can delete organizations.");
     const { error: orgError } = await supabase
       .from("organizations")
       .delete()
       .eq("id", orgId);
-    if (orgError) throw orgError;
+
+    if (orgError) handleSupabaseError(orgError);
   }
   async createStorage(
     orgId: string,
     name: string,
     image: string,
+    color: string,
     details: string,
   ): Promise<void> {
+    if (!(await isManager(orgId)))
+      throw new Error("Only managers can create storage.");
+
     const { error } = await supabase.from("org_memberships").insert({
       id: generateUUID(),
       organization_id: orgId,
       type: "STORAGE",
       storage_name: name,
       profile_image: image,
+      color: color,
       details: details,
     });
-    if (error) throw error;
+    if (error) handleSupabaseError(error);
   }
-  async deleteMembership(membershipId: string): Promise<void> {
+  async deleteMembership(orgId: string, membershipId: string): Promise<void> {
+    if (!(await isManager(orgId)))
+      throw new Error("Only managers can delete memberships.");
+
     const { error } = await supabase
       .from("org_memberships")
       .delete()
       .eq("id", membershipId);
-    if (error) throw error;
+    if (error) handleSupabaseError(error);
   }
   async transferOwnership(orgId: string, newManagerId: string): Promise<void> {
+    if (!(await isManager(orgId)))
+      throw new Error("Only managers can transfer ownership.");
+
+    // Check if the target is a user member of the organization
+    const { data: membership, error: membershipError } = await supabase
+      .from("org_memberships")
+      .select("type")
+      .eq("organization_id", orgId)
+      .or(`user_id.eq.${newManagerId},id.eq.${newManagerId}`)
+      .maybeSingle();
+
+    if (membershipError) handleSupabaseError(membershipError);
+    if (!membership)
+      throw new Error("Target user is not a member of this organization.");
+    if (membership.type === "STORAGE")
+      throw new Error("Only users can be owners.");
+
     const { error } = await supabase
       .from("organizations")
       .update({ manager_id: newManagerId })
       .eq("id", orgId);
-    if (error) throw error;
+
+    if (error) handleSupabaseError(error);
   }
 
   async updateOrganizationImage(
     orgId: string,
     imageKey: string,
+    color: string,
   ): Promise<void> {
+    if (!(await isManager(orgId)))
+      throw new Error("Only managers can update organization images.");
+
     const { error } = await supabase
       .from("organizations")
-      .update({ image: imageKey })
+      .update({ image: imageKey, color })
       .eq("id", orgId);
-    if (error) throw error;
+    if (error) handleSupabaseError(error);
+  }
+
+  async updateMembershipImage(
+    orgId: string,
+    membershipId: string,
+    imageKey: string,
+    color: string,
+  ): Promise<void> {
+    if (!(await isManager(orgId)))
+      throw new Error("Only managers can update membership images.");
+
+    const { error } = await supabase
+      .from("org_memberships")
+      .update({ profile_image: imageKey, color })
+      .eq("id", membershipId);
+    if (error) handleSupabaseError(error);
   }
 
   // Helpers
   private async generateUniqueCode(): Promise<string> {
     while (true) {
-      const code = this.generateRandomString(7);
+      const code = this.generateRandomString(8);
       const { data: existing, error } = await supabase
         .from("organizations")
         .select("id")

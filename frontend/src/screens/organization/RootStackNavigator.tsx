@@ -7,6 +7,7 @@ import MemberProfileScreen from "./MemberProfileScreen";
 import CreateStorageScreen from "./CreateStorageScreen";
 import SheetScreen from "./SheetScreen";
 import CreateEquipmentScreen from "./CreateEquipmentScreen";
+import EditEquipmentScreen from "./EditEquipmentScreen";
 import DeleteOrgScreen from "./DeleteOrgScreen";
 import { ProfileDrawer } from "../drawer/ProfileNavigator";
 import { MembershipProvider } from "../../lib/context/MembershipContext";
@@ -54,6 +55,11 @@ export default function RootStackNavigator() {
             name="DeleteOrg"
             component={DeleteOrgScreen}
             options={{ headerShown: true, title: "Delete Organization" }}
+          />
+          <RootStack.Screen
+            name="EditEquipment"
+            component={EditEquipmentScreen}
+            options={{ headerShown: true, title: "Edit Equipment" }}
           />
         </RootStack.Navigator>
       </EquipmentProvider>

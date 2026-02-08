@@ -33,7 +33,7 @@ export default function PasswordOverlay({
   const handleUpdatePassword = async () => {
     try {
       showSpinner();
-      await authService.updatePassword(currPassword, newPassword);
+      await authService.updatePassword(newPassword, confirmPassword);
       setVisible(false);
     } catch (e) {
       Logger.error(e);
@@ -99,10 +99,5 @@ const styles = StyleSheet.create({
     ...ProfileStyles.buttonText,
     color: Colors.white,
     fontWeight: "bold",
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
   },
 });

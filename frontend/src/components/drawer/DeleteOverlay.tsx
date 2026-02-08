@@ -35,7 +35,7 @@ export default function DeleteOverlay({
         setMessage("Email does not match");
         return;
       }
-      await authService.deleteAccount(session?.user.id);
+      await authService.deleteAccount();
     } catch (e) {
       Logger.error(e);
       if (e instanceof Error) {

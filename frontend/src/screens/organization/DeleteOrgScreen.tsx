@@ -14,7 +14,7 @@ import { Logger } from "../../lib/utils/Logger";
 */
 export default function DeleteOrgScreen() {
   const navigation = useNavigation();
-  const { organization } = useMembership();
+  const { organization, isManager } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
   const [orgNameConfirm, setOrgNameConfirm] = useState("");
@@ -24,12 +24,16 @@ export default function DeleteOrgScreen() {
   }
 
   const handleDelete = async () => {
-    if (orgNameConfirm !== organization.name) {
-      setMessage("Organization name doesn't match. Please type it exactly.");
-      return;
-    }
-
     try {
+      // checks
+      if (orgNameConfirm !== organization.name)
+        throw new Error(
+          "Organization name doesn't match. Please type it exactly.",
+        );
+      if (!isManager)
+        throw new Error("Only managers can delete organizations.");
+
+      // perform deletion
       showSpinner();
       await organization.delete();
       setMessage("Organization deleted successfully.");

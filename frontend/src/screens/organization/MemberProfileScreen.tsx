@@ -13,21 +13,21 @@ import ConfirmationModal from "../../components/member/ConfirmationModal";
 import { DisplayStyles } from "../../styles/Display";
 import EditImage from "../../components/EditImage";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
-import { useAuth } from "../../lib/context/AuthContext";
 
 export default function MemberProfileScreen({
   route,
 }: MemberProfileScreenProps) {
   const navigation = useNavigation();
   const { member } = route.params;
-  const { organization } = useMembership();
+  const { organization, isManager } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
-  const { session } = useAuth();
 
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [imageKey, setImageKey] = useState(member.profile);
   const [color, setColor] = useState(member.color || "#791111");
+
+  const isStorage = member.membershipType === "STORAGE";
 
   const [modalConfig, setModalConfig] = useState<{
     visible: boolean;
@@ -69,6 +69,10 @@ export default function MemberProfileScreen({
 
   const handleKick = async () => {
     try {
+      if (!isManager) throw new Error("Only managers can kick members.");
+      if (member.userId === organization.managerId)
+        throw new Error("You cannot kick the manager.");
+
       showSpinner();
       await member.delete();
       setMessage("Member kicked successfully.");
@@ -84,6 +88,11 @@ export default function MemberProfileScreen({
 
   const handleTransfer = async () => {
     try {
+      if (!isManager) throw new Error("Only managers can transfer ownership.");
+      if (isStorage) throw new Error("Storage entities cannot be managers.");
+      if (member.userId === organization.managerId)
+        throw new Error("This member is already the manager.");
+
       showSpinner();
       await organization.transferOwnership(member.userId!);
       setMessage(`${member.name} is now the manager.`);
@@ -99,6 +108,9 @@ export default function MemberProfileScreen({
 
   const handleSave = async (newImageKey: string, newColor: string) => {
     try {
+      if (!isManager)
+        throw new Error("Only managers can edit storage profiles.");
+
       showSpinner();
       await member.updateImage(newImageKey, newColor);
       setImageKey(newImageKey);
@@ -111,9 +123,6 @@ export default function MemberProfileScreen({
       hideSpinner();
     }
   };
-
-  const isManager = organization.managerId === session?.user.id;
-  const isStorage = member.membershipType === "STORAGE";
 
   return (
     <View style={ProfileStyles.container}>

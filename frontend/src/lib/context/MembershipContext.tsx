@@ -24,6 +24,7 @@ interface MembershipContextType {
   membership: OrgMembership | null;
   isResolving: boolean;
   switchOrganization: (orgId: string) => Promise<void>;
+  isManager: boolean;
 }
 
 const MembershipContext = createContext<MembershipContextType | undefined>(
@@ -106,6 +107,9 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
     membership,
     isResolving,
     switchOrganization,
+    isManager: membership
+      ? organization?.managerId === membership.userId
+      : false,
   };
 
   return (

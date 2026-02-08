@@ -19,7 +19,7 @@ import { Hex } from "../../types/other";
 */
 export default function CreateStorageScreen() {
   const navigation = useNavigation();
-  const { organization } = useMembership();
+  const { organization, isManager } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
 
@@ -31,17 +31,11 @@ export default function CreateStorageScreen() {
 
   // Create a new storage
   const handleCreate = async () => {
-    if (!name.trim()) {
-      setMessage("Please enter a name for the storage.");
-      return;
-    }
-
-    if (!organization) {
-      setMessage("No active organization found.");
-      return;
-    }
-
     try {
+      if (!name.trim()) throw new Error("Please enter a name for the storage.");
+      if (!organization) throw new Error("No active organization found.");
+      if (!isManager) throw new Error("Only managers can create storage.");
+
       showSpinner();
       await organizationService.createStorage(
         organization.id,

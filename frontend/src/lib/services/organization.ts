@@ -1,6 +1,6 @@
 import { generateUUID } from "../utils/UUID";
 import { supabase } from "../supabase/supabase";
-import { handleSupabaseError, isManager } from "./util";
+import { handleSupabaseError } from "./util";
 
 export interface IOrganizationService {
   createOrganization(
@@ -97,8 +97,6 @@ export class OrganizationService implements IOrganizationService {
   }
 
   async deleteOrganization(orgId: string): Promise<void> {
-    if (!(await isManager(orgId)))
-      throw new Error("Only managers can delete organizations.");
     const { error: orgError } = await supabase
       .from("organizations")
       .delete()
@@ -113,9 +111,6 @@ export class OrganizationService implements IOrganizationService {
     color: string,
     details: string,
   ): Promise<void> {
-    if (!(await isManager(orgId)))
-      throw new Error("Only managers can create storage.");
-
     const { error } = await supabase.from("org_memberships").insert({
       id: generateUUID(),
       organization_id: orgId,
@@ -127,10 +122,7 @@ export class OrganizationService implements IOrganizationService {
     });
     if (error) handleSupabaseError(error);
   }
-  async deleteMembership(orgId: string, membershipId: string): Promise<void> {
-    if (!(await isManager(orgId)))
-      throw new Error("Only managers can delete memberships.");
-
+  async deleteMembership(membershipId: string): Promise<void> {
     const { error } = await supabase
       .from("org_memberships")
       .delete()
@@ -138,23 +130,6 @@ export class OrganizationService implements IOrganizationService {
     if (error) handleSupabaseError(error);
   }
   async transferOwnership(orgId: string, newManagerId: string): Promise<void> {
-    if (!(await isManager(orgId)))
-      throw new Error("Only managers can transfer ownership.");
-
-    // Check if the target is a user member of the organization
-    const { data: membership, error: membershipError } = await supabase
-      .from("org_memberships")
-      .select("type")
-      .eq("organization_id", orgId)
-      .or(`user_id.eq.${newManagerId},id.eq.${newManagerId}`)
-      .maybeSingle();
-
-    if (membershipError) handleSupabaseError(membershipError);
-    if (!membership)
-      throw new Error("Target user is not a member of this organization.");
-    if (membership.type === "STORAGE")
-      throw new Error("Only users can be owners.");
-
     const { error } = await supabase
       .from("organizations")
       .update({ manager_id: newManagerId })
@@ -168,9 +143,6 @@ export class OrganizationService implements IOrganizationService {
     imageKey: string,
     color: string,
   ): Promise<void> {
-    if (!(await isManager(orgId)))
-      throw new Error("Only managers can update organization images.");
-
     const { error } = await supabase
       .from("organizations")
       .update({ image: imageKey, color })
@@ -179,14 +151,10 @@ export class OrganizationService implements IOrganizationService {
   }
 
   async updateMembershipImage(
-    orgId: string,
     membershipId: string,
     imageKey: string,
     color: string,
   ): Promise<void> {
-    if (!(await isManager(orgId)))
-      throw new Error("Only managers can update membership images.");
-
     const { error } = await supabase
       .from("org_memberships")
       .update({ profile_image: imageKey, color })

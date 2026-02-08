@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "android": "expo run:android & sleep 20 && adb wait-for-device && adb reverse tcp:54321 tcp:54321 && adb reverse tcp:54322 tcp:54322 && adb reverse tcp:54323 tcp:54323 && adb reverse tcp:54324 tcp:54324 && adb reverse tcp:8080 tcp:8080",
+    "android": "(sleep 20 && adb wait-for-device && adb reverse tcp:54321 tcp:54321 && adb reverse tcp:54322 tcp:54322 && adb reverse tcp:54323 tcp:54323 && adb reverse tcp:54324 tcp:54324 && adb reverse tcp:8080 tcp:8080) & expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",

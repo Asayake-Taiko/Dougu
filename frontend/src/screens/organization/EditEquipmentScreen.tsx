@@ -14,6 +14,7 @@ import { Hex, Item } from "../../types/other";
 import { Equipment } from "../../types/models";
 import { Logger } from "../../lib/utils/Logger";
 import { useModal } from "../../lib/context/ModalContext";
+import { useMembership } from "../../lib/context/MembershipContext";
 
 export default function EditEquipmentScreen({
   route,
@@ -22,6 +23,7 @@ export default function EditEquipmentScreen({
   const { setMessage } = useModal();
   const { itemId } = route.params;
   const { ownerships } = useEquipment();
+  const { isManager } = useMembership();
 
   const initialItem: Item | null = useMemo(() => {
     for (const ownership of ownerships.values()) {
@@ -80,6 +82,8 @@ export default function EditEquipmentScreen({
   const handleUpdate = async () => {
     if (!initialItem) return;
     try {
+      if (!isManager) throw new Error("Only managers can edit item profiles.");
+
       const updates: any = { name, details, color: itemColor };
       if (initialItem.type === "equipment") {
         updates.image = imageKey;
@@ -97,6 +101,8 @@ export default function EditEquipmentScreen({
   const handleDelete = async () => {
     if (!initialItem) return;
     try {
+      if (!isManager) throw new Error("Only managers can delete items.");
+
       await initialItem.delete();
       navigation.goBack();
     } catch (e: any) {

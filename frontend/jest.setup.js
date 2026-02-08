@@ -5,6 +5,7 @@ jest.mock("@expo/vector-icons", () => ({
   MaterialCommunityIcons: "MaterialCommunityIcons",
   Ionicons: "Ionicons",
   FontAwesome: "FontAwesome",
+  FontAwesome5: "FontAwesome5",
   Feather: "Feather",
 }));
 

@@ -4,7 +4,7 @@ import { EquipmentRecord, ContainerRecord } from "../../types/db";
 import { Equipment, Container } from "../../types/models";
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
 import { Queries } from "../powersync/queries";
-import { handleSupabaseError, isManager } from "./util";
+import { handleSupabaseError } from "./util";
 
 export interface IEquipmentService {
   deleteEquipment(equipment: Equipment): Promise<void>;
@@ -37,10 +37,6 @@ export interface IEquipmentService {
 
 export class EquipmentService implements IEquipmentService {
   async deleteEquipment(equipment: Equipment): Promise<void> {
-    if (!(await isManager(equipment.organizationId))) {
-      throw new Error("Only managers can delete equipment.");
-    }
-
     const ids = Array.from(equipment.selectedIndices).map(
       (index) => equipment.records[index].id,
     );
@@ -49,10 +45,6 @@ export class EquipmentService implements IEquipmentService {
   }
 
   async deleteContainer(container: Container): Promise<void> {
-    if (!(await isManager(container.organizationId))) {
-      throw new Error("Only managers can delete containers.");
-    }
-
     const { error: conError } = await supabase
       .from("containers")
       .delete()
@@ -64,10 +56,6 @@ export class EquipmentService implements IEquipmentService {
     quantity: number,
     data: Omit<EquipmentRecord, "id" | "last_updated_date">,
   ): Promise<void> {
-    if (!(await isManager(data.organization_id))) {
-      throw new Error("Only managers can create equipment.");
-    }
-
     const timestamp = new Date().toISOString();
     const items = Array.from({ length: quantity }).map(() => ({
       id: generateUUID(),
@@ -83,10 +71,6 @@ export class EquipmentService implements IEquipmentService {
     quantity: number,
     data: Omit<ContainerRecord, "id" | "last_updated_date">,
   ): Promise<void> {
-    if (!(await isManager(data.organization_id))) {
-      throw new Error("Only managers can create containers.");
-    }
-
     const timestamp = new Date().toISOString();
     const items = Array.from({ length: quantity }).map(() => ({
       id: generateUUID(),

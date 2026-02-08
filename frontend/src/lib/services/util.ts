@@ -1,5 +1,4 @@
 import { PostgrestError } from "@supabase/supabase-js";
-import { supabase } from "../supabase/supabase";
 
 export function handleSupabaseError(error: PostgrestError): never {
   if (error.code === "23503") {
@@ -34,19 +33,4 @@ export function handleSupabaseError(error: PostgrestError): never {
   }
 
   throw new Error(error.message || "An unexpected error occurred.");
-}
-
-export async function isManager(orgId: string): Promise<boolean> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  const { data: org } = await supabase
-    .from("organizations")
-    .select("manager_id")
-    .eq("id", orgId)
-    .maybeSingle();
-
-  return org?.manager_id === user.id;
 }

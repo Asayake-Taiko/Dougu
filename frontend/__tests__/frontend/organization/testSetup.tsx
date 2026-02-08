@@ -22,6 +22,10 @@ jest.mock("../../../src/lib/context/MembershipContext", () => ({
   useMembership: jest.fn(),
 }));
 
+jest.mock("../../../src/lib/context/EquipmentContext", () => ({
+  useEquipment: jest.fn(),
+}));
+
 jest.mock("../../../src/lib/context/SpinnerContext", () => ({
   useSpinner: jest.fn(() => ({
     showSpinner: jest.fn(),

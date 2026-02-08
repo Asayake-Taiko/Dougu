@@ -15,8 +15,8 @@ export interface IAuthService {
   updateName(name: string): Promise<void>;
   sendEmailUpdateCode(email: string): Promise<void>;
   confirmEmailUpdate(email: string, code: string): Promise<void>;
-  updatePassword(newPassword: string, confirmPassword: string): Promise<void>;
-  deleteAccount(userId: string): Promise<void>;
+  updatePassword(currentPassword: string, newPassword: string): Promise<void>;
+  deleteAccount(): Promise<void>;
 }
 
 export class AuthService implements IAuthService {
@@ -183,7 +183,13 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async deleteAccount(userId: string): Promise<void> {}
+  async deleteAccount(): Promise<void> {
+    const { error } = await supabase.functions.invoke("delete-account");
+    if (error) {
+      throw error;
+    }
+    await supabase.auth.signOut();
+  }
 }
 
 // Singleton instance export

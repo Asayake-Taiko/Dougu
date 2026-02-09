@@ -10,7 +10,7 @@ npx supabase link
 Start the backend
 ```
 npx supabase start -x vector // supabase backend
-npx supabase functions serve // start supabase edge functions
+npx supabase functions serve delete-account // start supabase edge functions
 docker compose up -d           // powersync
 ```
 

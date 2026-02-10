@@ -4,7 +4,6 @@ import { EquipmentRecord, ContainerRecord } from "../../types/db";
 import { Equipment, Container } from "../../types/models";
 import { AbstractPowerSyncDatabase } from "@powersync/react-native";
 import { Queries } from "../powersync/queries";
-import { handleSupabaseError, isManager } from "./util";
 
 export interface IEquipmentService {
   deleteEquipment(equipment: Equipment): Promise<void>;
@@ -37,37 +36,25 @@ export interface IEquipmentService {
 
 export class EquipmentService implements IEquipmentService {
   async deleteEquipment(equipment: Equipment): Promise<void> {
-    if (!(await isManager(equipment.organizationId))) {
-      throw new Error("Only managers can delete equipment.");
-    }
-
     const ids = Array.from(equipment.selectedIndices).map(
       (index) => equipment.records[index].id,
     );
     const { error } = await supabase.from("equipment").delete().in("id", ids);
-    if (error) handleSupabaseError(error);
+    if (error) throw error;
   }
 
   async deleteContainer(container: Container): Promise<void> {
-    if (!(await isManager(container.organizationId))) {
-      throw new Error("Only managers can delete containers.");
-    }
-
-    const { error: conError } = await supabase
+    const { error } = await supabase
       .from("containers")
       .delete()
       .eq("id", container.id);
-    if (conError) handleSupabaseError(conError);
+    if (error) throw error;
   }
 
   async createEquipment(
     quantity: number,
     data: Omit<EquipmentRecord, "id" | "last_updated_date">,
   ): Promise<void> {
-    if (!(await isManager(data.organization_id))) {
-      throw new Error("Only managers can create equipment.");
-    }
-
     const timestamp = new Date().toISOString();
     const items = Array.from({ length: quantity }).map(() => ({
       id: generateUUID(),
@@ -76,17 +63,13 @@ export class EquipmentService implements IEquipmentService {
     }));
 
     const { error } = await supabase.from("equipment").insert(items);
-    if (error) handleSupabaseError(error);
+    if (error) throw error;
   }
 
   async createContainer(
     quantity: number,
     data: Omit<ContainerRecord, "id" | "last_updated_date">,
   ): Promise<void> {
-    if (!(await isManager(data.organization_id))) {
-      throw new Error("Only managers can create containers.");
-    }
-
     const timestamp = new Date().toISOString();
     const items = Array.from({ length: quantity }).map(() => ({
       id: generateUUID(),
@@ -95,7 +78,7 @@ export class EquipmentService implements IEquipmentService {
     }));
 
     const { error } = await supabase.from("containers").insert(items);
-    if (error) handleSupabaseError(error);
+    if (error) throw error;
   }
 
   async reassignEquipment(
@@ -151,16 +134,13 @@ export class EquipmentService implements IEquipmentService {
     const timestamp = new Date().toISOString();
     const data = { ...updates, last_updated_date: timestamp };
 
-    const { data: updated, error } = await supabase
+    const { error } = await supabase
       .from("equipment")
       .update(data)
       .in("id", ids)
       .select();
 
-    if (error) handleSupabaseError(error);
-    if (!updated || updated.length !== ids.length) {
-      throw new Error("Permission denied or Resource not found.");
-    }
+    if (error) throw error;
   }
 
   async updateContainer(
@@ -170,16 +150,13 @@ export class EquipmentService implements IEquipmentService {
     const timestamp = new Date().toISOString();
     const data = { ...updates, last_updated_date: timestamp };
 
-    const { data: updated, error } = await supabase
+    const { error } = await supabase
       .from("containers")
       .update(data)
       .eq("id", id)
       .select();
 
-    if (error) handleSupabaseError(error);
-    if (!updated || updated.length === 0) {
-      throw new Error("Permission denied or Resource not found.");
-    }
+    if (error) throw error;
   }
 }
 

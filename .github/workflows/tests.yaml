@@ -41,19 +41,11 @@ jobs:
           # Wait for services to be ready
           sleep 30
 
-      - name: Run Backend Tests
-        working-directory: ./backend
-        env:
-          SUPABASE_URL: "http://127.0.0.1:54321"
-          SUPABASE_PUBLISHABLE_KEY: "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH"
-          POWERSYNC_URL: "http://127.0.0.1:8080"
-        run: npm test
-
       - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: npm install
 
-      - name: Run Frontend Tests
+      - name: Run Tests
         working-directory: ./frontend
         env:
           EXPO_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321"

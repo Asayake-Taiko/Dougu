@@ -16,7 +16,7 @@ import { Colors } from "../../styles/global";
   storages, and equipment.
 */
 export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
-  const { organization } = useMembership();
+  const { organization, isManager } = useMembership();
   const { setMessage } = useModal();
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [imageKey, setImageKey] = useState("default_org");
@@ -32,6 +32,9 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
   const handleSave = async (newImageKey: string, newColor: string) => {
     try {
       if (!organization) return;
+      if (!isManager)
+        throw new Error("Only managers can edit organization profiles.");
+
       await organization.updateImage(newImageKey, newColor);
       setImageKey(newImageKey);
       setColor(newColor);

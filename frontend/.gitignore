@@ -41,5 +41,6 @@ yarn-error.*
 /ios
 /android
 
-
+# extra
 .expo/
+.temp

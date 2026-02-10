@@ -21,7 +21,7 @@ import { ItemStyles } from "../../styles/ItemStyles";
   and assign it to a user/storage.
 */
 export default function CreateEquipmentScreen() {
-  const { organization } = useMembership();
+  const { organization, isManager } = useMembership();
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
 
@@ -42,23 +42,15 @@ export default function CreateEquipmentScreen() {
 
   // Create a new equipment and assign it to a user
   const handleCreate = async () => {
-    if (!organization) {
-      setMessage("Organization not found.");
-      return;
-    }
-
-    const quantityCount = parseInt(quantity);
-    if (!assignUser || !name || !quantityCount) {
-      setMessage("Please fill out all fields.");
-      return;
-    }
-
-    if (quantityCount < 1 || quantityCount > 25) {
-      setMessage("You must make between 1 and 25 items at a time.");
-      return;
-    }
-
     try {
+      const quantityCount = parseInt(quantity);
+      if (!organization) throw new Error("Organization not found.");
+      if (!assignUser || !name || !quantityCount)
+        throw new Error("Please fill out all fields.");
+      if (quantityCount < 1 || quantityCount > 25)
+        throw new Error("Quantity must be between 1 and 25.");
+      if (!isManager) throw new Error("Only managers can create items.");
+
       showSpinner();
       if (index === 0) {
         // Create Equipment

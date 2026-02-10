@@ -16,7 +16,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.asa.preview",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "fetch",
+          "processing"
+        ]
       }
     },
     "android": {
@@ -33,7 +37,8 @@
     },
     "plugins": [
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "expo-background-task"
     ],
     "extra": {
       "eas": {

@@ -10,6 +10,7 @@ npx supabase link
 Start the backend
 ```
 npx supabase start -x vector // supabase backend
+npx supabase functions serve delete-account // start supabase edge functions
 docker compose up -d           // powersync
 ```
 
@@ -35,9 +36,4 @@ npx supabase db pull --db-url "postgresql://postgres.letoghfwotjbrzwgocpc:[YOUR-
 Reset Data to Default:
 ```
 npx supabase db reset
-```
-
-To test the backend:
-```
-npm test
 ```

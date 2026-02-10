@@ -14,6 +14,7 @@ import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
 import { authService } from "../../lib/services/auth";
 import EditImage from "../../components/EditImage";
+import { clearAllData } from "../../lib/powersync/PowerSync";
 
 export default function ProfileScreen() {
   const { session, profile } = useAuth();
@@ -110,6 +111,28 @@ export default function ProfileScreen() {
           <MaterialCommunityIcons name="chevron-right" size={30} />
         </View>
       </PressableOpacity>
+      {__DEV__ && (
+        <PressableOpacity
+          style={ProfileStyles.row}
+          onPress={async () => {
+            try {
+              showSpinner();
+              await clearAllData();
+              setMessage("Local database cleared. Please restart the app.");
+            } catch (error) {
+              Logger.error(error);
+              setMessage("Failed to clear local database");
+            } finally {
+              hideSpinner();
+            }
+          }}
+        >
+          <Text style={ProfileStyles.text}>[DEV] Clear Local DB</Text>
+          <View style={ProfileStyles.changeBtn}>
+            <MaterialCommunityIcons name="database-remove" size={30} />
+          </View>
+        </PressableOpacity>
+      )}
       <PressableOpacity style={ProfileStyles.row} onPress={handleLogout}>
         <Text style={ProfileStyles.text}>Logout</Text>
         <View style={ProfileStyles.changeBtn}>

@@ -1,25 +1,22 @@
 /* global jest */
-import dotenv from "dotenv";
 
-// hide dotenv logs
-const originalLog = console.log;
-console.log = (...args) => {
-  if (args[0] && typeof args[0] === "string" && args[0].includes("[dotenv")) {
-    return;
-  }
-  originalLog(...args);
-};
-dotenv.config();
-console.log = originalLog;
-
-process.env.EXPO_PUBLIC_SUPABASE_URL = "http://127.0.0.1:54321";
-process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
-process.env.EXPO_PUBLIC_POWERSYNC_URL = "http://127.0.0.1:8080";
-
+// Mock @expo/vector-icons
 jest.mock("@expo/vector-icons", () => ({
   MaterialCommunityIcons: "MaterialCommunityIcons",
+  Ionicons: "Ionicons",
+  FontAwesome: "FontAwesome",
+  FontAwesome5: "FontAwesome5",
+  Feather: "Feather",
 }));
+
+// Mock @react-native-async-storage/async-storage
 jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
+
+// Mock react-native-reanimated
+jest.mock("react-native-reanimated", () => {
+  const Reanimated = require("react-native-reanimated/mock");
+  Reanimated.default.call = () => {};
+  return Reanimated;
+});

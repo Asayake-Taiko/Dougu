@@ -266,16 +266,11 @@ export class OrgMembership {
   }
 
   async updateImage(newImage: string, color: string) {
-    await organizationService.updateMembershipImage(
-      this.organizationId,
-      this.id,
-      newImage,
-      color,
-    );
+    await organizationService.updateMembershipImage(this.id, newImage, color);
   }
 
   async delete() {
-    await organizationService.deleteMembership(this.organizationId, this.id);
+    await organizationService.deleteMembership(this.id);
   }
 }
 

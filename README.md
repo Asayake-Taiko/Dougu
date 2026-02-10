@@ -23,6 +23,10 @@ The codebase is designed to isolate the frontend and backend. To begin working o
 Make sure you have a local supabase and powersync server running (see backend/README.md), then run
 ```
 npm test
+
+# or 
+npm run test:frontend
+npm run test:backend
 ```
 
 ## Contributions

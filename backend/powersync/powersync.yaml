@@ -32,6 +32,8 @@ client_auth:
   supabase: true
   # Note: With asymmetric signing keys (ES256), the JWT secret is not needed. "kong" is Supabase's networking container
   jwks_uri: http://supabase_kong_backend:8000/auth/v1/.well-known/jwks.json
+  # Allow non-HTTPS for local JWKS URL
+  allow_local_jwks: true
 
   # JWKS audience
   audience: ["authenticated"]

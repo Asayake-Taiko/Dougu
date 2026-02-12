@@ -33,7 +33,10 @@ export default function LoginScreen({
 
   return (
     <View style={AuthStyles.container}>
-      <Text style={AuthStyles.header}>Login</Text>
+      <Text style={AuthStyles.header}>Sign In</Text>
+      <Text style={AuthStyles.subtitle}>
+        Enter your email and password to sign in
+      </Text>
       <TextInput
         style={AuthStyles.input}
         onChangeText={onChangeEmail}
@@ -53,9 +56,6 @@ export default function LoginScreen({
         testID="login-button"
       >
         <Text style={AuthStyles.btnText}>Login</Text>
-      </PressableOpacity>
-      <PressableOpacity onPress={() => navigation.navigate("CreateAccount")}>
-        <Text style={AuthStyles.link}>Create Account</Text>
       </PressableOpacity>
       <PressableOpacity onPress={() => navigation.navigate("SendCode")}>
         <Text style={AuthStyles.link}>Forgot Password?</Text>

@@ -11,8 +11,10 @@ export const AuthStyles = StyleSheet.create({
     backgroundColor: Colors.dark,
     width: "80%",
     borderRadius: Layout.borderRadius.md,
+    justifyContent: "center",
   },
   btnText: {
+    fontWeight: Typography.fontWeight[600],
     textAlign: "center",
     color: Colors.white,
     padding: Spacing.sm,
@@ -28,12 +30,17 @@ export const AuthStyles = StyleSheet.create({
   },
   link: {
     color: Colors.blue,
-    marginTop: Spacing.sm,
   },
   header: {
-    fontSize: Typography.fontSize.xxl,
+    fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.primary,
+    color: Colors.dark,
+    padding: Spacing.sm,
+  },
+  subtitle: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.dark,
+    textAlign: "center",
   },
   input: {
     height: Layout.dimensions.inputHeight,
@@ -50,11 +57,16 @@ export const AuthStyles = StyleSheet.create({
     borderRadius: Layout.borderRadius.md,
     padding: Spacing.sm,
   },
-  nameContainer: {
+  additionalText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray500,
+    textAlign: "center",
+    padding: Spacing.sm,
+  },
+  signInContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    width: "80%",
     marginTop: "5%",
   },
   requestContainer: {
@@ -63,9 +75,11 @@ export const AuthStyles = StyleSheet.create({
     width: "100%",
     marginTop: "15%",
   },
-  subtitle: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.dark,
-    textAlign: "center",
+  logo: {
+    fontSize: Typography.fontSize.xxl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.primary,
+    padding: 50,
+    marginTop: -80,
   },
 });

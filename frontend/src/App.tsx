@@ -20,7 +20,13 @@ function AppContent() {
   return (
     <NavigationContainer>
       <StatusBar style="auto" />
-      {session ? <RootStackNavigator /> : <AuthNavigator />}
+      {session ? (
+        <PowerSyncProvider>
+          <RootStackNavigator />
+        </PowerSyncProvider>
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 }
@@ -28,15 +34,13 @@ function AppContent() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <PowerSyncProvider>
-        <AuthProvider>
-          <SpinnerProvider>
-            <ModalProvider>
-              <AppContent />
-            </ModalProvider>
-          </SpinnerProvider>
-        </AuthProvider>
-      </PowerSyncProvider>
+      <AuthProvider>
+        <SpinnerProvider>
+          <ModalProvider>
+            <AppContent />
+          </ModalProvider>
+        </SpinnerProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

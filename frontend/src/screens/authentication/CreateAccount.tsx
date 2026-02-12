@@ -6,18 +6,16 @@ import { PressableOpacity } from "../../components/PressableOpacity";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
-import { CreateAccountScreenNavigationProp } from "../../types/navigation";
+import { useRoute } from "@react-navigation/native";
+import type { CreateAccountScreenRouteProp } from "../../types/navigation";
 import { authService } from "../../lib/services/auth";
 
-export default function CreateAccountScreen({
-  navigation,
-}: {
-  navigation: CreateAccountScreenNavigationProp;
-}) {
-  const [email, onChangeEmail] = useState("");
+export default function CreateAccountScreen() {
   const [first, onChangeFirst] = useState("");
   const [last, onChangeLast] = useState("");
   const [password, onChangePassword] = useState("");
+  const route = useRoute<CreateAccountScreenRouteProp>();
+  const email = route.params?.email || "";
   const { showSpinner, hideSpinner } = useSpinner();
   const { setMessage } = useModal();
 
@@ -35,30 +33,21 @@ export default function CreateAccountScreen({
 
   return (
     <View style={AuthStyles.container}>
-      <Text style={AuthStyles.header}>Create Account</Text>
-      <View style={AuthStyles.nameContainer}>
-        <TextInput
-          style={AuthStyles.name}
-          onChangeText={onChangeFirst}
-          value={first}
-          placeholder="first"
-          keyboardType="default"
-        />
-        <TextInput
-          style={AuthStyles.name}
-          onChangeText={onChangeLast}
-          value={last}
-          placeholder="last"
-          keyboardType="default"
-        />
-      </View>
+      <Text style={AuthStyles.header}>Great!</Text>
+      <Text style={AuthStyles.subtitle}>Can we get your name too?</Text>
       <TextInput
         style={AuthStyles.input}
-        onChangeText={onChangeEmail}
-        value={email}
-        placeholder="email"
-        keyboardType="email-address"
-        autoCapitalize="none"
+        onChangeText={onChangeFirst}
+        value={first}
+        placeholder="first name"
+        keyboardType="default"
+      />
+      <TextInput
+        style={AuthStyles.input}
+        onChangeText={onChangeLast}
+        value={last}
+        placeholder="last name"
+        keyboardType="default"
       />
       <PasswordInput
         password={password}
@@ -66,7 +55,7 @@ export default function CreateAccountScreen({
         placeHolder="password"
       />
       <PressableOpacity style={AuthStyles.button} onPress={handleRegister}>
-        <Text style={AuthStyles.btnText}>Create</Text>
+        <Text style={AuthStyles.btnText}>Finish signing up</Text>
       </PressableOpacity>
     </View>
   );

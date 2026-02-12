@@ -12,8 +12,9 @@ import type { OrgMembership } from "./models";
 
 // Auth Stack Parameter List
 export type AuthStackParamList = {
+  Landing: undefined;
   Login: undefined;
-  CreateAccount: undefined;
+  CreateAccount: { email: string };
   SendCode: undefined;
   ResetPassword: { email: string };
 };
@@ -50,13 +51,13 @@ export type ProfileStackParamList = {
 };
 
 // Navigation props for Auth screens
+export type LandingScreenNavigationProp = StackNavigationProp<
+  AuthStackParamList,
+  "Landing"
+>;
 export type LoginScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
   "Login"
->;
-export type CreateAccountScreenNavigationProp = StackNavigationProp<
-  AuthStackParamList,
-  "CreateAccount"
 >;
 export type SendCodeScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -64,6 +65,10 @@ export type SendCodeScreenNavigationProp = StackNavigationProp<
 >;
 
 // Route props for Auth screens
+export type CreateAccountScreenRouteProp = RouteProp<
+  AuthStackParamList,
+  "CreateAccount"
+>;
 export type ResetPasswordScreenRouteProp = RouteProp<
   AuthStackParamList,
   "ResetPassword"

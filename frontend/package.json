@@ -6,7 +6,9 @@
     "lint": "expo lint",
     "test": "npm run test:frontend && npm run test:backend",
     "test:frontend": "jest --config jest.config.js",
-    "test:backend": "vitest run --config vitest.config.ts"
+    "test:backend": "vitest run --config vitest.config.ts",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -55,6 +57,7 @@
     "jest": "~29.7.0",
     "jest-expo": "~54.0.17",
     "prettier": "^3.7.4",
+    "react-test-renderer": "19.1.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.18"
   },

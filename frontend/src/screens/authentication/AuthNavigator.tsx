@@ -16,7 +16,11 @@ export default function AuthNavigator() {
         cardStyle: { backgroundColor: "#fff" },
       }}
     >
-      <Stack.Screen name="Landing" component={LandingScreen} />
+      <Stack.Screen
+        name="Landing"
+        component={LandingScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="SendCode" component={SendCodeScreen} />

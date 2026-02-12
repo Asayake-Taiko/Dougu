@@ -1,6 +1,8 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
+import { Colors, Spacing, Layout } from "../styles/global";
+import { PressableOpacity } from "./PressableOpacity";
 
 export default function PasswordInput({
   password,
@@ -23,40 +25,41 @@ export default function PasswordInput({
         secureTextEntry={!showPassword}
         value={password}
         placeholder={placeHolder}
+        placeholderTextColor={Colors.gray400}
         keyboardType="default"
         autoCapitalize="none"
         {...props}
       />
-      <MaterialCommunityIcons
-        name={showPassword ? "eye" : "eye-off"}
-        size={28}
-        color="#aaa"
-        style={styles.icon}
-        onPress={() => setShowPassword(!showPassword)}
-      />
+      <PressableOpacity onPress={() => setShowPassword(!showPassword)}>
+        <MaterialCommunityIcons
+          name={showPassword ? "eye" : "eye-off"}
+          size={24}
+          color={Colors.gray400}
+          style={styles.icon}
+        />
+      </PressableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   icon: {
-    padding: 5,
-    width: "18%",
+    paddingRight: Spacing.sm,
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderWidth: 1,
-    borderRadius: 10,
+    borderWidth: Layout.borderWidth.thin,
+    borderColor: Colors.gray300,
+    borderRadius: Layout.borderRadius.md,
     width: "80%",
-    height: 50,
-    marginTop: "5%",
+    height: Layout.dimensions.buttonHeight,
+    marginBottom: Spacing.md,
   },
   pinput: {
-    height: 50,
-    margin: "5%",
-    padding: 10,
-    width: "75%",
+    flex: 1,
+    height: "100%",
+    paddingLeft: Spacing.sm,
   },
 });

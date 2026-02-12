@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, Image } from "react-native";
 import { AuthStyles } from "../../styles/AuthStyles";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { LandingScreenNavigationProp } from "../../types/navigation";
@@ -37,16 +37,27 @@ export default function LandingScreen({
       <PressableOpacity style={AuthStyles.button} onPress={handleEmail}>
         <Text style={AuthStyles.btnText}>Sign up with email</Text>
       </PressableOpacity>
-      <Text style={AuthStyles.additionalText}>
-        ---------- or continue with ----------
-      </Text>
-      <PressableOpacity style={AuthStyles.button} onPress={undefined}>
-        <Text style={AuthStyles.btnText}>Google</Text>
+
+      <View style={AuthStyles.separatorContainer}>
+        <View style={AuthStyles.separatorLine} />
+        <Text style={AuthStyles.separatorText}>or continue with</Text>
+        <View style={AuthStyles.separatorLine} />
+      </View>
+
+      <PressableOpacity style={AuthStyles.googleButton} onPress={undefined}>
+        <Image
+          source={{
+            uri: "https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png",
+          }}
+          style={{ width: 24, height: 24 }}
+        />
+        <Text style={AuthStyles.googleButtonText}>Google</Text>
       </PressableOpacity>
+
       <View style={AuthStyles.signInContainer}>
-        <Text style={AuthStyles.additionalText}>Already have an account?</Text>
+        <Text style={AuthStyles.footerText}>Already have an account?</Text>
         <PressableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={AuthStyles.link}>Sign In</Text>
+          <Text style={AuthStyles.link}> Sign In</Text>
         </PressableOpacity>
       </View>
     </View>

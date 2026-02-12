@@ -83,11 +83,12 @@ export const AuthStyles = StyleSheet.create({
     alignItems: "center",
   },
   googleButtonText: {
-    fontWeight: Typography.fontWeight[600],
+    fontWeight: Typography.fontWeight[700],
     textAlign: "center",
     color: Colors.black,
     padding: Spacing.sm,
     marginLeft: Spacing.sm,
+    fontSize: Typography.fontSize.md,
   },
   separatorContainer: {
     flexDirection: "row",

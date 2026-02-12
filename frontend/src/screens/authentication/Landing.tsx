@@ -4,6 +4,7 @@ import { AuthStyles } from "../../styles/AuthStyles";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { LandingScreenNavigationProp } from "../../types/navigation";
 import { useModal } from "../../lib/context/ModalContext";
+import GoogleIcon from "../../assets/google.png";
 
 export default function LandingScreen({
   navigation,
@@ -30,7 +31,7 @@ export default function LandingScreen({
         style={AuthStyles.input}
         onChangeText={onChangeEmail}
         value={email}
-        placeholder="email@domain.com"
+        placeholder="email"
         keyboardType="email-address"
         autoCapitalize="none"
       />
@@ -45,12 +46,7 @@ export default function LandingScreen({
       </View>
 
       <PressableOpacity style={AuthStyles.googleButton} onPress={undefined}>
-        <Image
-          source={{
-            uri: "https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png",
-          }}
-          style={{ width: 24, height: 24 }}
-        />
+        <Image source={GoogleIcon} style={{ width: 24, height: 24 }} />
         <Text style={AuthStyles.googleButtonText}>Google</Text>
       </PressableOpacity>
 

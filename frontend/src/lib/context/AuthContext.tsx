@@ -4,20 +4,14 @@ import React, {
   useState,
   ReactNode,
   useEffect,
-  useMemo,
 } from "react";
 import { Logger } from "../utils/Logger";
 import { Session } from "@supabase/supabase-js";
-import { useQuery } from "@powersync/react-native";
-import { Queries } from "../powersync/queries";
-import { ProfileRecord } from "../../types/db";
 import { supabase } from "../supabase/supabase";
-import { Profile } from "../../types/models";
 
 interface AuthContextType {
   isLoading: boolean;
   session: Session | null | undefined;
-  profile: Profile | null;
   isLoggedIn: boolean;
 }
 
@@ -68,22 +62,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
-  // Fetch the profile reactively using PowerSync
-  const { data: profileRecords } = useQuery<ProfileRecord>(
-    Queries.Profile.getById,
-    [session?.user.id || ""],
-  );
-  const profile = useMemo(() => {
-    const record = profileRecords[0];
-    return record ? new Profile(record) : null;
-  }, [profileRecords]);
-
   return (
     <AuthContext.Provider
       value={{
         isLoading,
         session,
-        profile,
         isLoggedIn: !!session,
       }}
     >

@@ -41,6 +41,11 @@ jobs:
           # Wait for services to be ready
           sleep 30
 
+      - name: Start Supabase Functions
+        working-directory: ./backend
+        run: |
+          supabase functions serve --no-verify-jwt
+
       - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: npm install

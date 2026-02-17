@@ -242,6 +242,9 @@ export class OrgMembership {
     return this.membership.organization_id;
   }
   get name() {
+    if (this.membership.user_id === "d31e1e1e-d31e-d31e-d31e-d31e1e1e1e1e") {
+      return "Deleted User";
+    }
     if (this.membership.type === "STORAGE") {
       return this.membership.storage_name || "Unnamed Storage";
     }

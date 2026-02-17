@@ -36,6 +36,7 @@ export default function DeleteOverlay({
         return;
       }
       await authService.deleteAccount();
+      setMessage("Account deleted successfully");
     } catch (e) {
       Logger.error(e);
       if (e instanceof Error) {

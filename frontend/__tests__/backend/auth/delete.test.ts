@@ -118,5 +118,11 @@ describe("AuthService Delete Account Tests", () => {
       .single();
 
     expect(updatedEquipment!.assigned_to).toBe(membershipId);
+
+    // 7. Can no longer log in as the deleted user
+    await authService.logout();
+    await expect(
+      authService.login(memberEmail, "password123"),
+    ).rejects.toThrow();
   });
 });

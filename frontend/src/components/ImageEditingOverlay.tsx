@@ -87,9 +87,6 @@ export default function ImageEditingOverlay({
     setVisible(false);
   };
 
-  const isCustomImage = (key: string) =>
-    key.startsWith("http") || key.includes("/");
-
   // Helper to render a group of images
   const renderImageGroup = (
     title: string,
@@ -186,31 +183,12 @@ export default function ImageEditingOverlay({
                   <Text style={styles.groupTitle}>Custom Selection</Text>
                   <View style={styles.grid}>
                     <PressableOpacity
-                      style={[
-                        styles.imageItem,
-                        styles.uploadItem,
-                        isCustomImage(selectedImageKey) &&
-                          styles.selectedImageItem,
-                      ]}
+                      style={[styles.imageItem, styles.uploadItem]}
                       onPress={handlePickImage}
                       disabled={isUploading}
                     >
                       {isUploading ? (
                         <ActivityIndicator color={Colors.primary} />
-                      ) : isCustomImage(selectedImageKey) ? (
-                        <>
-                          <DisplayImage
-                            imageKey={selectedImageKey}
-                            style={styles.fill}
-                          />
-                          <View style={styles.editBadge}>
-                            <MaterialCommunityIcons
-                              name="pencil"
-                              size={12}
-                              color="white"
-                            />
-                          </View>
-                        </>
                       ) : (
                         <View style={styles.uploadPlaceholder}>
                           <MaterialCommunityIcons
@@ -385,19 +363,6 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 2,
     fontWeight: "500",
-  },
-  editBadge: {
-    position: "absolute",
-    bottom: 4,
-    right: 4,
-    backgroundColor: Colors.primary,
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "white",
   },
   footer: {
     padding: 20,

@@ -11,24 +11,22 @@ export default function DisplayImage({
   imageKey,
   style,
   color,
-  uri,
 }: {
   imageKey: string | undefined;
   style?: StyleProp<ImageStyle>;
   color?: string;
-  uri?: string;
 }) {
   const [imageSource, setImageSource] = useState<ImageSourcePropType>(
     allMappings["default_image"],
   );
 
   useEffect(() => {
-    if (uri) {
-      setImageSource({ uri });
+    if (imageKey?.includes("/")) {
+      setImageSource({ uri: imageKey });
     } else {
       setImageSource(allMappings[imageKey ?? "default_image"]);
     }
-  }, [imageKey, uri]);
+  }, [imageKey]);
 
   return (
     <Image source={imageSource} style={[style, { backgroundColor: color }]} />

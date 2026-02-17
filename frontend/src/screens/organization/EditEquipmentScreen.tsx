@@ -1,6 +1,7 @@
 import { Text, View, StyleSheet, TextInput, Pressable } from "react-native";
 import React, { useState, useMemo } from "react";
 import { ScrollView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { Colors } from "../../styles/global";
@@ -126,7 +127,7 @@ export default function EditEquipmentScreen({
   const isContainer = initialItem.type === "container";
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ImageEditingOverlay
         visible={overlayVisible}
         setVisible={setOverlayVisible}
@@ -214,6 +215,7 @@ export default function EditEquipmentScreen({
                   onChangeText={onChangeName}
                   value={name}
                   placeholder="name"
+                  placeholderTextColor={Colors.gray500}
                   keyboardType="default"
                 />
               </View>
@@ -229,6 +231,7 @@ export default function EditEquipmentScreen({
                   onChangeText={onChangeDetails}
                   value={details}
                   placeholder="details"
+                  placeholderTextColor={Colors.gray500}
                   keyboardType="default"
                   multiline={true}
                 />
@@ -262,7 +265,7 @@ export default function EditEquipmentScreen({
           <Text style={styles.btnText}>Update</Text>
         </PressableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -316,6 +319,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   details: {
     height: 70, // Reduced height to fit checklist
@@ -326,6 +330,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   buttonContainer: {
     flexDirection: "row",

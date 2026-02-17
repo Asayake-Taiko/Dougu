@@ -71,6 +71,7 @@ export default function DeleteOrgScreen() {
         value={orgNameConfirm}
         onChangeText={setOrgNameConfirm}
         placeholder={organization.name}
+        placeholderTextColor={Colors.gray500}
         autoCapitalize="none"
         autoCorrect={false}
       />
@@ -142,6 +143,7 @@ const styles = StyleSheet.create({
     width: "90%",
     backgroundColor: "#F7FAFC",
     fontSize: 16,
+    color: Colors.black,
   },
   button: {
     backgroundColor: Colors.primary || "#E53E3E",

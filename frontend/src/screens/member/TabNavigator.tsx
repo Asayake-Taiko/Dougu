@@ -9,6 +9,7 @@ import { DrawerScreenProps } from "@react-navigation/drawer";
 import { Text, View } from "react-native";
 import { Colors } from "../../styles/global/colors";
 import SplashScreen from "../splash";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Screens
 import EquipmentScreen from "./Equipment";
@@ -23,6 +24,8 @@ const Tab = createBottomTabNavigator<MemberTabParamList>();
  * Sub-component to access EquipmentProvider context and handle its loading state
  */
 function TabNavigatorContent({ organizationId }: { organizationId: string }) {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -44,6 +47,10 @@ function TabNavigatorContent({ organizationId }: { organizationId: string }) {
         },
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: "gray",
+        tabBarStyle: {
+          paddingBottom: insets.bottom,
+          height: insets.bottom + 60,
+        },
       })}
     >
       <Tab.Screen

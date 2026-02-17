@@ -25,7 +25,7 @@ export default function PasswordInput({
         secureTextEntry={!showPassword}
         value={password}
         placeholder={placeHolder}
-        placeholderTextColor={Colors.gray400}
+        placeholderTextColor={Colors.gray500}
         keyboardType="default"
         autoCapitalize="none"
         {...props}
@@ -61,5 +61,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: "100%",
     paddingLeft: Spacing.sm,
+    color: Colors.black,
   },
 });

@@ -7,6 +7,7 @@ import { PressableOpacity } from "../../components/PressableOpacity";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
+import { Colors } from "../../styles/global";
 
 import { authService } from "../../lib/services/auth";
 
@@ -40,6 +41,7 @@ export default function SendCodeScreen() {
         onChangeText={onChangeEmail}
         value={email}
         placeholder="email"
+        placeholderTextColor={Colors.gray500}
         keyboardType="email-address"
         autoCapitalize="none"
       />

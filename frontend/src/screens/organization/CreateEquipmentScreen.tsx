@@ -131,6 +131,7 @@ export default function CreateEquipmentScreen() {
             onChangeText={onChangeName}
             value={name}
             placeholder="name"
+            placeholderTextColor={Colors.gray500}
             keyboardType="default"
           />
         </View>
@@ -174,6 +175,7 @@ export default function CreateEquipmentScreen() {
             onChangeText={onChangeQuantity}
             value={quantity}
             placeholder="quantity"
+            placeholderTextColor={Colors.gray500}
             keyboardType="numeric"
           />
         </View>
@@ -188,6 +190,7 @@ export default function CreateEquipmentScreen() {
             onChangeText={onChangeDetails}
             value={details}
             placeholder="details"
+            placeholderTextColor={Colors.gray500}
             keyboardType="default"
             multiline={true}
           />
@@ -236,6 +239,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   details: {
     height: 90,
@@ -246,6 +250,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   link: {
     color: Colors.primary || "#791111",

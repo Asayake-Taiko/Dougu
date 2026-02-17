@@ -62,12 +62,14 @@ export default function NameOverlay({
           onChangeText={setFirstName}
           value={firstName}
           placeholder="first"
+          placeholderTextColor={Colors.gray500}
           style={styles.name}
         />
         <TextInput
           onChangeText={setLastName}
           value={lastName}
           placeholder="last"
+          placeholderTextColor={Colors.gray500}
           style={styles.name}
         />
       </View>
@@ -106,6 +108,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
+    color: Colors.black,
   },
   nameContainer: {
     flexDirection: "row",

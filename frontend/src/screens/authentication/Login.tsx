@@ -8,6 +8,7 @@ import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
 import { LoginScreenNavigationProp } from "../../types/navigation";
 import { authService } from "../../lib/services/auth";
+import { Colors } from "../../styles/global";
 
 export default function LoginScreen({
   navigation,
@@ -42,6 +43,7 @@ export default function LoginScreen({
         onChangeText={onChangeEmail}
         value={email}
         placeholder="email"
+        placeholderTextColor={Colors.gray500}
         keyboardType="email-address"
         autoCapitalize="none"
       />

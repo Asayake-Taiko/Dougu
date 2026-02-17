@@ -9,6 +9,7 @@ import {
   ImageSourcePropType,
   ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../styles/global";
 import { PressableOpacity } from "./PressableOpacity";
 import ColorSelect from "./organization/ColorSelect";
@@ -120,7 +121,7 @@ export default function ImageEditingOverlay({
       visible={visible}
       onRequestClose={() => setVisible(false)}
     >
-      <View style={styles.centeredView}>
+      <SafeAreaView style={styles.centeredView}>
         <Pressable style={styles.backdrop} onPress={() => setVisible(false)} />
         <View style={styles.modalView}>
           <View style={styles.handle} />
@@ -245,7 +246,7 @@ export default function ImageEditingOverlay({
             </PressableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 }

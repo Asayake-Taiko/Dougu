@@ -9,6 +9,7 @@ import { Logger } from "../../lib/utils/Logger";
 import { useRoute } from "@react-navigation/native";
 import type { CreateAccountScreenRouteProp } from "../../types/navigation";
 import { authService } from "../../lib/services/auth";
+import { Colors } from "../../styles/global";
 
 export default function CreateAccountScreen() {
   const [first, onChangeFirst] = useState("");
@@ -40,6 +41,7 @@ export default function CreateAccountScreen() {
         onChangeText={onChangeFirst}
         value={first}
         placeholder="first name"
+        placeholderTextColor={Colors.gray500}
         keyboardType="default"
       />
       <TextInput
@@ -47,6 +49,7 @@ export default function CreateAccountScreen() {
         onChangeText={onChangeLast}
         value={last}
         placeholder="last name"
+        placeholderTextColor={Colors.gray500}
         keyboardType="default"
       />
       <PasswordInput

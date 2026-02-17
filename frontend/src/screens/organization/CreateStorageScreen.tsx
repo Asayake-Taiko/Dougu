@@ -12,6 +12,7 @@ import { organizationService } from "../../lib/services/organization";
 import EditImage from "../../components/EditImage";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
 import { Hex } from "../../types/other";
+import { Colors } from "../../styles/global";
 
 /*
   Create storage screen allows a manager to create storage.
@@ -81,6 +82,7 @@ export default function CreateStorageScreen() {
             onChangeText={onChangeName}
             value={name}
             placeholder="name"
+            placeholderTextColor={Colors.gray500}
             keyboardType="default"
           />
         </View>
@@ -95,6 +97,7 @@ export default function CreateStorageScreen() {
             onChangeText={onChangeDetails}
             value={details}
             placeholder="details"
+            placeholderTextColor={Colors.gray500}
             keyboardType="default"
             multiline={true}
           />
@@ -124,6 +127,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   details: {
     height: 100,
@@ -134,6 +138,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   rowContainer: {
     flexDirection: "row",

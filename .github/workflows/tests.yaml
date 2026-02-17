@@ -44,7 +44,8 @@ jobs:
       - name: Start Supabase Functions
         working-directory: ./backend
         run: |
-          supabase functions serve --no-verify-jwt
+          supabase functions serve --no-verify-jwt &
+          sleep 10
 
       - name: Install Frontend Dependencies
         working-directory: ./frontend

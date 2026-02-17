@@ -1,7 +1,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-Deno.serve(async (req)=>{
+Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
@@ -13,8 +13,10 @@ Deno.serve(async (req)=>{
         }
       }
     });
-    const { data, error: userErr } = await supabaseUser.auth.getUser();
-    if (userErr || !data?.user) {
+
+    // 1. Authenticate User
+    const { data: { user }, error: userErr } = await supabaseUser.auth.getUser();
+    if (userErr || !user) {
       return new Response(JSON.stringify({
         error: "Not authenticated"
       }), {
@@ -24,8 +26,9 @@ Deno.serve(async (req)=>{
         }
       });
     }
-    const userId = data.user.id;
-    // Admin client (service role) for deleting auth users
+    const userId = user.id;
+
+    // 2. Setup Admin Client
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
       auth: {
         autoRefreshToken: false,
@@ -33,13 +36,58 @@ Deno.serve(async (req)=>{
         detectSessionInUrl: false
       }
     });
-    // Delete the profile account
-    const { error: cleanupErr } = await supabaseAdmin.rpc('delete_user', {
-      user_id: userId
+
+    // 3. Ensure "Deleted User" exists
+    const DELETED_USER_EMAIL = 'deleted@dougu.app';
+    let deletedUserId: string | undefined;
+
+    // Try to find existing
+    const { data: foundId } = await supabaseAdmin.rpc('get_user_id_by_email', {
+      p_email: DELETED_USER_EMAIL
     });
-    if (cleanupErr) {
+
+    if (foundId) {
+      deletedUserId = foundId;
+    } else {
+      // Create if not found
+      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: DELETED_USER_EMAIL,
+        password: crypto.randomUUID(),
+        email_confirm: true,
+        user_metadata: {
+          name: 'Deleted User',
+          profile_image: null
+        }
+      });
+
+      if (createError) {
+        // If race condition where it was just created, try finding again
+        const { data: retryFoundId } = await supabaseAdmin.rpc('get_user_id_by_email', {
+          p_email: DELETED_USER_EMAIL
+        });
+        if (retryFoundId) {
+          deletedUserId = retryFoundId;
+        } else {
+          throw new Error(`Failed to create or find deleted user placeholder: ${createError.message}`);
+        }
+      } else {
+        deletedUserId = newUser.user.id;
+      }
+    }
+
+    if (!deletedUserId) {
+      throw new Error("Could not determine Deleted User ID");
+    }
+
+    // 4. Perform Reassign and Delete
+    const { error: rpcError } = await supabaseAdmin.rpc('reassign_and_delete_user', {
+      target_user_id: userId,
+      deleted_user_id: deletedUserId
+    });
+
+    if (rpcError) {
       return new Response(JSON.stringify({
-        error: cleanupErr.message
+        error: rpcError.message
       }), {
         status: 400,
         headers: {
@@ -47,18 +95,7 @@ Deno.serve(async (req)=>{
         }
       });
     }
-    // Delete the auth account (auth.users)
-    const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
-    if (delErr) {
-      return new Response(JSON.stringify({
-        error: delErr.message
-      }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-    }
+
     return new Response(JSON.stringify({
       ok: true
     }), {
@@ -69,7 +106,7 @@ Deno.serve(async (req)=>{
     });
   } catch (err) {
     return new Response(JSON.stringify({
-      message: err?.message ?? err
+      error: err?.message ?? err
     }), {
       headers: {
         'Content-Type': 'application/json'

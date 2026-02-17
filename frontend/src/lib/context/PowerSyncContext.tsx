@@ -18,9 +18,10 @@ export const PowerSyncProvider: React.FC<PowerSyncProviderProps> = ({
   children,
 }) => {
   useEffect(() => {
+    // Connect immediately on mount
     connectToDatabase();
 
-    const subscription = AppState.addEventListener(
+    const appStateSubscription = AppState.addEventListener(
       "change",
       async (nextAppState) => {
         Logger.info(`AppState changed to: ${nextAppState}`);
@@ -58,7 +59,9 @@ export const PowerSyncProvider: React.FC<PowerSyncProviderProps> = ({
     );
 
     return () => {
-      subscription.remove();
+      // Disconnect when the provider unmounts (e.g. on logout)
+      db.disconnect();
+      appStateSubscription.remove();
     };
   }, []);
 

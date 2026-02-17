@@ -184,6 +184,28 @@ export class AuthService implements IAuthService {
   }
 
   async deleteAccount(): Promise<void> {
+    // if the user owns any organizations, throw an error
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) {
+      throw new Error("No user session found");
+    }
+    const { data: organizations, error: orgError } = await supabase
+      .from("organizations")
+      .select("*")
+      .eq("manager_id", user.id);
+    if (orgError) {
+      throw orgError;
+    }
+    if (organizations && organizations.length > 0) {
+      throw new Error(
+        "You own organizations. Please transfer ownership before deleting your account.",
+      );
+    }
+
+    // delete the user
     const { error } = await supabase.functions.invoke("delete-account");
     if (error) {
       throw error;

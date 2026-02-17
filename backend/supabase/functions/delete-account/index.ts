@@ -1,7 +1,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-Deno.serve(async (req)=>{
+Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
@@ -13,8 +13,10 @@ Deno.serve(async (req)=>{
         }
       }
     });
-    const { data, error: userErr } = await supabaseUser.auth.getUser();
-    if (userErr || !data?.user) {
+
+    // 1. Authenticate User
+    const { data: { user }, error: userErr } = await supabaseUser.auth.getUser();
+    if (userErr || !user) {
       return new Response(JSON.stringify({
         error: "Not authenticated"
       }), {
@@ -24,8 +26,9 @@ Deno.serve(async (req)=>{
         }
       });
     }
-    const userId = data.user.id;
-    // Admin client (service role) for deleting auth users
+    const userId = user.id;
+
+    // 2. Setup Admin Client
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
       auth: {
         autoRefreshToken: false,
@@ -33,13 +36,16 @@ Deno.serve(async (req)=>{
         detectSessionInUrl: false
       }
     });
-    // Delete the profile account
-    const { error: cleanupErr } = await supabaseAdmin.rpc('delete_user', {
-      user_id: userId
+
+
+    // 3. Perform Reassign and Delete
+    const { error: rpcError } = await supabaseAdmin.rpc('reassign_and_delete_user', {
+      target_user_id: userId
     });
-    if (cleanupErr) {
+
+    if (rpcError) {
       return new Response(JSON.stringify({
-        error: cleanupErr.message
+        error: rpcError.message
       }), {
         status: 400,
         headers: {
@@ -47,18 +53,7 @@ Deno.serve(async (req)=>{
         }
       });
     }
-    // Delete the auth account (auth.users)
-    const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
-    if (delErr) {
-      return new Response(JSON.stringify({
-        error: delErr.message
-      }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-    }
+
     return new Response(JSON.stringify({
       ok: true
     }), {
@@ -69,7 +64,7 @@ Deno.serve(async (req)=>{
     });
   } catch (err) {
     return new Response(JSON.stringify({
-      message: err?.message ?? err
+      error: err?.message ?? err
     }), {
       headers: {
         'Content-Type': 'application/json'

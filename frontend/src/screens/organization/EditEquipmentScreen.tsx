@@ -27,8 +27,14 @@ export default function EditEquipmentScreen({
 
   const initialItem: Item | null = useMemo(() => {
     for (const ownership of ownerships.values()) {
-      const found = ownership.items.find((i) => i.id === itemId);
-      if (found) return found;
+      for (const item of ownership.items) {
+        if (item.id === itemId) return item;
+        // Search inside containers for equipment
+        if (item.type === "container") {
+          const foundInContainer = item.equipment.find((e) => e.id === itemId);
+          if (foundInContainer) return foundInContainer;
+        }
+      }
     }
     return null;
   }, [ownerships, itemId]);

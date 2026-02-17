@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "./lib/context/AuthContext";
 import { SpinnerProvider } from "./lib/context/SpinnerContext";
 import { ModalProvider } from "./lib/context/ModalContext";
 import { PowerSyncProvider } from "./lib/context/PowerSyncContext";
+import { ProfileProvider } from "./lib/context/ProfileContext";
 import SplashScreen from "./screens/splash";
 import AuthNavigator from "./screens/authentication/AuthNavigator";
 import RootStackNavigator from "./screens/organization/RootStackNavigator";
@@ -20,7 +21,15 @@ function AppContent() {
   return (
     <NavigationContainer>
       <StatusBar style="auto" />
-      {session ? <RootStackNavigator /> : <AuthNavigator />}
+      {session ? (
+        <PowerSyncProvider>
+          <ProfileProvider>
+            <RootStackNavigator />
+          </ProfileProvider>
+        </PowerSyncProvider>
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 }
@@ -28,15 +37,13 @@ function AppContent() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <PowerSyncProvider>
-        <AuthProvider>
-          <SpinnerProvider>
-            <ModalProvider>
-              <AppContent />
-            </ModalProvider>
-          </SpinnerProvider>
-        </AuthProvider>
-      </PowerSyncProvider>
+      <AuthProvider>
+        <SpinnerProvider>
+          <ModalProvider>
+            <AppContent />
+          </ModalProvider>
+        </SpinnerProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

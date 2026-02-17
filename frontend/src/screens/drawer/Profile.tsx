@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text } from "react-native";
 import { useAuth } from "../../lib/context/AuthContext";
+import { useProfile } from "../../lib/context/ProfileContext";
 import { ProfileStyles } from "../../styles/ProfileStyles";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
@@ -17,7 +18,8 @@ import EditImage from "../../components/EditImage";
 import { clearAllData } from "../../lib/powersync/PowerSync";
 
 export default function ProfileScreen() {
-  const { session, profile } = useAuth();
+  const { session } = useAuth();
+  const { profile } = useProfile();
 
   const [profileImage, setProfileImage] = useState("default_profile");
   const [profileColor, setProfileColor] = useState("#791111");

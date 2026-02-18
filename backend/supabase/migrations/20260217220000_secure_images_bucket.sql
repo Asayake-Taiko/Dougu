@@ -3,9 +3,6 @@ update storage.buckets
 set public = false
 where id = 'images';
 
--- Enable RLS on storage.objects
-alter table storage.objects enable row level security;
-
 -- Drop existing public/broad policies
 drop policy if exists "Public Access" on storage.objects;
 drop policy if exists "Authenticated Upload" on storage.objects;
@@ -30,7 +27,7 @@ using (
     select 1 
     from public.related_org_members rom
     where rom.viewer_id = auth.uid()::text
-    and storage.objects.name like 'profiles/' || rom.target_user_id || '/%'
+    and name like 'profiles/' || rom.target_user_id || '/%'
   )
 );
 

@@ -30,7 +30,7 @@ jobs:
       - name: Start Supabase
         working-directory: ./backend
         run: |
-          supabase start -x realtime,storage-api,imgproxy,studio,migra,postgres-meta
+          supabase start -x realtime,imgproxy,studio,migra,postgres-meta
           supabase db reset
 
       - name: Start PowerSync

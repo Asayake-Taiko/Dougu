@@ -19,7 +19,10 @@ jest.mock("@expo/vector-icons", () => ({
 }));
 
 // Mock sub-paths for components that import specifically
-jest.mock("@expo/vector-icons/MaterialCommunityIcons", () => "MaterialCommunityIcons");
+jest.mock(
+  "@expo/vector-icons/MaterialCommunityIcons",
+  () => "MaterialCommunityIcons",
+);
 jest.mock("@expo/vector-icons/FontAwesome", () => "FontAwesome");
 jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 jest.mock("@expo/vector-icons/Feather", () => "Feather");
@@ -32,6 +35,6 @@ jest.mock("@react-native-async-storage/async-storage", () =>
 // Mock react-native-reanimated
 jest.mock("react-native-reanimated", () => {
   const Reanimated = require("react-native-reanimated/mock");
-  Reanimated.default.call = () => { };
+  Reanimated.default.call = () => {};
   return Reanimated;
 });

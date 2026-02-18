@@ -34,7 +34,10 @@ vi.mock("@expo/vector-icons", () => ({
   Zocial: "Zocial",
 }));
 
-vi.mock("@expo/vector-icons/MaterialCommunityIcons", () => "MaterialCommunityIcons");
+vi.mock(
+  "@expo/vector-icons/MaterialCommunityIcons",
+  () => "MaterialCommunityIcons",
+);
 vi.mock("@expo/vector-icons/FontAwesome", () => "FontAwesome");
 vi.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 vi.mock("@expo/vector-icons/Feather", () => "Feather");

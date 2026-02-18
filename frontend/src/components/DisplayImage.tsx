@@ -32,8 +32,12 @@ export default function DisplayImage({
         return;
       }
 
-      // Check if it's a local file URI (e.g. from image picker)
-      if (imageKey.startsWith("file://")) {
+      // Check if it's a local file URI or full remote URL
+      if (
+        imageKey.startsWith("file://") ||
+        imageKey.startsWith("http://") ||
+        imageKey.startsWith("https://")
+      ) {
         if (isMounted) setImageSource({ uri: imageKey });
         return;
       }

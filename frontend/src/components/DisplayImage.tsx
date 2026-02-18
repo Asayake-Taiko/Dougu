@@ -32,6 +32,12 @@ export default function DisplayImage({
         return;
       }
 
+      // Check if it's a local file URI (e.g. from image picker)
+      if (imageKey.startsWith("file://")) {
+        if (isMounted) setImageSource({ uri: imageKey });
+        return;
+      }
+
       // Check if it's a storage path (contains /)
       if (imageKey.includes("/")) {
         try {

@@ -14,6 +14,7 @@ import { ItemStyles } from "../../styles/ItemStyles";
 import { Hex, Item } from "../../types/other";
 import { Equipment } from "../../types/models";
 import { Logger } from "../../lib/utils/Logger";
+import { uploadImage } from "../../lib/supabase/storage";
 import { useModal } from "../../lib/context/ModalContext";
 import { useMembership } from "../../lib/context/MembershipContext";
 
@@ -93,7 +94,17 @@ export default function EditEquipmentScreen({
 
       const updates: any = { name, details, color: itemColor };
       if (initialItem.type === "equipment") {
-        updates.image = imageKey;
+        let finalImageKey = imageKey;
+        if (imageKey.startsWith("file://")) {
+          const timestamp = Date.now();
+          const randomStr = Math.random().toString(36).substring(7);
+          const filename = `${timestamp}_${randomStr}.png`;
+          finalImageKey = await uploadImage(
+            imageKey,
+            `organizations/${organization?.id || "unknown"}/equipment/${filename}`,
+          );
+        }
+        updates.image = finalImageKey;
         await (initialItem as Equipment).update(updates, localSelectedIndices);
       } else {
         await initialItem.update(updates);
@@ -135,7 +146,6 @@ export default function EditEquipmentScreen({
         currentColor={itemColor}
         onSave={handleSaveImage}
         hideImagePicker={isContainer}
-        uploadContext={{ type: "org_equipment", orgId: organization?.id || "" }}
       />
 
       {/* Header / Item Preview */}

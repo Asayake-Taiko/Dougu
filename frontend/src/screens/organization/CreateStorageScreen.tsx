@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { organizationService } from "../../lib/services/organization";
 import EditImage from "../../components/EditImage";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
+import { uploadImage } from "../../lib/supabase/storage";
 import { Hex } from "../../types/other";
 import { Colors } from "../../styles/global";
 
@@ -38,10 +39,22 @@ export default function CreateStorageScreen() {
       if (!isManager) throw new Error("Only managers can create storage.");
 
       showSpinner();
+
+      let finalProfileKey = profileKey;
+      if (profileKey.startsWith("file://")) {
+        const timestamp = Date.now();
+        const randomStr = Math.random().toString(36).substring(7);
+        const filename = `${timestamp}_${randomStr}.png`;
+        finalProfileKey = await uploadImage(
+          profileKey,
+          `organizations/${organization.id}/storages/${filename}`,
+        );
+      }
+
       await organizationService.createStorage(
         organization.id,
         name,
-        profileKey,
+        finalProfileKey,
         profileColor,
         details,
       );

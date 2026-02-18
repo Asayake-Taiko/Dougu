@@ -1,7 +1,6 @@
 import { Text, View, StyleSheet, TextInput } from "react-native";
 import React, { useState } from "react";
-
-// project imports
+// Fixed imports
 import CurrMembersDropdown from "../../components/member/CurrMembersDropdown";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { useSpinner } from "../../lib/context/SpinnerContext";
@@ -15,6 +14,7 @@ import { Logger } from "../../lib/utils/Logger";
 import { equipmentService } from "../../lib/services/equipment";
 import EquipmentDisplay from "../../components/member/EquipmentDisplay";
 import { ItemStyles } from "../../styles/ItemStyles";
+import { uploadImage } from "../../lib/supabase/storage";
 
 /*
   Create equipment screen allows a manager to create equipment
@@ -52,13 +52,25 @@ export default function CreateEquipmentScreen() {
       if (!isManager) throw new Error("Only managers can create items.");
 
       showSpinner();
+
+      let finalImageKey = imageKey;
+      if (imageKey.startsWith("file://")) {
+        const timestamp = Date.now();
+        const randomStr = Math.random().toString(36).substring(7);
+        const filename = `${timestamp}_${randomStr}.png`;
+        finalImageKey = await uploadImage(
+          imageKey,
+          `organizations/${organization.id}/equipment/${filename}`,
+        );
+      }
+
       if (index === 0) {
         // Create Equipment
         await equipmentService.createEquipment(quantityCount, {
           name,
           organization_id: organization.id,
           assigned_to: assignUser.id,
-          image: imageKey,
+          image: finalImageKey,
           color: itemColor,
           details,
         });
@@ -99,7 +111,6 @@ export default function CreateEquipmentScreen() {
         currentColor={itemColor}
         onSave={handleSaveImage}
         hideImagePicker={index === 1}
-        uploadContext={{ type: "org_equipment", orgId: organization?.id || "" }}
       />
       <View style={styles.topRow}>
         {index === 0 ? (
@@ -226,6 +237,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
+    justifyContent: "center",
   },
   container: {
     backgroundColor: "#fff",

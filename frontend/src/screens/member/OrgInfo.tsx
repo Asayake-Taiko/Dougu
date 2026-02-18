@@ -6,6 +6,7 @@ import { InfoScreenProps } from "../../types/navigation";
 import { useMembership } from "../../lib/context/MembershipContext";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
 import EditImage from "../../components/EditImage";
+import { uploadImage } from "../../lib/supabase/storage";
 import { ProfileStyles } from "../../styles/ProfileStyles";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { Colors } from "../../styles/global";
@@ -35,9 +36,15 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
       if (!isManager)
         throw new Error("Only managers can edit organization profiles.");
 
-      await organization.updateImage(newImageKey, newColor);
-      setImageKey(newImageKey);
-      setColor(newColor);
+      let finalImageKey = newImageKey;
+      if (newImageKey.startsWith("file://")) {
+        finalImageKey = await uploadImage(
+          newImageKey,
+          `organizations/${organization.id}/profile.png`,
+        );
+      }
+
+      await organization.updateImage(finalImageKey, newColor);
       setMessage("Organization updated successfully");
     } catch (error: any) {
       setMessage(error.message || "Failed to update organization");
@@ -114,7 +121,6 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
         currentImageKey={imageKey}
         currentColor={color}
         onSave={handleSave}
-        uploadContext={{ type: "org_profile", orgId: organization?.id || "" }}
       />
     </View>
   );

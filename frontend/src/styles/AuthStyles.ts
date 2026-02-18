@@ -54,6 +54,7 @@ export const AuthStyles = StyleSheet.create({
     padding: Spacing.sm,
     width: "80%",
     marginBottom: Spacing.md,
+    color: Colors.black,
   },
   name: {
     width: "40%",

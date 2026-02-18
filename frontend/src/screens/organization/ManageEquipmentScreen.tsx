@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { Colors } from "../../styles/global";
 
 // project imports
 import EquipmentTable from "../../components/organization/EquipmentTable";
@@ -47,6 +48,7 @@ export default function ManageEquipmentScreen({
             />
             <TextInput
               placeholder="Search"
+              placeholderTextColor={Colors.gray500}
               onChangeText={setSearch}
               value={search}
               style={styles.searchInput}
@@ -114,6 +116,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: "100%",
     fontSize: 16,
+    color: Colors.black,
   },
   addIconContainer: {
     backgroundColor: "#f4f4f4",

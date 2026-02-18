@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { Colors } from "./global";
 
 export const createJoinStyles = StyleSheet.create({
   mainContainer: {
@@ -31,6 +32,7 @@ export const createJoinStyles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     width: "80%",
+    color: Colors.black,
   },
   button: {
     height: 50,

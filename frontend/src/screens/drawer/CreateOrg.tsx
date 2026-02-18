@@ -9,6 +9,7 @@ import { useModal } from "../../lib/context/ModalContext";
 import { organizationService } from "../../lib/services/organization";
 import { Logger } from "../../lib/utils/Logger";
 import { useAuth } from "../../lib/context/AuthContext";
+import { Colors } from "../../styles/global";
 
 /*
   Screen for creating an organization, user enters the name of the org
@@ -68,6 +69,7 @@ export default function CreateOrgScreen({
           onChangeText={onChangeName}
           value={name}
           placeholder="Ex. Great_Org"
+          placeholderTextColor={Colors.gray500}
           keyboardType="default"
           autoCapitalize="none"
         />

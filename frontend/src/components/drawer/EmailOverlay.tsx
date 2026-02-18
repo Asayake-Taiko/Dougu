@@ -73,6 +73,7 @@ export default function EmailOverlay({
           onChangeText={setEmail}
           value={email}
           placeholder="new email"
+          placeholderTextColor={Colors.gray500}
           style={styles.email}
           keyboardType="email-address"
           autoCapitalize="none"
@@ -85,6 +86,7 @@ export default function EmailOverlay({
         onChangeText={setCode}
         value={code}
         placeholder="verification code"
+        placeholderTextColor={Colors.gray500}
         style={styles.code}
         keyboardType="numeric"
       />
@@ -140,6 +142,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginTop: "5%",
+    color: Colors.black,
   },
   email: {
     width: "60%",
@@ -147,6 +150,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
+    color: Colors.black,
     // marginLeft handled by flex layout now, or keeping logic close to original
   },
   row: {

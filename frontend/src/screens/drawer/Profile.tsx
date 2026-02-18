@@ -15,6 +15,7 @@ import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
 import { authService } from "../../lib/services/auth";
 import EditImage from "../../components/EditImage";
+import { uploadImage } from "../../lib/supabase/storage";
 import { clearAllData } from "../../lib/powersync/PowerSync";
 
 export default function ProfileScreen() {
@@ -28,6 +29,7 @@ export default function ProfileScreen() {
   const [emailVisible, setEmailVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-render
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
 
@@ -58,7 +60,20 @@ export default function ProfileScreen() {
   const handleSave = async (newImageKey: string, newColor: string) => {
     try {
       showSpinner();
-      await authService.updateProfile(newImageKey, newColor);
+      let finalImageKey = newImageKey;
+
+      if (newImageKey.startsWith("file://")) {
+        if (!session?.user.id) throw new Error("User ID not found");
+        finalImageKey = await uploadImage(
+          newImageKey,
+          `profiles/${session.user.id}/profile.png`,
+        );
+      }
+
+      await authService.updateProfile(finalImageKey, newColor);
+      setProfileImage(finalImageKey);
+      setProfileColor(newColor);
+      setRefreshKey((prev) => prev + 1);
       setMessage("Profile updated successfully");
     } catch (error: any) {
       setMessage(error.message || "Failed to update profile");
@@ -71,6 +86,7 @@ export default function ProfileScreen() {
   return (
     <View style={ProfileStyles.container}>
       <EditImage
+        key={profileImage + refreshKey}
         imageKey={profileImage}
         color={profileColor}
         onPress={() => setProfileVisible(true)}

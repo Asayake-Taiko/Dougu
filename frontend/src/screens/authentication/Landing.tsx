@@ -5,6 +5,7 @@ import { PressableOpacity } from "../../components/PressableOpacity";
 import { LandingScreenNavigationProp } from "../../types/navigation";
 import { useModal } from "../../lib/context/ModalContext";
 import GoogleIcon from "../../assets/google.png";
+import { Colors } from "../../styles/global";
 
 export default function LandingScreen({
   navigation,
@@ -32,6 +33,7 @@ export default function LandingScreen({
         onChangeText={onChangeEmail}
         value={email}
         placeholder="email"
+        placeholderTextColor={Colors.gray500}
         keyboardType="email-address"
         autoCapitalize="none"
       />

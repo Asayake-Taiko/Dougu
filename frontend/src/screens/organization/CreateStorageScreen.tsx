@@ -11,7 +11,9 @@ import { useNavigation } from "@react-navigation/native";
 import { organizationService } from "../../lib/services/organization";
 import EditImage from "../../components/EditImage";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
+import { uploadImage } from "../../lib/supabase/storage";
 import { Hex } from "../../types/other";
+import { Colors } from "../../styles/global";
 
 /*
   Create storage screen allows a manager to create storage.
@@ -37,10 +39,22 @@ export default function CreateStorageScreen() {
       if (!isManager) throw new Error("Only managers can create storage.");
 
       showSpinner();
+
+      let finalProfileKey = profileKey;
+      if (profileKey.startsWith("file://")) {
+        const timestamp = Date.now();
+        const randomStr = Math.random().toString(36).substring(7);
+        const filename = `${timestamp}_${randomStr}.png`;
+        finalProfileKey = await uploadImage(
+          profileKey,
+          `organizations/${organization.id}/storages/${filename}`,
+        );
+      }
+
       await organizationService.createStorage(
         organization.id,
         name,
-        profileKey,
+        finalProfileKey,
         profileColor,
         details,
       );
@@ -81,6 +95,7 @@ export default function CreateStorageScreen() {
             onChangeText={onChangeName}
             value={name}
             placeholder="name"
+            placeholderTextColor={Colors.gray500}
             keyboardType="default"
           />
         </View>
@@ -95,6 +110,7 @@ export default function CreateStorageScreen() {
             onChangeText={onChangeDetails}
             value={details}
             placeholder="details"
+            placeholderTextColor={Colors.gray500}
             keyboardType="default"
             multiline={true}
           />
@@ -124,6 +140,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   details: {
     height: 100,
@@ -134,6 +151,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   rowContainer: {
     flexDirection: "row",

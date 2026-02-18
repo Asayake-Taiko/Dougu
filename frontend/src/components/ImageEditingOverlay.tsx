@@ -8,6 +8,7 @@ import {
   ScrollView,
   ImageSourcePropType,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../styles/global";
 import { PressableOpacity } from "./PressableOpacity";
 import ColorSelect from "./organization/ColorSelect";
@@ -18,6 +19,9 @@ import {
   iconMapping,
 } from "../lib/utils/ImageMapping";
 import DisplayImage from "./DisplayImage";
+import { launchImageLibraryAsync } from "expo-image-picker";
+import { Logger } from "../lib/utils/Logger";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface ImageEditingOverlayProps {
   visible: boolean;
@@ -39,6 +43,26 @@ export default function ImageEditingOverlay({
   const [selectedImageKey, setSelectedImageKey] = useState(currentImageKey);
   const [selectedColor, setSelectedColor] = useState<Hex>(currentColor as Hex);
   const [activeTab, setActiveTab] = useState<"image" | "color">("image");
+
+  const handlePickImage = async () => {
+    try {
+      const result = await launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+        selectionLimit: 1,
+      });
+
+      if (!result.canceled) {
+        const asset = result.assets[0];
+        setSelectedImageKey(asset.uri);
+      }
+    } catch (error: any) {
+      Logger.error("Upload failed:", error);
+      alert(error.message || "Failed to upload image. Please try again.");
+    }
+  };
 
   useEffect(() => {
     if (visible) {
@@ -84,51 +108,59 @@ export default function ImageEditingOverlay({
       visible={visible}
       onRequestClose={() => setVisible(false)}
     >
-      <View style={styles.centeredView}>
+      <SafeAreaView style={styles.centeredView}>
         <Pressable style={styles.backdrop} onPress={() => setVisible(false)} />
         <View style={styles.modalView}>
+          <View style={styles.handle} />
+
           {/* Header / Preview */}
           <View style={styles.previewContainer}>
-            <View style={styles.previewCircle}>
+            <View
+              style={[styles.previewCircle, { backgroundColor: selectedColor }]}
+            >
               {!hideImagePicker && (
-                <DisplayImage
-                  imageKey={selectedImageKey}
-                  style={styles.fill}
-                  color={selectedColor}
-                />
+                <DisplayImage imageKey={selectedImageKey} style={styles.fill} />
               )}
             </View>
           </View>
 
-          {/* Tabs */}
+          {/* Tabs - Modern Segmented Control */}
           {!hideImagePicker && (
-            <View style={styles.tabContainer}>
-              <PressableOpacity
-                style={[styles.tab, activeTab === "image" && styles.activeTab]}
-                onPress={() => setActiveTab("image")}
-              >
-                <Text
+            <View style={styles.tabWrapper}>
+              <View style={styles.tabContainer}>
+                <PressableOpacity
                   style={[
-                    styles.tabText,
-                    activeTab === "image" && styles.activeTabText,
+                    styles.tab,
+                    activeTab === "image" && styles.activeTab,
                   ]}
+                  onPress={() => setActiveTab("image")}
                 >
-                  Image
-                </Text>
-              </PressableOpacity>
-              <PressableOpacity
-                style={[styles.tab, activeTab === "color" && styles.activeTab]}
-                onPress={() => setActiveTab("color")}
-              >
-                <Text
+                  <Text
+                    style={[
+                      styles.tabText,
+                      activeTab === "image" && styles.activeTabText,
+                    ]}
+                  >
+                    Image
+                  </Text>
+                </PressableOpacity>
+                <PressableOpacity
                   style={[
-                    styles.tabText,
-                    activeTab === "color" && styles.activeTabText,
+                    styles.tab,
+                    activeTab === "color" && styles.activeTab,
                   ]}
+                  onPress={() => setActiveTab("color")}
                 >
-                  Color
-                </Text>
-              </PressableOpacity>
+                  <Text
+                    style={[
+                      styles.tabText,
+                      activeTab === "color" && styles.activeTabText,
+                    ]}
+                  >
+                    Color
+                  </Text>
+                </PressableOpacity>
+              </View>
             </View>
           )}
 
@@ -136,6 +168,26 @@ export default function ImageEditingOverlay({
           <View style={styles.contentContainer}>
             {activeTab === "image" && !hideImagePicker ? (
               <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Custom Image / Upload Section Integrated into Grid */}
+                <View style={styles.groupContainer}>
+                  <Text style={styles.groupTitle}>Custom Selection</Text>
+                  <View style={styles.grid}>
+                    <PressableOpacity
+                      style={[styles.imageItem, styles.uploadItem]}
+                      onPress={handlePickImage}
+                    >
+                      <View style={styles.uploadPlaceholder}>
+                        <MaterialCommunityIcons
+                          name="plus"
+                          size={24}
+                          color="#666"
+                        />
+                        <Text style={styles.uploadSmallText}>Upload</Text>
+                      </View>
+                    </PressableOpacity>
+                  </View>
+                </View>
+
                 {renderImageGroup("Profiles", baseProfileMapping)}
                 {renderImageGroup("Organizations", baseOrgMapping)}
                 {renderImageGroup("Items", iconMapping)}
@@ -153,11 +205,11 @@ export default function ImageEditingOverlay({
           {/* Footer / Save */}
           <View style={styles.footer}>
             <PressableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Text style={styles.saveButtonText}>Save</Text>
+              <Text style={styles.saveButtonText}>Save Changes</Text>
             </PressableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 }
@@ -169,54 +221,72 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   modalView: {
     backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    height: "85%", // Large bottom sheet
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    height: "85%",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: -2,
+      height: -4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    paddingTop: 20,
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 20,
+    paddingTop: 8,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 12,
   },
   previewContainer: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   previewCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  tabWrapper: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   tabContainer: {
     flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    marginHorizontal: 20,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 12,
+    padding: 2,
   },
   tab: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 8,
     alignItems: "center",
-    borderBottomWidth: 2,
-    borderBottomColor: "transparent",
+    borderRadius: 10,
   },
   activeTab: {
-    borderBottomColor: Colors.primary,
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   tabText: {
-    fontSize: 16,
-    color: "#888",
+    fontSize: 14,
+    color: "#666",
     fontWeight: "500",
   },
   activeTabText: {
@@ -226,7 +296,6 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 10,
   },
   colorPickerContainer: {
     flex: 1,
@@ -234,13 +303,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   groupContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   groupTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#1A1A1A",
   },
   grid: {
     flexDirection: "row",
@@ -249,39 +318,62 @@ const styles = StyleSheet.create({
     columnGap: "2.6%",
   },
   imageItem: {
-    width: "23%", // 4 columns
+    width: "23%",
     aspectRatio: 1,
-    marginBottom: 10,
+    marginBottom: 12,
     borderWidth: 2,
     borderColor: "transparent",
-    borderRadius: 12,
-    padding: 5,
-    backgroundColor: "#f9f9f9",
+    borderRadius: 16,
+    padding: 6,
+    backgroundColor: "#F8F8F8",
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+  },
+  uploadItem: {
+    borderStyle: "dashed",
+    borderColor: "#CCC",
+    backgroundColor: "#F0F0F0",
   },
   selectedImageItem: {
     borderColor: Colors.primary,
-    backgroundColor: "#fff0f0",
+    backgroundColor: "#FFF5F5",
+  },
+  uploadPlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  uploadSmallText: {
+    fontSize: 10,
+    color: "#666",
+    marginTop: 2,
+    fontWeight: "500",
   },
   footer: {
     padding: 20,
+    paddingBottom: 34, // Safe area ish
     borderTopWidth: 1,
-    borderTopColor: "#eee",
+    borderTopColor: "#F0F0F0",
   },
   saveButton: {
     backgroundColor: Colors.primary,
-    paddingVertical: 15,
-    borderRadius: 10,
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: "center",
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   saveButtonText: {
     color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
   },
   fill: {
     width: "100%",
     height: "100%",
+    borderRadius: 12,
   },
 });

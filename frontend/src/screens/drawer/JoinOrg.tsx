@@ -10,6 +10,7 @@ import { organizationService } from "../../lib/services/organization";
 import { useSpinner } from "../../lib/context/SpinnerContext";
 import { useModal } from "../../lib/context/ModalContext";
 import { Logger } from "../../lib/utils/Logger";
+import { Colors } from "../../styles/global";
 
 /*
   Screen for joining an organization, user enters the access code to join
@@ -63,6 +64,7 @@ export default function JoinOrgScreen({
           onChangeText={onChangeCode}
           value={code}
           placeholder="Ex. ABC1234"
+          placeholderTextColor={Colors.gray500}
           keyboardType="default"
           autoCapitalize="characters"
         />

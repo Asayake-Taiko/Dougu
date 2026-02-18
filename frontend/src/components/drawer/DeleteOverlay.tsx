@@ -62,6 +62,7 @@ export default function DeleteOverlay({
         onChangeText={setEmail}
         value={email}
         placeholder="email"
+        placeholderTextColor={Colors.gray500}
         style={styles.email}
         autoCapitalize="none"
         keyboardType="email-address"
@@ -102,5 +103,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginTop: "5%",
+    color: Colors.black,
   },
 });

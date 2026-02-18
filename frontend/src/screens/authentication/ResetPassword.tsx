@@ -9,6 +9,7 @@ import { useSpinner } from "../../lib/context/SpinnerContext";
 import { Logger } from "../../lib/utils/Logger";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { authService } from "../../lib/services/auth";
+import { Colors } from "../../styles/global";
 
 export default function ResetPasswordScreen() {
   const [password, onChangePassword] = useState("");
@@ -46,6 +47,7 @@ export default function ResetPasswordScreen() {
         onChangeText={setCode}
         value={code}
         placeholder="code"
+        placeholderTextColor={Colors.gray500}
         keyboardType="numeric"
         testID="codeInput"
       />

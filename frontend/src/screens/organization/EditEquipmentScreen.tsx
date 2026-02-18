@@ -1,6 +1,7 @@
 import { Text, View, StyleSheet, TextInput, Pressable } from "react-native";
 import React, { useState, useMemo } from "react";
 import { ScrollView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { Colors } from "../../styles/global";
@@ -13,6 +14,7 @@ import { ItemStyles } from "../../styles/ItemStyles";
 import { Hex, Item } from "../../types/other";
 import { Equipment } from "../../types/models";
 import { Logger } from "../../lib/utils/Logger";
+import { uploadImage } from "../../lib/supabase/storage";
 import { useModal } from "../../lib/context/ModalContext";
 import { useMembership } from "../../lib/context/MembershipContext";
 
@@ -23,7 +25,7 @@ export default function EditEquipmentScreen({
   const { setMessage } = useModal();
   const { itemId } = route.params;
   const { ownerships } = useEquipment();
-  const { isManager } = useMembership();
+  const { isManager, organization } = useMembership();
 
   const initialItem: Item | null = useMemo(() => {
     for (const ownership of ownerships.values()) {
@@ -92,7 +94,17 @@ export default function EditEquipmentScreen({
 
       const updates: any = { name, details, color: itemColor };
       if (initialItem.type === "equipment") {
-        updates.image = imageKey;
+        let finalImageKey = imageKey;
+        if (imageKey.startsWith("file://")) {
+          const timestamp = Date.now();
+          const randomStr = Math.random().toString(36).substring(7);
+          const filename = `${timestamp}_${randomStr}.png`;
+          finalImageKey = await uploadImage(
+            imageKey,
+            `organizations/${organization?.id || "unknown"}/equipment/${filename}`,
+          );
+        }
+        updates.image = finalImageKey;
         await (initialItem as Equipment).update(updates, localSelectedIndices);
       } else {
         await initialItem.update(updates);
@@ -126,7 +138,7 @@ export default function EditEquipmentScreen({
   const isContainer = initialItem.type === "container";
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ImageEditingOverlay
         visible={overlayVisible}
         setVisible={setOverlayVisible}
@@ -214,6 +226,7 @@ export default function EditEquipmentScreen({
                   onChangeText={onChangeName}
                   value={name}
                   placeholder="name"
+                  placeholderTextColor={Colors.gray500}
                   keyboardType="default"
                 />
               </View>
@@ -229,6 +242,7 @@ export default function EditEquipmentScreen({
                   onChangeText={onChangeDetails}
                   value={details}
                   placeholder="details"
+                  placeholderTextColor={Colors.gray500}
                   keyboardType="default"
                   multiline={true}
                 />
@@ -262,7 +276,7 @@ export default function EditEquipmentScreen({
           <Text style={styles.btnText}>Update</Text>
         </PressableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -316,6 +330,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   details: {
     height: 70, // Reduced height to fit checklist
@@ -326,6 +341,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     backgroundColor: "#F9F9F9",
+    color: Colors.black,
   },
   buttonContainer: {
     flexDirection: "row",

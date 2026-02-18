@@ -17,7 +17,11 @@ export default function EquipmentOverlay() {
   };
 
   const handleSelectAll = () => {
-    item.selectAll();
+    if (item.selectedCount === item.count) {
+      item.deselectAll();
+    } else {
+      item.selectAll();
+    }
     setLocalUpdate((prev) => prev + 1);
   };
 

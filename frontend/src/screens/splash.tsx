@@ -1,11 +1,16 @@
 import React from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { Colors } from "../styles/global";
 
 export default function SplashScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Dougu</Text>
-      <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
+      <ActivityIndicator
+        size="large"
+        color={Colors.primary}
+        style={styles.loader}
+      />
     </View>
   );
 }
@@ -13,7 +18,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.white,
     alignItems: "center",
     justifyContent: "center",
   },

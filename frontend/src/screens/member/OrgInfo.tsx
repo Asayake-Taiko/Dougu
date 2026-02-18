@@ -22,6 +22,7 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [imageKey, setImageKey] = useState("default_org");
   const [color, setColor] = useState("#791111");
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-render
 
   useEffect(() => {
     if (organization) {
@@ -45,6 +46,7 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
       }
 
       await organization.updateImage(finalImageKey, newColor);
+      setRefreshKey((prev) => prev + 1);
       setMessage("Organization updated successfully");
     } catch (error: any) {
       setMessage(error.message || "Failed to update organization");
@@ -54,6 +56,7 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
   return (
     <View style={ProfileStyles.container}>
       <EditImage
+        key={imageKey + refreshKey}
         imageKey={imageKey}
         color={color}
         onPress={() => setOverlayVisible(true)}

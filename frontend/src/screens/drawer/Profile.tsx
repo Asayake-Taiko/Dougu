@@ -29,6 +29,7 @@ export default function ProfileScreen() {
   const [emailVisible, setEmailVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-render
   const { setMessage } = useModal();
   const { showSpinner, hideSpinner } = useSpinner();
 
@@ -70,6 +71,9 @@ export default function ProfileScreen() {
       }
 
       await authService.updateProfile(finalImageKey, newColor);
+      setProfileImage(finalImageKey);
+      setProfileColor(newColor);
+      setRefreshKey((prev) => prev + 1);
       setMessage("Profile updated successfully");
     } catch (error: any) {
       setMessage(error.message || "Failed to update profile");
@@ -82,6 +86,7 @@ export default function ProfileScreen() {
   return (
     <View style={ProfileStyles.container}>
       <EditImage
+        key={profileImage + refreshKey}
         imageKey={profileImage}
         color={profileColor}
         onPress={() => setProfileVisible(true)}

@@ -25,6 +25,12 @@ import { uploadImage } from "../lib/supabase/storage";
 import { Logger } from "../lib/utils/Logger";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
+export type UploadContext =
+  | { type: "user_profile"; userId: string }
+  | { type: "org_profile"; orgId: string }
+  | { type: "org_equipment"; orgId: string }
+  | { type: "custom" };
+
 interface ImageEditingOverlayProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
@@ -32,6 +38,7 @@ interface ImageEditingOverlayProps {
   currentColor: string;
   onSave: (imageKey: string, color: string) => Promise<void>;
   hideImagePicker?: boolean;
+  uploadContext?: UploadContext;
 }
 
 export default function ImageEditingOverlay({
@@ -41,6 +48,7 @@ export default function ImageEditingOverlay({
   currentColor,
   onSave,
   hideImagePicker = false,
+  uploadContext = { type: "custom" },
 }: ImageEditingOverlayProps) {
   const [selectedImageKey, setSelectedImageKey] = useState(currentImageKey);
   const [selectedColor, setSelectedColor] = useState<Hex>(currentColor as Hex);
@@ -59,17 +67,35 @@ export default function ImageEditingOverlay({
       if (!result.canceled) {
         setIsUploading(true);
         const asset = result.assets[0];
-        // Generate a unique filename using timestamp
-        const filename = `${Date.now()}_${Math.random()
-          .toString(36)
-          .substring(7)}.jpg`;
-        const publicUrl = await uploadImage(asset.uri, "custom", filename);
-        setSelectedImageKey(publicUrl);
+
+        let path = "";
+        const timestamp = Date.now();
+        const randomStr = Math.random().toString(36).substring(7);
+        const filename = `${timestamp}_${randomStr}.png`;
+
+        switch (uploadContext.type) {
+          case "user_profile":
+            path = `profiles/${uploadContext.userId}/profile.png`;
+            break;
+          case "org_profile":
+            path = `organizations/${uploadContext.orgId}/profile.png`;
+            break;
+          case "org_equipment":
+            path = `organizations/${uploadContext.orgId}/equipment/${filename}`;
+            break;
+          case "custom":
+          default:
+            path = `custom/${filename}`;
+            break;
+        }
+
+        const imagePath = await uploadImage(asset.uri, path);
+        setSelectedImageKey(imagePath);
         setIsUploading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       Logger.error("Upload failed:", error);
-      alert("Failed to upload image. Please try again.");
+      alert(error.message || "Failed to upload image. Please try again.");
       setIsUploading(false);
     }
   };

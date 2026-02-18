@@ -24,7 +24,7 @@ export default function EditEquipmentScreen({
   const { setMessage } = useModal();
   const { itemId } = route.params;
   const { ownerships } = useEquipment();
-  const { isManager } = useMembership();
+  const { isManager, organization } = useMembership();
 
   const initialItem: Item | null = useMemo(() => {
     for (const ownership of ownerships.values()) {
@@ -135,6 +135,7 @@ export default function EditEquipmentScreen({
         currentColor={itemColor}
         onSave={handleSaveImage}
         hideImagePicker={isContainer}
+        uploadContext={{ type: "org_equipment", orgId: organization?.id || "" }}
       />
 
       {/* Header / Item Preview */}

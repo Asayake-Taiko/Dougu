@@ -5,25 +5,22 @@ import { decode } from "base64-arraybuffer";
 /**
  * Uploads an image to Supabase Storage.
  * @param localUri The local URI of the image file (e.g. from ImagePicker).
- * @param folder The folder path within the bucket (e.g. 'profiles', 'organizations').
- * @param filename The desired filename.
- * @returns The public URL of the uploaded image.
+ * @param path The full path within the bucket (e.g. 'profiles/user_123/profile.png').
+ * @returns The file path of the uploaded image in the bucket (not the public URL).
  */
 export async function uploadImage(
   localUri: string,
-  folder: string,
-  filename: string,
+  path: string,
 ): Promise<string> {
   try {
     // Read the file as base64 using the new Expo SDK 54 File API
     const file = new File(localUri);
     const base64 = await file.base64();
-    const filePath = `${folder}/${filename}`;
 
     // Upload to Supabase Storage
     const { error } = await supabase.storage
       .from("images")
-      .upload(filePath, decode(base64), {
+      .upload(path, decode(base64), {
         contentType: "image/png",
         upsert: true,
       });
@@ -32,12 +29,8 @@ export async function uploadImage(
       throw error;
     }
 
-    // Get public URL
-    const { data: publicUrlData } = supabase.storage
-      .from("images")
-      .getPublicUrl(filePath);
-
-    return publicUrlData.publicUrl;
+    // For secure/private buckets, we return the path.
+    return path;
   } catch (error) {
     console.error("Error uploading image:", error);
     throw error;

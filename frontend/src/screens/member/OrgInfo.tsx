@@ -114,6 +114,7 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
         currentImageKey={imageKey}
         currentColor={color}
         onSave={handleSave}
+        uploadContext={{ type: "org_profile", orgId: organization?.id || "" }}
       />
     </View>
   );

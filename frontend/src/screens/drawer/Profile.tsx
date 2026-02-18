@@ -147,6 +147,7 @@ export default function ProfileScreen() {
         currentImageKey={profileImage}
         currentColor={profileColor}
         onSave={handleSave}
+        uploadContext={{ type: "user_profile", userId: session?.user.id || "" }}
       />
       <NameOverlay visible={nameVisible} setVisible={setNameVisible} />
       <PasswordOverlay

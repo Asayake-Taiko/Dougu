@@ -19,7 +19,12 @@ import {
   iconMapping,
 } from "../lib/utils/ImageMapping";
 import DisplayImage from "./DisplayImage";
-import { launchImageLibraryAsync } from "expo-image-picker";
+import {
+  launchImageLibraryAsync,
+  launchCameraAsync,
+  requestCameraPermissionsAsync,
+} from "expo-image-picker";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import { Logger } from "../lib/utils/Logger";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
@@ -44,6 +49,42 @@ export default function ImageEditingOverlay({
   const [selectedColor, setSelectedColor] = useState<Hex>(currentColor as Hex);
   const [activeTab, setActiveTab] = useState<"image" | "color">("image");
 
+  const handleTakePhoto = async () => {
+    try {
+      const { status } = await requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to access camera was denied");
+        return;
+      }
+
+      const result = await launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+
+      if (!result.canceled) {
+        const asset = result.assets[0];
+
+        // Resize image to 150x150 to meet bucket limits
+        const manipulatedResult = await ImageManipulator.manipulate(asset.uri)
+          .resize({ width: 150, height: 150 })
+          .renderAsync()
+          .then((ref) =>
+            ref.saveAsync({
+              compress: 0.8,
+              format: SaveFormat.PNG,
+            }),
+          );
+
+        setSelectedImageKey(manipulatedResult.uri);
+      }
+    } catch (error: any) {
+      Logger.error("Camera failed:", error);
+      alert(error.message || "Failed to take photo. Please try again.");
+    }
+  };
+
   const handlePickImage = async () => {
     try {
       const result = await launchImageLibraryAsync({
@@ -56,7 +97,19 @@ export default function ImageEditingOverlay({
 
       if (!result.canceled) {
         const asset = result.assets[0];
-        setSelectedImageKey(asset.uri);
+
+        // Resize image to 150x150 to meet bucket limits
+        const manipulatedResult = await ImageManipulator.manipulate(asset.uri)
+          .resize({ width: 150, height: 150 })
+          .renderAsync()
+          .then((ref) =>
+            ref.saveAsync({
+              compress: 0.8,
+              format: SaveFormat.PNG,
+            }),
+          );
+
+        setSelectedImageKey(manipulatedResult.uri);
       }
     } catch (error: any) {
       Logger.error("Upload failed:", error);
@@ -172,6 +225,19 @@ export default function ImageEditingOverlay({
                 <View style={styles.groupContainer}>
                   <Text style={styles.groupTitle}>Custom Selection</Text>
                   <View style={styles.grid}>
+                    <PressableOpacity
+                      style={[styles.imageItem, styles.uploadItem]}
+                      onPress={handleTakePhoto}
+                    >
+                      <View style={styles.uploadPlaceholder}>
+                        <MaterialCommunityIcons
+                          name="camera"
+                          size={24}
+                          color="#666"
+                        />
+                        <Text style={styles.uploadSmallText}>Camera</Text>
+                      </View>
+                    </PressableOpacity>
                     <PressableOpacity
                       style={[styles.imageItem, styles.uploadItem]}
                       onPress={handlePickImage}

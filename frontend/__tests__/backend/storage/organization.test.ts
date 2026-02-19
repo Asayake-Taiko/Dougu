@@ -13,6 +13,12 @@ const createDummyImage = () => {
   return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 };
 
+// Helper to create a large dummy image (> 200KB)
+const createLargeDummyImage = () => {
+  // 300,000 bytes of 'A' (approx 300KB)
+  return Buffer.alloc(300000, "A").toString("base64");
+};
+
 describe("Organization Storage Rules", () => {
   let manager: any;
   let member: any;
@@ -223,11 +229,64 @@ describe("Organization Storage Rules", () => {
       );
     expect(error50).not.toBeNull();
 
-    // 3. Cleanup: Remove the 49 images to avoid polluting other tests
     const filenames = Array.from({ length: 49 }).map(
       (_, i) => `organizations/${orgId}/equipment/limit_test_${i}.png`,
     );
     await manager.client.storage.from("images").remove(filenames);
+  });
+
+  it("Should NOT be able to upload an organization profile image larger than 200KB", async () => {
+    const { error } = await manager.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/large_profile.png`,
+        decode(createLargeDummyImage()),
+        {
+          contentType: "image/png",
+          upsert: true,
+        },
+      );
+
+    expect(error).not.toBeNull();
+    expect(error?.message).toMatch(
+      /(File size limit exceeded|The object exceeded the maximum allowed size)/,
+    );
+  });
+
+  it("Should NOT be able to upload an equipment image larger than 200KB", async () => {
+    const { error } = await manager.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/equipment/large_item.png`,
+        decode(createLargeDummyImage()),
+        {
+          contentType: "image/png",
+          upsert: true,
+        },
+      );
+
+    expect(error).not.toBeNull();
+    expect(error?.message).toMatch(
+      /(File size limit exceeded|The object exceeded the maximum allowed size)/,
+    );
+  });
+
+  it("Should NOT be able to upload a storage image larger than 200KB", async () => {
+    const { error } = await manager.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/storage/large_loc.png`,
+        decode(createLargeDummyImage()),
+        {
+          contentType: "image/png",
+          upsert: true,
+        },
+      );
+
+    expect(error).not.toBeNull();
+    expect(error?.message).toMatch(
+      /(File size limit exceeded|The object exceeded the maximum allowed size)/,
+    );
   });
 
   // DELETE
@@ -240,12 +299,14 @@ describe("Organization Storage Rules", () => {
   });
 
   it("Member should NOT be able to delete organization image", async () => {
-    await manager.client.storage
+    const { error: uploadError } = await manager.client.storage
       .from("images")
       .upload(
         `organizations/${orgId}/equipment/member_delete_test.png`,
         decode(createDummyImage()),
+        { contentType: "image/png" },
       );
+    expect(uploadError).toBeNull();
 
     await member.client.storage
       .from("images")
@@ -267,6 +328,7 @@ describe("Organization Storage Rules", () => {
       .upload(
         `organizations/${orgId}/equipment/delete_test.png`,
         decode(createDummyImage()),
+        { contentType: "image/png" },
       );
     expect(uploadError).toBeNull();
 
@@ -291,6 +353,7 @@ describe("Organization Storage Rules", () => {
     const { error: uploadError } = await manager.client.storage
       .from("images")
       .upload(path, decode(createDummyImage()), {
+        contentType: "image/png",
         upsert: true,
       });
     expect(uploadError).toBeNull();
@@ -314,6 +377,7 @@ describe("Organization Storage Rules", () => {
     const { error: uploadError } = await manager.client.storage
       .from("images")
       .upload(path, decode(createDummyImage()), {
+        contentType: "image/png",
         upsert: true,
       });
     expect(uploadError).toBeNull();

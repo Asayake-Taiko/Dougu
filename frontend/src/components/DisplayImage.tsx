@@ -1,9 +1,11 @@
 import { Image } from "expo-image";
-import { allMappings } from "../lib/utils/ImageMapping";
 import { useState, useEffect } from "react";
-import { ImageSourcePropType, StyleProp, ImageStyle } from "react-native";
+import { StyleProp, ImageStyle } from "react-native";
 import { supabase } from "../lib/supabase/supabase";
 import { Logger } from "../lib/utils/Logger";
+import { allMappings } from "../lib/utils/ImageMapping";
+
+const signedUrlCache = new Map<string, { url: string; expiresAt: number }>();
 
 /*
   A wrapper for the expo-image component that consolidates
@@ -18,52 +20,64 @@ export default function DisplayImage({
   style?: StyleProp<ImageStyle>;
   color?: string;
 }) {
-  const [imageSource, setImageSource] = useState<ImageSourcePropType>(
-    allMappings["default_image"],
-  );
+  const [signedUrl, setSignedUrl] = useState<string | null>(() => {
+    if (!imageKey) return null;
+
+    // Check cache first for immediate synchronous render
+    if (imageKey.includes("/")) {
+      const cached = signedUrlCache.get(imageKey);
+      if (cached && cached.expiresAt > Date.now()) {
+        return cached.url;
+      }
+    }
+    return null;
+  });
 
   useEffect(() => {
     let isMounted = true;
 
     const resolveSource = async () => {
-      // If no key provided, use default
-      if (!imageKey) {
-        if (isMounted) setImageSource(allMappings["default_image"]);
-        return;
-      }
-
-      // Check if it's a local file URI or full remote URL
-      if (
-        imageKey.startsWith("file://") ||
-        imageKey.startsWith("http://") ||
-        imageKey.startsWith("https://")
-      ) {
-        if (isMounted) setImageSource({ uri: imageKey });
+      // If no key provided or if it's a known mapping, we don't need to sign a URL
+      if (!imageKey || allMappings[imageKey]) {
+        if (isMounted) setSignedUrl(null);
         return;
       }
 
       // Check if it's a storage path (contains /)
       if (imageKey.includes("/")) {
+        // Check cache again in case it was populated
+        const cached = signedUrlCache.get(imageKey);
+        if (cached && cached.expiresAt > Date.now()) {
+          if (isMounted) setSignedUrl(cached.url);
+          return;
+        }
+
         try {
           // Generate signed URL valid for 1 hour
+          const expiresIn = 3600;
           const { data, error } = await supabase.storage
             .from("images")
-            .createSignedUrl(imageKey, 3600);
+            .createSignedUrl(imageKey, expiresIn);
 
           if (error) throw Error("Failed to sign URL for image: " + imageKey);
           if (data?.signedUrl) {
-            if (isMounted) setImageSource({ uri: data.signedUrl });
+            // Cache the result (expire slightly before the token does to be safe)
+            signedUrlCache.set(imageKey, {
+              url: data.signedUrl,
+              expiresAt: Date.now() + (expiresIn - 60) * 1000,
+            });
+
+            if (isMounted) setSignedUrl(data.signedUrl);
           }
         } catch (e) {
           Logger.error("Error resolving image source:", e);
-          if (isMounted) setImageSource(allMappings["default_image"]);
+          if (isMounted) setSignedUrl(null);
         }
         return;
       }
 
-      // Otherwise assume it's a local asset key mapping
-      if (isMounted)
-        setImageSource(allMappings[imageKey] || allMappings["default_image"]);
+      // For everything else, we don't need to sign a URL
+      if (isMounted) setSignedUrl(null);
     };
 
     resolveSource();
@@ -73,7 +87,50 @@ export default function DisplayImage({
     };
   }, [imageKey]);
 
+  // Priority 1: Direct URL (http/https/file)
+  if (
+    imageKey &&
+    (imageKey.startsWith("http") || imageKey.startsWith("file://"))
+  ) {
+    return (
+      <Image
+        source={{ uri: imageKey }}
+        style={[style, { backgroundColor: color }]}
+        cachePolicy={"memory-disk"}
+      />
+    );
+  }
+
+  // Priority 2: Storage image with a signed URL
+  if (imageKey && imageKey.includes("/") && signedUrl) {
+    return (
+      <Image
+        source={{
+          uri: signedUrl,
+          cacheKey: imageKey,
+        }}
+        style={[style, { backgroundColor: color }]}
+        cachePolicy={"memory-disk"}
+      />
+    );
+  }
+
+  // Priority 3: Known static asset mapping
+  if (imageKey && allMappings[imageKey]) {
+    return (
+      <Image
+        source={allMappings[imageKey]}
+        style={[style, { backgroundColor: color }]}
+        cachePolicy={"memory-disk"}
+      />
+    );
+  }
+
+  // Fallback: Default image
   return (
-    <Image source={imageSource} style={[style, { backgroundColor: color }]} />
+    <Image
+      source={allMappings["default_image"]}
+      style={[style, { backgroundColor: color }]}
+    />
   );
 }

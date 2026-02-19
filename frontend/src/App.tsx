@@ -20,7 +20,7 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
       {session ? (
         <PowerSyncProvider>
           <ProfileProvider>

@@ -18,7 +18,7 @@ docker compose up -d           // powersync
 Close supabase and powersync
 ```
 npx supabase stop
-docker compose down --remove-orphans -v
+docker compose down
 ```
 
 # Cleanup
@@ -30,7 +30,7 @@ If you encounter "No such container" or other Docker state issues, run:
 # Other
 Pull changes from cloud to local:
 ```
-npx supabase db pull --db-url "postgresql://postgres.letoghfwotjbrzwgocpc:[YOUR-PASSWORD]@aws-0-us-west-2.pooler.supabase.com:5432/postgres"
+npx supabase db pull
 ```
 
 Reset Data to Default:

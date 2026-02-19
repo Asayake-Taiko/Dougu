@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { View, Text, TextInput, Image } from "react-native";
+import { View, Text, TextInput } from "react-native";
 import { AuthStyles } from "../../styles/AuthStyles";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { LandingScreenNavigationProp } from "../../types/navigation";
 import { useModal } from "../../lib/context/ModalContext";
-import GoogleIcon from "../../assets/google.png";
 import { Colors } from "../../styles/global";
+import GoogleSignInButton from "../../components/GoogleSignInButton";
 
 export default function LandingScreen({
   navigation,
@@ -47,10 +47,7 @@ export default function LandingScreen({
         <View style={AuthStyles.separatorLine} />
       </View>
 
-      <PressableOpacity style={AuthStyles.googleButton} onPress={undefined}>
-        <Image source={GoogleIcon} style={{ width: 24, height: 24 }} />
-        <Text style={AuthStyles.googleButtonText}>Google</Text>
-      </PressableOpacity>
+      <GoogleSignInButton />
 
       <View style={AuthStyles.signInContainer}>
         <Text style={AuthStyles.footerText}>Already have an account?</Text>

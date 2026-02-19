@@ -59,7 +59,11 @@ export default function LoginScreen({
       >
         <Text style={AuthStyles.btnText}>Login</Text>
       </PressableOpacity>
-      <PressableOpacity onPress={() => navigation.navigate("SendCode")}>
+
+      <PressableOpacity
+        onPress={() => navigation.navigate("SendCode")}
+        style={{ marginTop: 20 }}
+      >
         <Text style={AuthStyles.link}>Forgot Password?</Text>
       </PressableOpacity>
     </View>

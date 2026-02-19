@@ -20,7 +20,6 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      <StatusBar style="auto" />
       {session ? (
         <PowerSyncProvider>
           <ProfileProvider>
@@ -37,6 +36,7 @@ function AppContent() {
 export default function App() {
   return (
     <SafeAreaProvider>
+      <StatusBar style="dark" />
       <AuthProvider>
         <SpinnerProvider>
           <ModalProvider>

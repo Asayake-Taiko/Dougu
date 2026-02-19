@@ -145,3 +145,7 @@ CREATE TRIGGER enforce_org_image_limit
 BEFORE INSERT ON storage.objects
 FOR EACH ROW
 EXECUTE FUNCTION public.check_org_image_limit();
+
+-- Address function_search_path_mutable advisory for check_org_image_limit
+-- This is a security best practice to prevent search path hijacking.
+ALTER FUNCTION public.check_org_image_limit() SET search_path = public;

@@ -13,6 +13,12 @@ const createDummyImage = () => {
   return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 };
 
+// Helper to create a large dummy image (> 200KB)
+const createLargeDummyImage = () => {
+  // 300,000 bytes of 'A' (approx 300KB)
+  return Buffer.alloc(300000, "A").toString("base64");
+};
+
 describe("Profile Storage Rules", () => {
   let userA: any;
   let userB: any;
@@ -161,6 +167,7 @@ describe("Profile Storage Rules", () => {
       .upload(
         `profiles/${userA.user.id}/delete_test.png`,
         decode(createDummyImage()),
+        { contentType: "image/png" },
       );
 
     // Try to delete as User B
@@ -177,5 +184,25 @@ describe("Profile Storage Rules", () => {
 
     const found = listData?.find((f: any) => f.name === "delete_test.png");
     expect(found).toBeDefined();
+  });
+
+  // LIMITS
+  /* ------------------------------------------------------------------- */
+  it("Should NOT be able to upload a profile image larger than 200KB", async () => {
+    const { error } = await userA.client.storage
+      .from("images")
+      .upload(
+        `profiles/${userA.user.id}/large_profile.png`,
+        decode(createLargeDummyImage()),
+        {
+          contentType: "image/png",
+          upsert: true,
+        },
+      );
+
+    expect(error).not.toBeNull();
+    expect(error?.message).toMatch(
+      /(File size limit exceeded|The object exceeded the maximum allowed size)/,
+    );
   });
 });

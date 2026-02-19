@@ -13,6 +13,12 @@ const createDummyImage = () => {
   return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 };
 
+// Helper to create a large dummy image (> 200KB)
+const createLargeDummyImage = () => {
+  // 300,000 bytes of 'A' (approx 300KB)
+  return Buffer.alloc(300000, "A").toString("base64");
+};
+
 describe("Organization Storage Rules", () => {
   let manager: any;
   let member: any;
@@ -98,6 +104,45 @@ describe("Organization Storage Rules", () => {
       );
     expect(error).toBeNull();
   });
+  it("Manager should be able to upload storage image", async () => {
+    const { error } = await manager.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/storage/loc1.png`,
+        decode(createDummyImage()),
+        {
+          contentType: "image/png",
+          upsert: true,
+        },
+      );
+    expect(error).toBeNull();
+  });
+
+  it("Member should NOT be able to upload equipment image", async () => {
+    const { error } = await member.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/equipment/member_upload.png`,
+        decode(createDummyImage()),
+        {
+          contentType: "image/png",
+        },
+      );
+    expect(error).not.toBeNull();
+  });
+
+  it("Member should NOT be able to upload storage image", async () => {
+    const { error } = await member.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/storage/member_upload.png`,
+        decode(createDummyImage()),
+        {
+          contentType: "image/png",
+        },
+      );
+    expect(error).not.toBeNull();
+  });
 
   // READ
   /* ------------------------------------------------------------------- */
@@ -114,6 +159,39 @@ describe("Organization Storage Rules", () => {
     const { error } = await outsider.client.storage
       .from("images")
       .download(`organizations/${orgId}/profile.png`);
+
+    expect(error).not.toBeNull();
+  });
+  it("Member should be able to view equipment image", async () => {
+    const { data, error } = await member.client.storage
+      .from("images")
+      .createSignedUrl(`organizations/${orgId}/equipment/item1.png`, 60);
+
+    expect(error).toBeNull();
+    expect(data?.signedUrl).toBeTruthy();
+  });
+
+  it("Outsider should NOT be able to view equipment image", async () => {
+    const { error } = await outsider.client.storage
+      .from("images")
+      .download(`organizations/${orgId}/equipment/item1.png`);
+
+    expect(error).not.toBeNull();
+  });
+
+  it("Member should be able to view storage image", async () => {
+    const { data, error } = await member.client.storage
+      .from("images")
+      .createSignedUrl(`organizations/${orgId}/storage/loc1.png`, 60);
+
+    expect(error).toBeNull();
+    expect(data?.signedUrl).toBeTruthy();
+  });
+
+  it("Outsider should NOT be able to view storage image", async () => {
+    const { error } = await outsider.client.storage
+      .from("images")
+      .download(`organizations/${orgId}/storage/loc1.png`);
 
     expect(error).not.toBeNull();
   });
@@ -149,9 +227,66 @@ describe("Organization Storage Rules", () => {
           upsert: true,
         },
       );
-
-    // This should fail if the limit is enforced
     expect(error50).not.toBeNull();
+
+    const filenames = Array.from({ length: 49 }).map(
+      (_, i) => `organizations/${orgId}/equipment/limit_test_${i}.png`,
+    );
+    await manager.client.storage.from("images").remove(filenames);
+  });
+
+  it("Should NOT be able to upload an organization profile image larger than 200KB", async () => {
+    const { error } = await manager.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/large_profile.png`,
+        decode(createLargeDummyImage()),
+        {
+          contentType: "image/png",
+          upsert: true,
+        },
+      );
+
+    expect(error).not.toBeNull();
+    expect(error?.message).toMatch(
+      /(File size limit exceeded|The object exceeded the maximum allowed size)/,
+    );
+  });
+
+  it("Should NOT be able to upload an equipment image larger than 200KB", async () => {
+    const { error } = await manager.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/equipment/large_item.png`,
+        decode(createLargeDummyImage()),
+        {
+          contentType: "image/png",
+          upsert: true,
+        },
+      );
+
+    expect(error).not.toBeNull();
+    expect(error?.message).toMatch(
+      /(File size limit exceeded|The object exceeded the maximum allowed size)/,
+    );
+  });
+
+  it("Should NOT be able to upload a storage image larger than 200KB", async () => {
+    const { error } = await manager.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/storage/large_loc.png`,
+        decode(createLargeDummyImage()),
+        {
+          contentType: "image/png",
+          upsert: true,
+        },
+      );
+
+    expect(error).not.toBeNull();
+    expect(error?.message).toMatch(
+      /(File size limit exceeded|The object exceeded the maximum allowed size)/,
+    );
   });
 
   // DELETE
@@ -164,12 +299,14 @@ describe("Organization Storage Rules", () => {
   });
 
   it("Member should NOT be able to delete organization image", async () => {
-    await manager.client.storage
+    const { error: uploadError } = await manager.client.storage
       .from("images")
       .upload(
         `organizations/${orgId}/equipment/member_delete_test.png`,
         decode(createDummyImage()),
+        { contentType: "image/png" },
       );
+    expect(uploadError).toBeNull();
 
     await member.client.storage
       .from("images")
@@ -182,6 +319,76 @@ describe("Organization Storage Rules", () => {
     const found = listData?.find(
       (f: any) => f.name === "member_delete_test.png",
     );
+    expect(found).toBeDefined();
+  });
+
+  it("Manager should be able to delete equipment image", async () => {
+    const { error: uploadError } = await manager.client.storage
+      .from("images")
+      .upload(
+        `organizations/${orgId}/equipment/delete_test.png`,
+        decode(createDummyImage()),
+        { contentType: "image/png" },
+      );
+    expect(uploadError).toBeNull();
+
+    const { error } = await manager.client.storage
+      .from("images")
+      .remove([`organizations/${orgId}/equipment/delete_test.png`]);
+    expect(error).toBeNull();
+  });
+
+  it("Manager should be able to delete storage image", async () => {
+    const { error } = await manager.client.storage
+      .from("images")
+      .remove([`organizations/${orgId}/storage/loc1.png`]);
+    expect(error).toBeNull();
+  });
+
+  it("Member should NOT be able to delete equipment image", async () => {
+    const filename = "member_delete_test_2.png";
+    const path = `organizations/${orgId}/equipment/${filename}`;
+
+    // 1. Manager uploads
+    const { error: uploadError } = await manager.client.storage
+      .from("images")
+      .upload(path, decode(createDummyImage()), {
+        contentType: "image/png",
+        upsert: true,
+      });
+    expect(uploadError).toBeNull();
+
+    // 2. Member tries to delete
+    await member.client.storage.from("images").remove([path]);
+
+    // 3. Verify it still exists
+    const { data: listData } = await manager.client.storage
+      .from("images")
+      .list(`organizations/${orgId}/equipment`);
+
+    const found = listData?.find((f: any) => f.name === filename);
+    expect(found).toBeDefined();
+  });
+
+  it("Member should NOT be able to delete storage image", async () => {
+    const filename = "member_delete_test_storage.png";
+    const path = `organizations/${orgId}/storage/${filename}`;
+
+    const { error: uploadError } = await manager.client.storage
+      .from("images")
+      .upload(path, decode(createDummyImage()), {
+        contentType: "image/png",
+        upsert: true,
+      });
+    expect(uploadError).toBeNull();
+
+    await member.client.storage.from("images").remove([path]);
+
+    const { data: listData } = await manager.client.storage
+      .from("images")
+      .list(`organizations/${orgId}/storage`);
+
+    const found = listData?.find((f: any) => f.name === filename);
     expect(found).toBeDefined();
   });
 });

@@ -69,6 +69,7 @@ describe("DisplayImage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("display-image").props.source).toEqual({
         uri: "https://signed-url.com",
+        cacheKey: path,
       });
     });
   });
@@ -81,6 +82,7 @@ describe("DisplayImage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("display-image").props.source).toEqual({
         uri: "https://signed-url.com",
+        cacheKey: path,
       });
     });
   });

@@ -101,10 +101,6 @@ export class Equipment {
 
     if (this.selectedIndices.has(index)) {
       this.selectedIndices.delete(index);
-      // Ensure at least one is always selected
-      if (this.selectedIndices.size === 0) {
-        this.selectedIndices.add(0);
-      }
     } else {
       this.selectedIndices.add(index);
     }
@@ -115,6 +111,10 @@ export class Equipment {
     for (let i = 0; i < this.records.length; i++) {
       this.selectedIndices.add(i);
     }
+  }
+
+  deselectAll() {
+    this.selectedIndices.clear();
   }
 
   clearSelection() {

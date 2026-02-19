@@ -19,7 +19,28 @@ console.log = originalLog;
 // Mock @expo/vector-icons
 vi.mock("@expo/vector-icons", () => ({
   MaterialCommunityIcons: "MaterialCommunityIcons",
+  Ionicons: "Ionicons",
+  FontAwesome: "FontAwesome",
+  FontAwesome5: "FontAwesome5",
+  Feather: "Feather",
+  AntDesign: "AntDesign",
+  Entypo: "Entypo",
+  EvilIcons: "EvilIcons",
+  Fontisto: "Fontisto",
+  Foundation: "Foundation",
+  MaterialIcons: "MaterialIcons",
+  Octicons: "Octicons",
+  SimpleLineIcons: "SimpleLineIcons",
+  Zocial: "Zocial",
 }));
+
+vi.mock(
+  "@expo/vector-icons/MaterialCommunityIcons",
+  () => "MaterialCommunityIcons",
+);
+vi.mock("@expo/vector-icons/FontAwesome", () => "FontAwesome");
+vi.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
+vi.mock("@expo/vector-icons/Feather", () => "Feather");
 
 // Mock @react-native-async-storage/async-storage
 vi.mock(

@@ -43,6 +43,12 @@ export default function DisplayImage({
         return;
       }
 
+      // If it's a direct URL (local or remote), we don't need to sign it
+      if (imageKey.startsWith("http") || imageKey.startsWith("file://")) {
+        if (isMounted) setSignedUrl(null);
+        return;
+      }
+
       // Check if it's a storage path (contains /)
       if (imageKey.includes("/")) {
         // Check cache again in case it was populated

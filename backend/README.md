@@ -37,3 +37,7 @@ Reset Data to Default:
 ```
 npx supabase db reset
 ```
+
+
+// check if email already exits earlier 
+// image size limits

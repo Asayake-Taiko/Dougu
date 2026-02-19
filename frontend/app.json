@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.asa.preview",
+      "bundleIdentifier": "com.dougu.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
@@ -30,7 +30,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.frontend"
+      "package": "com.dougu.app"
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
@@ -38,7 +38,13 @@
     "plugins": [
       "expo-font",
       "expo-asset",
-      "expo-background-task"
+      "expo-background-task",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.155240857176-66u3s9t0i550925gjjcbk2prg2kqcaj7"
+        }
+      ]
     ],
     "extra": {
       "eas": {

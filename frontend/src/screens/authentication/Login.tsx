@@ -9,6 +9,7 @@ import { Logger } from "../../lib/utils/Logger";
 import { LoginScreenNavigationProp } from "../../types/navigation";
 import { authService } from "../../lib/services/auth";
 import { Colors } from "../../styles/global";
+import GoogleSignInButton from "../../components/GoogleSignInButton";
 
 export default function LoginScreen({
   navigation,
@@ -59,7 +60,19 @@ export default function LoginScreen({
       >
         <Text style={AuthStyles.btnText}>Login</Text>
       </PressableOpacity>
-      <PressableOpacity onPress={() => navigation.navigate("SendCode")}>
+
+      <View style={AuthStyles.separatorContainer}>
+        <View style={AuthStyles.separatorLine} />
+        <Text style={AuthStyles.separatorText}>or continue with</Text>
+        <View style={AuthStyles.separatorLine} />
+      </View>
+
+      <GoogleSignInButton />
+
+      <PressableOpacity
+        onPress={() => navigation.navigate("SendCode")}
+        style={{ marginTop: 20 }}
+      >
         <Text style={AuthStyles.link}>Forgot Password?</Text>
       </PressableOpacity>
     </View>

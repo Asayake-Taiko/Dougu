@@ -1,50 +1,34 @@
-import {
-  GoogleSignin,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { supabase } from "../lib/supabase/supabase";
 import { StyleSheet, View, Text, Image } from "react-native";
 import { Layout, Spacing, Colors, Typography } from "../styles/global";
 import { PressableOpacity } from "./PressableOpacity";
 import GoogleIcon from "../assets/google.png";
+import { Logger } from "../lib/utils/Logger";
+import { useModal } from "../lib/context/ModalContext";
 
 export default function GoogleSignInButton() {
+  const { setMessage } = useModal();
   GoogleSignin.configure({
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    // androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
   });
 
   const handleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut(); // Force account selection by signing out first
       const userInfo = await GoogleSignin.signIn();
       const idToken = userInfo.data?.idToken;
-      if (!idToken) {
-        throw new Error("No ID token present!");
-      }
-
-      const { data, error } = await supabase.auth.signInWithIdToken({
+      if (!idToken) return;
+      const { error } = await supabase.auth.signInWithIdToken({
         provider: "google",
         token: idToken,
       });
-
-      if (error) {
-        console.error("Supabase Auth Error", error);
-      } else {
-        console.log("Signed in with Google!", data);
-      }
+      if (error) throw error;
     } catch (error: any) {
-      if (error?.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-      } else if (error?.code === statusCodes.IN_PROGRESS) {
-        // operation (e.g. sign in) is in progress already
-      } else if (error?.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-      } else {
-        // some other error happened
-        console.error("Google Sign In Error", error);
-      }
+      setMessage(error.message || "An error occurred");
+      Logger.error(error.message);
     }
   };
 

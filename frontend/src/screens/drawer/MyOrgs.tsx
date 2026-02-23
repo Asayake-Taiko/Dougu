@@ -29,6 +29,7 @@ export default function MyOrgsScreen({
   const { data: organizations } = useQuery<OrganizationRecord>(
     Queries.Organization.getAllForUser,
     [session?.user?.id],
+    { tables: ["organizations", "org_memberships"] },
   );
 
   // set the current organization and navigate to the MemberTabs

@@ -70,14 +70,16 @@ export const MembershipProvider: React.FC<{ children: ReactNode }> = ({
       user_profile?: string;
       user_color?: string;
     }
-  >(Queries.Membership.getDetailsByOrgAndUser, [
-    organizationId,
-    session?.user.id,
-  ]);
+  >(
+    Queries.Membership.getDetailsByOrgAndUser,
+    [organizationId, session?.user.id],
+    { tables: ["org_memberships", "profiles"] },
+  );
 
   const { data: orgData, isLoading: loadingOrg } = useQuery<OrganizationRecord>(
     Queries.Organization.getById,
     [organizationId],
+    { tables: ["organizations"] },
   );
 
   // Derive models and state

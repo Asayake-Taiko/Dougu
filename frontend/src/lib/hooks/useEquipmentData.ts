@@ -21,16 +21,20 @@ export function useEquipmentData(
       user_profile?: string;
       user_color?: string;
     }
-  >(Queries.Membership.getAllByOrg, [organizationId]);
+  >(Queries.Membership.getAllByOrg, [organizationId], {
+    tables: ["org_memberships", "profiles"],
+  });
 
   const { data: rawContainers } = useQuery<ContainerRecord>(
     Queries.Container.getAllByOrg,
     [organizationId],
+    { tables: ["containers"] },
   );
 
   const { data: rawEquipment } = useQuery<EquipmentRecord>(
     Queries.Equipment.getAllByOrg,
     [organizationId],
+    { tables: ["equipment"] },
   );
 
   // 1. Process Memberships

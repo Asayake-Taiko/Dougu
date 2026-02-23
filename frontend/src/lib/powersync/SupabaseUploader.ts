@@ -56,9 +56,11 @@ export async function uploadToSupabase(
       const { error } = await supabaseClient.from(table).upsert(putOps[table]);
       if (error) {
         console.error(error);
-        throw new Error(
+        const err: any = new Error(
           `Could not bulk PUT data to Supabase table ${table}: ${JSON.stringify(error)}`,
         );
+        err.code = error.code;
+        throw err;
       }
     }
 
@@ -70,9 +72,11 @@ export async function uploadToSupabase(
         .in("id", deleteOps[table]);
       if (error) {
         console.error(error);
-        throw new Error(
+        const err: any = new Error(
           `Could not bulk DELETE data from Supabase table ${table}: ${JSON.stringify(error)}`,
         );
+        err.code = error.code;
+        throw err;
       }
     }
 
@@ -84,9 +88,11 @@ export async function uploadToSupabase(
         .eq("id", op.id);
       if (error) {
         console.error(error);
-        throw new Error(
+        const err: any = new Error(
           `Could not PATCH data in Supabase: ${JSON.stringify(error)}`,
         );
+        err.code = error.code;
+        throw err;
       }
     }
 

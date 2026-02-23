@@ -48,8 +48,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "de6f5e2e-1edd-43bd-8f19-4da500c61b07"
+        "projectId": "536fa3cf-d4c7-498d-b17b-d9340ad9f2a7"
       }
-    }
+    },
+    "owner": "dougu"
   }
 }

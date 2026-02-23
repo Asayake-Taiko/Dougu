@@ -20,7 +20,10 @@
         "UIBackgroundModes": [
           "fetch",
           "processing"
-        ]
+        ],
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {

@@ -5,7 +5,6 @@ import { Colors } from "../../styles/global/colors";
 interface EquipmentChecklistProps {
   records: any[];
   selectedIndices: Set<number>;
-  itemName: string;
   onToggle: (index: number) => void;
   onSelectAll: () => void;
 }
@@ -13,7 +12,6 @@ interface EquipmentChecklistProps {
 export default function EquipmentChecklist({
   records,
   selectedIndices,
-  itemName,
   onToggle,
   onSelectAll,
 }: EquipmentChecklistProps) {
@@ -43,7 +41,7 @@ export default function EquipmentChecklist({
                 <Text
                   style={[styles.recordId, isSelected && styles.selectedText]}
                 >
-                  {itemName} {isSelected ? "✓" : ""}
+                  {record.id} {isSelected ? "✓" : ""}
                 </Text>
                 <View
                   style={[styles.colorBadge, { backgroundColor: record.color }]}

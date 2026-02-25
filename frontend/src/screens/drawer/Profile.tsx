@@ -106,7 +106,7 @@ export default function ProfileScreen() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -163,9 +163,15 @@ export default function ProfileScreen() {
         </View>
       </PressableOpacity>
       <PressableOpacity style={ProfileStyles.row} onPress={handleClearDatabase}>
-        <Text style={[ProfileStyles.text, { color: "#791111" }]}>Clear Local Sync Data</Text>
+        <Text style={[ProfileStyles.text, { color: "#791111" }]}>
+          Clear Local Sync Data
+        </Text>
         <View style={ProfileStyles.changeBtn}>
-          <MaterialCommunityIcons name="database-remove" size={24} color="#791111" />
+          <MaterialCommunityIcons
+            name="database-remove"
+            size={24}
+            color="#791111"
+          />
         </View>
       </PressableOpacity>
       <ImageEditingOverlay

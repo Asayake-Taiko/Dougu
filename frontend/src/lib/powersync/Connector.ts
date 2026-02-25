@@ -1,10 +1,21 @@
 import {
   PowerSyncBackendConnector,
   AbstractPowerSyncDatabase,
+  createBaseLogger,
+  LogLevel,
 } from "@powersync/react-native";
 import { supabase } from "../supabase/supabase";
 import { uploadToSupabase } from "./SupabaseUploader";
 import { Logger } from "../utils/Logger";
+
+const logger = createBaseLogger();
+
+// Configure the logger to use the default console output
+logger.useDefaults();
+
+// Set the minimum log level to DEBUG to see all log messages
+// Available levels: DEBUG, INFO, WARN, ERROR, TRACE, OFF
+logger.setLevel(LogLevel.DEBUG);
 
 /**
  * Connector for PowerSync to upload data to Supabase.

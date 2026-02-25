@@ -110,45 +110,46 @@ export function useEquipmentData(
         }
       }
     });
-
-    // 3. Combine into final Ownerships Map
-    if (!userId || !membership || !organizationId) {
-      return new Map<string, OrgOwnership>();
-    }
-
-    const tempMap = new Map<string, OrgOwnership>();
-
-    membershipMap.forEach((val, key) => {
-      tempMap.set(key, {
-        membership: val.membership,
-        items: [],
-      });
-    });
-
-    // Add Containers
-    assignedContainers.forEach(({ container, ownerId }) => {
-      if (tempMap.has(ownerId)) {
-        tempMap.get(ownerId)!.items.push(container);
-      }
-    });
-
-    // Add Direct Equipment
-    directAssignments.forEach(({ equipment, ownerId }) => {
-      if (tempMap.has(ownerId)) {
-        tempMap.get(ownerId)!.items.push(equipment);
-      }
-    });
-
-    // Sort alphabetically
-    const sortedRoots = Array.from(tempMap.values()).sort((a, b) => {
-      return a.membership.name.localeCompare(b.membership.name);
-    });
-
-    const finalMap = new Map<string, OrgOwnership>();
-    sortedRoots.forEach((root) => {
-      root.items.sort((a, b) => a.name.localeCompare(b.name));
-      finalMap.set(root.membership.id, root);
-    });
-
-    return finalMap;
   }
+
+  // 3. Combine into final Ownerships Map
+  if (!userId || !membership || !organizationId) {
+    return new Map<string, OrgOwnership>();
+  }
+
+  const tempMap = new Map<string, OrgOwnership>();
+
+  membershipMap.forEach((val, key) => {
+    tempMap.set(key, {
+      membership: val.membership,
+      items: [],
+    });
+  });
+
+  // Add Containers
+  assignedContainers.forEach(({ container, ownerId }) => {
+    if (tempMap.has(ownerId)) {
+      tempMap.get(ownerId)!.items.push(container);
+    }
+  });
+
+  // Add Direct Equipment
+  directAssignments.forEach(({ equipment, ownerId }) => {
+    if (tempMap.has(ownerId)) {
+      tempMap.get(ownerId)!.items.push(equipment);
+    }
+  });
+
+  // Sort alphabetically
+  const sortedRoots = Array.from(tempMap.values()).sort((a, b) => {
+    return a.membership.name.localeCompare(b.membership.name);
+  });
+
+  const finalMap = new Map<string, OrgOwnership>();
+  sortedRoots.forEach((root) => {
+    root.items.sort((a, b) => a.name.localeCompare(b.name));
+    finalMap.set(root.membership.id, root);
+  });
+
+  return finalMap;
+}

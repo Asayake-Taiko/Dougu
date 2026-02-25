@@ -48,9 +48,15 @@ export const PowerSyncProvider: React.FC<PowerSyncProviderProps> = ({
                 POWERSYNC_BACKGROUND_TASK,
               );
             }
+
+            // Ensure we are connected when returning to foreground
+            if (!db.connected) {
+              Logger.info("PowerSync not connected on resume, connecting...");
+              connectToDatabase();
+            }
           } catch (error) {
             Logger.error(
-              "Failed to check/unregister background task status:",
+              "Failed to check/unregister background task or reconnect:",
               error,
             );
           }

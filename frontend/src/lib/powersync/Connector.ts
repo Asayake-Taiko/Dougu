@@ -14,19 +14,24 @@ export class Connector implements PowerSyncBackendConnector {
    * Implement fetchCredentials to obtain a JWT from your authentication service.
    */
   async fetchCredentials() {
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
 
-    if (error || !session) {
-      throw error;
+      if (error || !session) {
+        throw error || new Error("No session found");
+      }
+
+      return {
+        endpoint: process.env.EXPO_PUBLIC_POWERSYNC_URL ?? "",
+        token: session.access_token,
+      };
+    } catch (e: any) {
+      Logger.error("PowerSync: Error fetching credentials", e);
+      throw e;
     }
-
-    return {
-      endpoint: process.env.EXPO_PUBLIC_POWERSYNC_URL ?? "",
-      token: session.access_token,
-    };
   }
 
   /**

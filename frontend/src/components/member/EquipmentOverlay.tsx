@@ -44,7 +44,7 @@ export default function EquipmentOverlay() {
         <EquipmentChecklist
           records={item.records}
           selectedIndices={item.selectedIndices}
-          itemName={item.name}
+          itemName={item.id}
           onToggle={handleToggle}
           onSelectAll={handleSelectAll}
         />

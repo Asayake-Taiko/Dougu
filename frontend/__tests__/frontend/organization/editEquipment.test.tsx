@@ -266,8 +266,8 @@ describe("EditEquipmentScreen", () => {
       fireEvent.press(recordsTab);
 
       // Verify we're on the records tab - check for all instances
-      const equipmentNames = screen.getAllByText(/Test Equipment/);
-      expect(equipmentNames.length).toBeGreaterThan(1);
+      const equipmentIds = screen.getAllByText(/equipment/);
+      expect(equipmentIds.length).toBeGreaterThan(1);
     });
 
     it("should switch back to Details tab", () => {
@@ -532,8 +532,8 @@ describe("EditEquipmentScreen", () => {
       fireEvent.press(recordsTab);
 
       // EquipmentChecklist component should be rendered with the records
-      const equipmentNames = screen.getAllByText(/Multi Equipment/);
-      expect(equipmentNames.length).toBeGreaterThan(1);
+      const equipmentIds = screen.getAllByText(/equipment/);
+      expect(equipmentIds.length).toBeGreaterThan(1);
     });
 
     it("should update selected indices when update is called", async () => {

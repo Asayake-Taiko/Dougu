@@ -48,3 +48,52 @@ vi.mock(
   () =>
     import("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
+
+// Mock react-native-worklets
+vi.mock("react-native-worklets", () => {
+  const serializableMappingCache = {
+    set: vi.fn(),
+    get: vi.fn(),
+  };
+  return {
+    scheduleOnRN: (fn: any, ...args: any[]) => fn(...args),
+    runOnJS: (fn: any) => fn,
+    runOnUI: (fn: any) => fn,
+    createSerializable: (v: any) => v,
+    isSerializableRef: () => false,
+    registerCustomSerializable: () => {},
+    isSynchronizable: () => false,
+    createSynchronizable: (v: any) => v,
+    createWorkletRuntime: () => ({}),
+    runOnRuntime: (r: any, fn: any) => fn,
+    scheduleOnRuntime: (r: any, fn: any) => fn,
+    RuntimeKind: { JS: 0, UI: 1 },
+    getRuntimeKind: () => 0,
+    serializableMappingCache,
+    shareableMappingCache: serializableMappingCache,
+    makeShareable: (v: any) => v,
+    makeShareableCloneOnUIRecursive: (v: any) => v,
+    makeShareableCloneRecursive: (v: any) => v,
+    isShareableRef: () => false,
+    scheduleOnUI: (fn: any) => fn(),
+    runOnUIAsync: (fn: any) => Promise.resolve(fn()),
+    runOnUISync: (fn: any) => fn(),
+    executeOnUIRuntimeSync: (fn: any) => fn(),
+  };
+});
+
+// Mock react-native
+vi.mock("react-native", () => ({
+  AppState: {
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  },
+  Platform: {
+    OS: "node",
+    select: (obj: any) => obj.default || obj.ios || obj.android,
+  },
+  StyleSheet: {
+    create: (obj: any) => obj,
+  },
+  NativeModules: {},
+}));

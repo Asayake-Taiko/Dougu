@@ -15,7 +15,8 @@ logger.useDefaults();
 
 // Set the minimum log level to DEBUG to see all log messages
 // Available levels: DEBUG, INFO, WARN, ERROR, TRACE, OFF
-logger.setLevel(LogLevel.DEBUG);
+const logger_level = __DEV__ ? LogLevel.DEBUG : LogLevel.OFF;
+logger.setLevel(logger_level);
 
 /**
  * Connector for PowerSync to upload data to Supabase.

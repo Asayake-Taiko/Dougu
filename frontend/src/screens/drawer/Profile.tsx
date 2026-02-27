@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, Alert } from "react-native";
+import { View, Text } from "react-native";
 import { useAuth } from "../../lib/context/AuthContext";
 import { useProfile } from "../../lib/context/ProfileContext";
 import { ProfileStyles } from "../../styles/ProfileStyles";
@@ -16,7 +16,6 @@ import { Logger } from "../../lib/utils/Logger";
 import { authService } from "../../lib/services/auth";
 import EditImage from "../../components/EditImage";
 import { uploadImage } from "../../lib/supabase/storage";
-import { clearAllData, connectToDatabase } from "../../lib/powersync/PowerSync";
 
 export default function ProfileScreen() {
   const { session } = useAuth();

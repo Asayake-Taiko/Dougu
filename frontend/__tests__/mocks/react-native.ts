@@ -1,6 +1,6 @@
 export const AppState = {
   addEventListener: () => ({ remove: () => {} }),
-  removeEventListener: () => { },
+  removeEventListener: () => {},
 };
 export const Platform = {
   OS: "node",

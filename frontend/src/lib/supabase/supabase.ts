@@ -18,7 +18,9 @@ export const supabase = createClient(
   },
 );
 
-// Tells Supabase Auth to continuously refresh the session automatically
+// Tells Supabase Auth to continuously refresh the session automatically if
+// the app is in the foreground. This prevents Android from killing the
+// JS background timer and causing token expiration.
 AppState.addEventListener("change", (state) => {
   if (state === "active") {
     supabase.auth.startAutoRefresh();

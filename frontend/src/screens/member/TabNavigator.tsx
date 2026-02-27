@@ -77,8 +77,6 @@ function TabNavigatorContent({ organizationId }: { organizationId: string }) {
   );
 }
 
-import { PowerSyncStatus } from "../../components/organization/PowerSyncStatus";
-
 export default function MemberTabs({
   route,
   navigation,
@@ -101,7 +99,6 @@ export default function MemberTabs({
     if (organization?.name) {
       navigation.setOptions({
         headerTitle: organization.name,
-        headerRight: () => <PowerSyncStatus compact />,
       });
     }
   }, [organization?.name, navigation]);

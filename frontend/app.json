@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./src/assets/splash.png",
       "resizeMode": "contain",
@@ -31,7 +30,6 @@
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.dougu.app"
     },
@@ -47,7 +45,8 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.155240857176-66u3s9t0i550925gjjcbk2prg2kqcaj7"
         }
-      ]
+      ],
+      "expo-image"
     ],
     "extra": {
       "eas": {

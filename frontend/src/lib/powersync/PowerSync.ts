@@ -1,5 +1,5 @@
 import { PowerSyncDatabase } from "@powersync/react-native";
-import { OPSqliteOpenFactory } from "@powersync/op-sqlite";
+import { ReactNativeQuickSqliteOpenFactory } from "@powersync/react-native/src/db/adapters/react-native-quick-sqlite/ReactNativeQuickSQLiteOpenFactory";
 import { AppSchema } from "./schema";
 import { Connector } from "./Connector";
 
@@ -8,7 +8,7 @@ import { Connector } from "./Connector";
  */
 export const db = new PowerSyncDatabase({
   schema: AppSchema,
-  database: new OPSqliteOpenFactory({
+  database: new ReactNativeQuickSqliteOpenFactory({
     dbFilename: "dougu.db",
   }),
 });

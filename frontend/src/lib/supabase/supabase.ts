@@ -2,20 +2,6 @@ import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "react-native";
 
-// In Expo background tasks, we need to use expo/fetch for reliable network requests.
-// However, expo/fetch is not compatible with Node.js environments used in vitest.
-const getFetch = () => {
-  if (typeof process !== "undefined" && process.env.VITEST) {
-    return fetch;
-  }
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require("expo/fetch").fetch;
-  } catch {
-    return fetch;
-  }
-};
-
 export const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL ?? "",
   process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
@@ -27,7 +13,7 @@ export const supabase = createClient(
       detectSessionInUrl: false,
     },
     global: {
-      fetch: getFetch() as any,
+      fetch: fetch,
     },
   },
 );

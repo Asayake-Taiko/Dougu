@@ -1,6 +1,5 @@
-import "react-native-url-polyfill/auto";
+import "@azure/core-asynciterator-polyfill";
 import { registerRootComponent } from "expo";
-
 import App from "./src/App";
 import "./src/lib/powersync/background";
 

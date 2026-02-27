@@ -82,33 +82,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleClearDatabase = async () => {
-    Alert.alert(
-      "Clear Database",
-      "This will disconnect the local database and delete all local data. It will re-sync from the cloud upon reconnecting. Are you sure?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Clear",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              showSpinner();
-              await clearAllData();
-              setMessage("Database cleared successfully. Reconnecting...");
-              await connectToDatabase();
-            } catch (error: any) {
-              Logger.error("Error clearing database:", error);
-              setMessage(error.message || "Failed to clear database.");
-            } finally {
-              hideSpinner();
-            }
-          },
-        },
-      ],
-    );
-  };
-
   return (
     <View style={ProfileStyles.container}>
       <EditImage
@@ -159,18 +132,6 @@ export default function ProfileScreen() {
         <Text style={ProfileStyles.text}>Logout</Text>
         <View style={ProfileStyles.changeBtn}>
           <MaterialCommunityIcons name="chevron-right" size={30} />
-        </View>
-      </PressableOpacity>
-      <PressableOpacity style={ProfileStyles.row} onPress={handleClearDatabase}>
-        <Text style={[ProfileStyles.text, { color: "#791111" }]}>
-          Clear Local Sync Data
-        </Text>
-        <View style={ProfileStyles.changeBtn}>
-          <MaterialCommunityIcons
-            name="database-remove"
-            size={24}
-            color="#791111"
-          />
         </View>
       </PressableOpacity>
       <ImageEditingOverlay

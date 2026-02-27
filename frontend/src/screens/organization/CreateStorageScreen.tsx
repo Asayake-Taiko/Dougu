@@ -125,6 +125,7 @@ export default function CreateStorageScreen() {
         currentImageKey={profileKey}
         currentColor={profileColor}
         onSave={handleSaveImage}
+        organizationId={organization?.id}
       />
     </View>
   );

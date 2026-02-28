@@ -1,10 +1,7 @@
 import React, { ReactNode, useEffect } from "react";
 import { AppState } from "react-native";
-import * as BackgroundTask from "expo-background-task";
-import * as TaskManager from "expo-task-manager";
 import { PowerSyncContext } from "@powersync/react-native";
-import { db, connectToDatabase } from "../powersync/PowerSync";
-import { POWERSYNC_BACKGROUND_TASK } from "../powersync/background";
+import { system } from "../powersync/System";
 import { Logger } from "../utils/Logger";
 
 interface PowerSyncProviderProps {
@@ -19,46 +16,21 @@ export const PowerSyncProvider: React.FC<PowerSyncProviderProps> = ({
 }) => {
   useEffect(() => {
     // Connect immediately on mount
-    connectToDatabase();
+    system.init();
 
     const appStateSubscription = AppState.addEventListener(
       "change",
       async (nextAppState) => {
         Logger.info(`AppState changed to: ${nextAppState}`);
-        if (nextAppState === "background") {
-          Logger.info("Registering PowerSync background task");
+        if (nextAppState === "active") {
           try {
-            await BackgroundTask.registerTaskAsync(POWERSYNC_BACKGROUND_TASK, {
-              minimumInterval: 15, // 15 minutes
-            });
-          } catch (error) {
-            Logger.error(
-              "Failed to register PowerSync background task:",
-              error,
-            );
-          }
-        } else if (nextAppState === "active") {
-          try {
-            const isRegistered = await TaskManager.isTaskRegisteredAsync(
-              POWERSYNC_BACKGROUND_TASK,
-            );
-            if (isRegistered) {
-              Logger.info("Unregistering PowerSync background task");
-              await BackgroundTask.unregisterTaskAsync(
-                POWERSYNC_BACKGROUND_TASK,
-              );
-            }
-
             // Ensure we are connected when returning to foreground
-            if (!db.connected) {
+            if (!system.powersync.connected) {
               Logger.info("PowerSync not connected on resume, connecting...");
-              connectToDatabase();
+              system.init();
             }
           } catch (error) {
-            Logger.error(
-              "Failed to check/unregister background task or reconnect:",
-              error,
-            );
+            Logger.error("Failed to reconnect on resume:", error);
           }
         }
       },
@@ -66,12 +38,14 @@ export const PowerSyncProvider: React.FC<PowerSyncProviderProps> = ({
 
     return () => {
       // Disconnect when the provider unmounts (e.g. on logout)
-      db.disconnect();
+      system.disconnect();
       appStateSubscription.remove();
     };
   }, []);
 
   return (
-    <PowerSyncContext.Provider value={db}>{children}</PowerSyncContext.Provider>
+    <PowerSyncContext.Provider value={system.powersync}>
+      {children}
+    </PowerSyncContext.Provider>
   );
 };

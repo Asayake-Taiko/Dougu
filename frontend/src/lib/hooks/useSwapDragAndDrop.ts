@@ -20,7 +20,7 @@ import { useMembership } from "../context/MembershipContext";
 import { Equipment, Container } from "../../types/models";
 import { Item } from "../../types/other";
 import { OrgMembershipRecord } from "../../types/db";
-import { db } from "../powersync/PowerSync";
+import { system } from "../powersync/System";
 import useAnimateOverlay from "./useAnimateOverlay";
 import { Logger } from "../utils/Logger";
 
@@ -313,11 +313,15 @@ export default function useSwapDragAndDrop({
         if (draggingItem.type === "equipment") {
           const equip = draggingItem as Equipment;
           const targetContainerId = hoverContainer.current?.id || null;
-          await equip.reassign(db, targetMember.id, targetContainerId);
+          await equip.reassign(
+            system.powersync,
+            targetMember.id,
+            targetContainerId,
+          );
           equip.clearSelection();
         } else {
           const container = draggingItem as Container;
-          await container.reassign(db, targetMember.id);
+          await container.reassign(system.powersync, targetMember.id);
         }
       } catch (error) {
         Logger.error("Error reassigning item:", error);

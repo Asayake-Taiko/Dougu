@@ -34,7 +34,7 @@ TaskManager.defineTask(POWERSYNC_BACKGROUND_TASK, async () => {
 
 // Register the task globally
 BackgroundTask.registerTaskAsync(POWERSYNC_BACKGROUND_TASK, {
-  minimumInterval: 15, // 15 minutes in seconds
+  minimumInterval: 30,
 }).catch((error) => {
   Logger.error("Failed to register PowerSync background task globally:", error);
 });

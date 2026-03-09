@@ -111,6 +111,7 @@ export default function CreateEquipmentScreen() {
         currentColor={itemColor}
         onSave={handleSaveImage}
         hideImagePicker={index === 1}
+        organizationId={organization?.id}
       />
       <View style={styles.topRow}>
         {index === 0 ? (

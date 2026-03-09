@@ -254,7 +254,6 @@ export default function EditEquipmentScreen({
             <EquipmentChecklist
               records={records}
               selectedIndices={localSelectedIndices}
-              itemName={name}
               onToggle={handleToggle}
               onSelectAll={handleSelectAll}
             />

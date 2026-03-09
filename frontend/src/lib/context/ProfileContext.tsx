@@ -33,6 +33,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({
   const { data: profileRecords, isLoading } = useQuery<ProfileRecord>(
     Queries.Profile.getById,
     [session?.user?.id || ""],
+    { tables: ["profiles"] },
   );
 
   const profile = useMemo(() => {

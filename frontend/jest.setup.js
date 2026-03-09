@@ -38,3 +38,35 @@ jest.mock("react-native-reanimated", () => {
   Reanimated.default.call = () => {};
   return Reanimated;
 });
+// Mock react-native-worklets
+jest.mock("react-native-worklets", () => {
+  const serializableMappingCache = {
+    set: jest.fn(),
+    get: jest.fn(),
+  };
+  return {
+    scheduleOnRN: (fn, ...args) => fn(...args),
+    runOnJS: (fn) => fn,
+    runOnUI: (fn) => fn,
+    createSerializable: (v) => v,
+    isSerializableRef: () => false,
+    registerCustomSerializable: () => {},
+    isSynchronizable: () => false,
+    createSynchronizable: (v) => v,
+    createWorkletRuntime: () => ({}),
+    runOnRuntime: (r, fn) => fn,
+    scheduleOnRuntime: (r, fn) => fn,
+    RuntimeKind: { JS: 0, UI: 1 },
+    getRuntimeKind: () => 0,
+    serializableMappingCache,
+    shareableMappingCache: serializableMappingCache,
+    makeShareable: (v) => v,
+    makeShareableCloneOnUIRecursive: (v) => v,
+    makeShareableCloneRecursive: (v) => v,
+    isShareableRef: () => false,
+    scheduleOnUI: (fn) => fn(),
+    runOnUIAsync: (fn) => Promise.resolve(fn()),
+    runOnUISync: (fn) => fn(),
+    executeOnUIRuntimeSync: (fn) => fn(),
+  };
+});

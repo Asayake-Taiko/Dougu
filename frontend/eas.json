@@ -6,21 +6,20 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_MOCK_ENABLED": "true"
-      }
+      "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_MOCK_ENABLED": "true"
-      }
+      "distribution": "internal"
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_MOCK_ENABLED": "false"
+        "EXPO_PUBLIC_SUPABASE_URL": "https://letoghfwotjbrzwgocpc.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_gSNUcuB5IoOcCcfq-MrmOQ_c6GMBfcw",
+        "EXPO_PUBLIC_POWERSYNC_URL": "https://6953034930605f245ffdaf90.powersync.journeyapps.com",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "155240857176-eg4n41239m6fvb56b2b5t33jka6sqlai.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "155240857176-66u3s9t0i550925gjjcbk2prg2kqcaj7.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "155240857176-b17m3h4fogtevqpamcolm14ib997p17k.apps.googleusercontent.com"
       }
     }
   },

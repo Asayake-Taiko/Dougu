@@ -15,4 +15,9 @@ export default defineConfig({
     testTimeout: 30000,
     hookTimeout: 30000,
   },
+  resolve: {
+    alias: {
+      "react-native": "./__tests__/mocks/react-native.ts",
+    },
+  },
 });

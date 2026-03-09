@@ -1,4 +1,5 @@
 import { supabase } from "../supabase/supabase";
+import { system } from "../powersync/System";
 
 export interface IAuthService {
   login(email: string, password: string): Promise<void>;
@@ -55,6 +56,9 @@ export class AuthService implements IAuthService {
 
   async logout(): Promise<void> {
     try {
+      // Clear local database data before signing out
+      await system.clearAllData();
+
       const { error } = await supabase.auth.signOut();
       if (error) {
         throw error;
@@ -210,6 +214,9 @@ export class AuthService implements IAuthService {
     if (error) {
       throw error;
     }
+
+    // Clear local database data before signing out
+    await system.clearAllData();
     await supabase.auth.signOut();
   }
 }

@@ -124,6 +124,7 @@ export default function OrgInfoScreen({ navigation }: InfoScreenProps) {
         currentImageKey={imageKey}
         currentColor={color}
         onSave={handleSave}
+        organizationId={organization?.id}
       />
     </View>
   );

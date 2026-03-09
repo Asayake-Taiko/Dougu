@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./src/assets/splash.png",
       "resizeMode": "contain",
@@ -20,7 +19,10 @@
         "UIBackgroundModes": [
           "fetch",
           "processing"
-        ]
+        ],
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {
@@ -28,7 +30,6 @@
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.dougu.app"
     },
@@ -44,12 +45,14 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.155240857176-66u3s9t0i550925gjjcbk2prg2kqcaj7"
         }
-      ]
+      ],
+      "expo-image"
     ],
     "extra": {
       "eas": {
-        "projectId": "de6f5e2e-1edd-43bd-8f19-4da500c61b07"
+        "projectId": "536fa3cf-d4c7-498d-b17b-d9340ad9f2a7"
       }
-    }
+    },
+    "owner": "dougu"
   }
 }

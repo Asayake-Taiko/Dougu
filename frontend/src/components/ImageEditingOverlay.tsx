@@ -27,7 +27,7 @@ import {
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import { Logger } from "../lib/utils/Logger";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-
+import { supabase } from "../lib/supabase/supabase";
 interface ImageEditingOverlayProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
@@ -35,6 +35,7 @@ interface ImageEditingOverlayProps {
   currentColor: string;
   onSave: (imageKey: string, color: string) => Promise<void>;
   hideImagePicker?: boolean;
+  organizationId?: string;
 }
 
 export default function ImageEditingOverlay({
@@ -44,10 +45,12 @@ export default function ImageEditingOverlay({
   currentColor,
   onSave,
   hideImagePicker = false,
+  organizationId,
 }: ImageEditingOverlayProps) {
   const [selectedImageKey, setSelectedImageKey] = useState(currentImageKey);
   const [selectedColor, setSelectedColor] = useState<Hex>(currentColor as Hex);
   const [activeTab, setActiveTab] = useState<"image" | "color">("image");
+  const [customImages, setCustomImages] = useState<string[]>([]);
 
   const handleTakePhoto = async () => {
     try {
@@ -122,8 +125,73 @@ export default function ImageEditingOverlay({
       setSelectedImageKey(currentImageKey);
       setSelectedColor(currentColor as Hex);
       setActiveTab(hideImagePicker ? "color" : "image");
+
+      if (organizationId && !hideImagePicker) {
+        const fetchCustomImages = async () => {
+          try {
+            const paths: string[] = [];
+
+            // Fetch equipment images
+            const { data: equipmentData } = await supabase.storage
+              .from("images")
+              .list(`organizations/${organizationId}/equipment`, { limit: 50 });
+
+            if (equipmentData) {
+              equipmentData.forEach((file) => {
+                // Ignore pseudo-directories or placeholders
+                if (
+                  file.name &&
+                  file.name !== ".emptyFolderPlaceholder" &&
+                  file.name !== "emptyFolderPlaceholder"
+                ) {
+                  paths.push(
+                    `organizations/${organizationId}/equipment/${file.name}`,
+                  );
+                }
+              });
+            }
+
+            // Fetch storage images
+            const { data: storageData } = await supabase.storage
+              .from("images")
+              .list(`organizations/${organizationId}/storages`, { limit: 50 });
+
+            if (storageData) {
+              storageData.forEach((file) => {
+                if (
+                  file.name &&
+                  file.name !== ".emptyFolderPlaceholder" &&
+                  file.name !== "emptyFolderPlaceholder"
+                ) {
+                  paths.push(
+                    `organizations/${organizationId}/storages/${file.name}`,
+                  );
+                }
+              });
+            }
+
+            // Check for profile.png
+            const { data: orgData } = await supabase.storage
+              .from("images")
+              .list(`organizations/${organizationId}`, {
+                limit: 10,
+                search: "profile.png",
+              });
+
+            if (orgData && orgData.some((f) => f.name === "profile.png")) {
+              paths.push(`organizations/${organizationId}/profile.png`);
+            }
+
+            setCustomImages(paths);
+          } catch (e) {
+            Logger.error("Failed to fetch custom images", e);
+          }
+        };
+
+        fetchCustomImages();
+      }
     }
-  }, [visible, currentImageKey, currentColor, hideImagePicker]);
+  }, [visible, currentImageKey, currentColor, hideImagePicker, organizationId]);
 
   const handleSave = async () => {
     await onSave(selectedImageKey, selectedColor);
@@ -251,6 +319,19 @@ export default function ImageEditingOverlay({
                         <Text style={styles.uploadSmallText}>Upload</Text>
                       </View>
                     </PressableOpacity>
+
+                    {customImages.map((path) => (
+                      <PressableOpacity
+                        key={path}
+                        style={[
+                          styles.imageItem,
+                          selectedImageKey === path && styles.selectedImageItem,
+                        ]}
+                        onPress={() => setSelectedImageKey(path)}
+                      >
+                        <DisplayImage imageKey={path} style={styles.fill} />
+                      </PressableOpacity>
+                    ))}
                   </View>
                 </View>
 
@@ -390,7 +471,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
     borderRadius: 16,
-    padding: 6,
     backgroundColor: "#F8F8F8",
     justifyContent: "center",
     alignItems: "center",

@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { CrudTransaction, CrudEntry, UpdateType } from "@powersync/common";
+import { Logger } from "../utils/Logger";
 
 /**
  * Response codes that should not retry.
@@ -55,10 +56,12 @@ export async function uploadToSupabase(
     for (const table of Object.keys(putOps)) {
       const { error } = await supabaseClient.from(table).upsert(putOps[table]);
       if (error) {
-        console.error(error);
-        throw new Error(
+        Logger.error(error);
+        const err: any = new Error(
           `Could not bulk PUT data to Supabase table ${table}: ${JSON.stringify(error)}`,
         );
+        err.code = error.code;
+        throw err;
       }
     }
 
@@ -69,10 +72,12 @@ export async function uploadToSupabase(
         .delete()
         .in("id", deleteOps[table]);
       if (error) {
-        console.error(error);
-        throw new Error(
+        Logger.error(error);
+        const err: any = new Error(
           `Could not bulk DELETE data from Supabase table ${table}: ${JSON.stringify(error)}`,
         );
+        err.code = error.code;
+        throw err;
       }
     }
 
@@ -83,17 +88,19 @@ export async function uploadToSupabase(
         .update(op.opData)
         .eq("id", op.id);
       if (error) {
-        console.error(error);
-        throw new Error(
+        Logger.error(error);
+        const err: any = new Error(
           `Could not PATCH data in Supabase: ${JSON.stringify(error)}`,
         );
+        err.code = error.code;
+        throw err;
       }
     }
 
     // Completes the transaction and moves onto the next one
     await transaction.complete();
   } catch (ex: any) {
-    console.debug(ex);
+    Logger.debug(ex);
     if (
       typeof ex.code == "string" &&
       FATAL_RESPONSE_CODES.some((regex) => regex.test(ex.code))
@@ -103,7 +110,7 @@ export async function uploadToSupabase(
        * discard the (rest of the) transaction. These errors
        * indicate a fatal issue
        */
-      console.error("Data upload error - discarding transaction:", ex);
+      Logger.error("Data upload error - discarding transaction:", ex);
       await transaction.complete();
     } else {
       // Error may be retryable - e.g. network error or temporary server error.

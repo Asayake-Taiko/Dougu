@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 // Compatibility layer for third-party mocks that expect 'jest' global
 // @ts-ignore
 global.jest = vi;
+// @ts-ignore
+global.__DEV__ = true;
 
 // hide dotenv logs
 const originalLog = console.log;
@@ -97,3 +99,31 @@ vi.mock("react-native", () => ({
   },
   NativeModules: {},
 }));
+
+// Mock @powersync/react-native
+vi.mock("@powersync/react-native", () => ({
+  PowerSyncDatabase: class {
+    connect = vi.fn().mockResolvedValue(undefined);
+    disconnect = vi.fn().mockResolvedValue(undefined);
+    disconnectAndClear = vi.fn().mockResolvedValue(undefined);
+  },
+  createBaseLogger: vi.fn().mockReturnValue({
+    useDefaults: vi.fn(),
+    setLevel: vi.fn(),
+  }),
+  LogLevel: {
+    DEBUG: 0,
+    INFO: 1,
+    WARN: 2,
+    ERROR: 3,
+    TRACE: 4,
+    OFF: 5,
+  },
+}));
+
+vi.mock(
+  "@powersync/react-native/src/db/adapters/react-native-quick-sqlite/ReactNativeQuickSQLiteOpenFactory",
+  () => ({
+    ReactNativeQuickSqliteOpenFactory: class {},
+  }),
+);

@@ -182,6 +182,7 @@ export default function MemberProfileScreen({
         currentImageKey={imageKey}
         currentColor={color}
         onSave={handleSave}
+        organizationId={organization?.id}
       />
     </View>
   );

@@ -146,6 +146,7 @@ export default function EditEquipmentScreen({
         currentColor={itemColor}
         onSave={handleSaveImage}
         hideImagePicker={isContainer}
+        organizationId={organization?.id}
       />
 
       {/* Header / Item Preview */}

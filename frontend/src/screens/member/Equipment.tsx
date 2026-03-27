@@ -1,11 +1,9 @@
 import React from "react";
-import { Text, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { Text, View, FlatList } from "react-native";
 
 // Project imports
 import { useEquipment } from "../../lib/context/EquipmentContext";
 import { useMembership } from "../../lib/context/MembershipContext";
-import { chunkArray } from "../../lib/utils/EquipmentUtils";
 import { EquipmentStyles } from "../../styles/EquipmentStyles";
 import Item from "../../components/member/Item";
 import EquipmentOverlay from "../../components/member/EquipmentOverlay";
@@ -25,27 +23,23 @@ export default function EquipmentScreen() {
   // Get the items assigned to the current user
   const userItems = ownerships.get(membership.id);
   const items = userItems?.items || [];
-  const chunkedData = chunkArray(items, 3);
-
   return (
     <View style={EquipmentStyles.background}>
-      <ScrollView>
-        <View style={EquipmentStyles.container}>
+      <FlatList
+        data={items}
+        numColumns={3}
+        ListHeaderComponent={
           <Text style={EquipmentStyles.title}>My Equipment</Text>
-          {chunkedData.map((group, index) => (
-            <View key={index} style={EquipmentStyles.equipmentRow}>
-              {group.map((item) => (
-                <View
-                  key={item.id}
-                  style={EquipmentStyles.equipmentItemContainer}
-                >
-                  <Item data={item} />
-                </View>
-              ))}
-            </View>
-          ))}
-        </View>
-      </ScrollView>
+        }
+        contentContainerStyle={EquipmentStyles.container}
+        columnWrapperStyle={EquipmentStyles.equipmentRow}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={EquipmentStyles.equipmentItemContainer}>
+            <Item data={item} />
+          </View>
+        )}
+      />
       <EquipmentOverlay />
       <ContainerOverlay
         containerPage={containerPage}

@@ -4,7 +4,7 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
   Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -98,17 +98,20 @@ export default function UserStoragesScreen({
           </Text>
         </TouchableOpacity>
       </View>
-      <ScrollView style={{ width: Dimensions.get("window").width }}>
-        {currData.map((item, index) => (
-          <MemberRow key={index} item={item} />
-        ))}
-        {tab === "Storages" ? (
-          <TouchableOpacity style={styles.createBtn} onPress={handleCreate}>
-            <Text style={styles.createBtnTxt}>Create Storage</Text>
-            <MaterialCommunityIcons name="crown" color={"#fff"} size={32} />
-          </TouchableOpacity>
-        ) : null}
-      </ScrollView>
+      <FlatList
+        style={{ width: Dimensions.get("window").width }}
+        data={currData}
+        keyExtractor={(item, index) => item.id || index.toString()}
+        renderItem={({ item }) => <MemberRow item={item} />}
+        ListFooterComponent={
+          tab === "Storages" ? (
+            <TouchableOpacity style={styles.createBtn} onPress={handleCreate}>
+              <Text style={styles.createBtnTxt}>Create Storage</Text>
+              <MaterialCommunityIcons name="crown" color={"#fff"} size={32} />
+            </TouchableOpacity>
+          ) : null
+        }
+      />
     </SafeAreaView>
   );
 }

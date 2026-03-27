@@ -1,10 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
-import {
-  ScrollView,
-  GestureDetector,
-  Gesture,
-} from "react-native-gesture-handler";
+import { View, Text, StyleSheet, Dimensions, FlatList } from "react-native";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, {
   ZoomIn,
   ZoomOut,
@@ -76,41 +72,38 @@ export default function ContainerOverlay({
           entering={ZoomIn}
           exiting={ZoomOut}
         >
-          <ScrollView
+          <FlatList
             horizontal={true}
             pagingEnabled={true}
             onScroll={onScroll}
             scrollEventThrottle={16}
             showsHorizontalScrollIndicator={false}
             style={{ flex: 1 }}
-          >
-            <View
-              style={{ display: "flex", flexDirection: "row", height: "100%" }}
-            >
-              {equipmentChunks3.map((page, index) => (
-                <View key={index} style={ContainerOverlayStyles.itemPage}>
-                  {page.map((row, index) => (
-                    <View
-                      key={`r${index}`}
-                      style={ContainerOverlayStyles.equipmentRow}
-                    >
-                      {row.map((equip) => (
-                        <View
-                          key={equip.id}
-                          style={ContainerOverlayStyles.equipmentItemContainer}
-                        >
-                          <EquipmentItem
-                            item={equip}
-                            draggingItem={draggingItem}
-                          />
-                        </View>
-                      ))}
-                    </View>
-                  ))}
-                </View>
-              ))}
-            </View>
-          </ScrollView>
+            data={equipmentChunks3}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item: page, index }) => (
+              <View key={index} style={ContainerOverlayStyles.itemPage}>
+                {page.map((row, rIndex) => (
+                  <View
+                    key={`r${rIndex}`}
+                    style={ContainerOverlayStyles.equipmentRow}
+                  >
+                    {row.map((equip) => (
+                      <View
+                        key={equip.id}
+                        style={ContainerOverlayStyles.equipmentItemContainer}
+                      >
+                        <EquipmentItem
+                          item={equip}
+                          draggingItem={draggingItem}
+                        />
+                      </View>
+                    ))}
+                  </View>
+                ))}
+              </View>
+            )}
+          />
           <PaginationDots
             length={equipmentChunks3.length}
             currIdx={containerPage}

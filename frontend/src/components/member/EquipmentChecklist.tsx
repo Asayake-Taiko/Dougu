@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Pressable, FlatList } from "react-native";
 import { Colors } from "../../styles/global/colors";
 
 interface EquipmentChecklistProps {
@@ -28,12 +28,14 @@ export default function EquipmentChecklist({
         </Pressable>
       </View>
 
-      <ScrollView style={styles.scrollView}>
-        {records.map((record, index) => {
+      <FlatList
+        style={styles.scrollView}
+        data={records}
+        keyExtractor={(record, index) => record.id || index.toString()}
+        renderItem={({ item: record, index }) => {
           const isSelected = selectedIndices.has(index);
           return (
             <Pressable
-              key={record.id || index}
               style={[styles.card, isSelected && styles.selectedCard]}
               onPress={() => onToggle(index)}
             >
@@ -58,8 +60,8 @@ export default function EquipmentChecklist({
               </Text>
             </Pressable>
           );
-        })}
-      </ScrollView>
+        }}
+      />
     </View>
   );
 }

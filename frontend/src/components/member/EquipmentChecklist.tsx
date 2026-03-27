@@ -41,7 +41,7 @@ export default function EquipmentChecklist({
                 <Text
                   style={[styles.recordId, isSelected && styles.selectedText]}
                 >
-                  {record.id} {isSelected ? "✓" : ""}
+                  {record.id}
                 </Text>
                 <View
                   style={[styles.colorBadge, { backgroundColor: record.color }]}
@@ -118,9 +118,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   recordId: {
+    flex: 1,
     fontSize: 14,
     fontWeight: "bold",
     color: "#555",
+    marginRight: 10,
   },
   selectedText: {
     color: Colors.primary,

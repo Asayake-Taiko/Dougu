@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // project imports
 import { UserStoragesScreenProps } from "../../types/navigation";
@@ -62,7 +63,7 @@ export default function UserStoragesScreen({
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={["bottom"]} style={styles.container}>
       <LinearGradient colors={["#791111", "#550c0c"]} style={styles.header}>
         <Text style={styles.headerText}>{organization.name}</Text>
       </LinearGradient>
@@ -108,7 +109,7 @@ export default function UserStoragesScreen({
           </TouchableOpacity>
         ) : null}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

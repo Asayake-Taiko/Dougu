@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Switch } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // project imports
 import { useEquipment } from "../../lib/context/EquipmentContext";
@@ -65,7 +66,7 @@ export default function SheetScreen() {
   if (!organization) return null;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={["bottom"]} style={styles.container}>
       <LinearGradient colors={["#791111", "#550c0c"]} style={styles.header}>
         <Text style={styles.headerText}>{organization.name}</Text>
       </LinearGradient>
@@ -94,7 +95,7 @@ export default function SheetScreen() {
       <View style={styles.sheetContainer}>
         <Sheet data={data} />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

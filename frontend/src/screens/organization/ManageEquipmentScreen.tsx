@@ -9,6 +9,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "../../styles/global";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // project imports
 import EquipmentTable from "../../components/organization/EquipmentTable";
@@ -32,7 +33,7 @@ export default function ManageEquipmentScreen({
   if (!organization) return null;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={["bottom"]} style={styles.container}>
       <LinearGradient colors={["#791111", "#550c0c"]} style={styles.header}>
         <Text style={styles.headerText}>{organization.name}</Text>
       </LinearGradient>
@@ -62,7 +63,7 @@ export default function ManageEquipmentScreen({
         </View>
         <EquipmentTable searchFilter={search} />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

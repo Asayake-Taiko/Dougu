@@ -29,6 +29,10 @@ npm run test:frontend
 npm run test:backend
 ```
 
+There are also a few manual tests that cannot be automatically run. So far this is what I have documented:
+- Background sync: ensure if a change is made offline and the app is closed, the change is synced in the background when there is internet
+- DB Reset: If the database is reset, the client should still be properly synced
+
 ## Contributions
 
 The app was designed by [Neela Kolte](https://www.behance.net/neelakolte), and these are some words from her:

@@ -140,8 +140,15 @@ export function useEquipmentData(
     }
   });
 
-  // Sort alphabetically
+  // Sort by equipment presence, then alphabetically
   const sortedRoots = Array.from(tempMap.values()).sort((a, b) => {
+    const aHasItems = a.items.length > 0 ? 1 : 0;
+    const bHasItems = b.items.length > 0 ? 1 : 0;
+
+    if (aHasItems !== bHasItems) {
+      return bHasItems - aHasItems; // Prioritize members with items
+    }
+
     return a.membership.name.localeCompare(b.membership.name);
   });
 

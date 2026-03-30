@@ -12,34 +12,38 @@ import { useMembership } from "../../lib/context/MembershipContext";
 export default function SwapScreen() {
   const { ownerships } = useEquipment();
   const { membership } = useMembership();
-  const swapUser = useRef<OrgMembershipRecord | null>(null);
+  const topUser = useRef<OrgMembershipRecord | null>(
+    membership?.membership || null,
+  );
+  const bottomUser = useRef<OrgMembershipRecord | null>(null);
   const [listOne, setListOne] = useState<Item[]>([]);
   const [listTwo, setListTwo] = useState<Item[]>([]);
 
   const updateLists = useCallback(() => {
-    if (membership) {
-      const myOwnership = ownerships.get(membership.id);
-      setListOne(myOwnership?.items || []);
-    } else {
-      setListOne([]);
+    // We get ownership based on selected top user, defaulting to current member if topUser is not set.
+    if (topUser.current) {
+      const topOwnership = ownerships.get(topUser.current.id);
+      setListOne(topOwnership?.items || []);
     }
 
-    if (swapUser.current) {
-      const swapOwnership = ownerships.get(swapUser.current.id);
-      setListTwo(swapOwnership?.items || []);
-    } else {
-      setListTwo([]);
+    if (bottomUser.current) {
+      const bottomOwnership = ownerships.get(bottomUser.current.id);
+      setListTwo(bottomOwnership?.items || []);
     }
-  }, [ownerships, membership]);
+  }, [ownerships]);
 
-  // Update lists whenever ownerships or selection changes
+  // Update lists whenever ownerships change
   useEffect(() => {
     updateLists();
-  }, [ownerships, membership, updateLists]);
+  }, [ownerships, updateLists]);
 
-  // get selected user equipment
-  const handleSet = (targetMembership: OrgMembershipRecord | null) => {
-    swapUser.current = targetMembership;
+  const handleSetTop = (targetMembership: OrgMembershipRecord | null) => {
+    topUser.current = targetMembership;
+    updateLists();
+  };
+
+  const handleSetBottom = (targetMembership: OrgMembershipRecord | null) => {
+    bottomUser.current = targetMembership;
     updateLists();
   };
 
@@ -47,8 +51,10 @@ export default function SwapScreen() {
     <SwapGestures
       listOne={listOne}
       listTwo={listTwo}
-      handleSet={handleSet}
-      swapUser={swapUser}
+      handleSetTop={handleSetTop}
+      handleSetBottom={handleSetBottom}
+      topUser={topUser}
+      bottomUser={bottomUser}
     />
   );
 }

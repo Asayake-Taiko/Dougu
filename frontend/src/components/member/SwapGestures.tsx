@@ -22,13 +22,17 @@ import FloatingDraggingItem from "./FloatingDraggingItem";
 export default function SwapGestures({
   listOne,
   listTwo,
-  handleSet,
-  swapUser,
+  handleSetTop,
+  handleSetBottom,
+  topUser,
+  bottomUser,
 }: {
   listOne: Item[];
   listTwo: Item[];
-  handleSet: (membership: OrgMembershipRecord | null) => void;
-  swapUser: React.RefObject<OrgMembershipRecord | null>;
+  handleSetTop: (membership: OrgMembershipRecord | null) => void;
+  handleSetBottom: (membership: OrgMembershipRecord | null) => void;
+  topUser: React.RefObject<OrgMembershipRecord | null>;
+  bottomUser: React.RefObject<OrgMembershipRecord | null>;
 }) {
   // state
   const halfLine = useRef<number>(0);
@@ -60,7 +64,8 @@ export default function SwapGestures({
     listTwo,
     topScrollOffset,
     bottomScrollOffset,
-    swapUser,
+    topUser,
+    bottomUser,
     startScrolling,
     stopScrolling,
     halfLine,
@@ -83,7 +88,13 @@ export default function SwapGestures({
             </Text>
           </View>
           <View style={styles.halfContainer}>
-            <Text style={styles.userText}>My Equipment</Text>
+            <View style={styles.topSpacer}>
+              <CurrMembersDropdown
+                setUser={handleSetTop}
+                excludeSelf={false}
+                initialName="My Equipment"
+              />
+            </View>
             <ScrollRow
               listData={listOne}
               scrollOffset={topScrollOffset}
@@ -96,7 +107,10 @@ export default function SwapGestures({
 
           <View style={styles.halfContainer} onLayout={handleLayout}>
             <View style={styles.spacer}>
-              <CurrMembersDropdown setUser={handleSet} isCreate={false} />
+              <CurrMembersDropdown
+                setUser={handleSetBottom}
+                excludeSelf={true}
+              />
             </View>
             <ScrollRow
               listData={listTwo}
@@ -147,12 +161,8 @@ const styles = StyleSheet.create({
   spacer: {
     marginTop: 20,
   },
-  userText: {
-    height: 40,
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 20,
-    marginTop: 20,
+  topSpacer: {
+    marginTop: 12, // 12 + 48(dropdown height) = 60 total, matching previous Text height 40 + mt 20
   },
   divider: {
     height: 1,

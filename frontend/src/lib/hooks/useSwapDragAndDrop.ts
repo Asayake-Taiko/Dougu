@@ -31,7 +31,8 @@ interface UseSwapDragAndDropProps {
   listTwo: Item[];
   topScrollOffset: SharedValue<number>;
   bottomScrollOffset: SharedValue<number>;
-  swapUser: React.RefObject<OrgMembershipRecord | null>;
+  topUser: React.RefObject<OrgMembershipRecord | null>;
+  bottomUser: React.RefObject<OrgMembershipRecord | null>;
   startScrolling: (isTop: boolean, direction: "left" | "right") => void;
   stopScrolling: () => void;
   halfLine: React.RefObject<number>;
@@ -42,7 +43,8 @@ export default function useSwapDragAndDrop({
   listTwo,
   topScrollOffset,
   bottomScrollOffset,
-  swapUser,
+  topUser,
+  bottomUser,
   startScrolling,
   stopScrolling,
   halfLine,
@@ -306,7 +308,9 @@ export default function useSwapDragAndDrop({
       if (!membership) return;
 
       const targetMember =
-        gestureEvent.y < halfLine.current ? membership : swapUser.current;
+        gestureEvent.y < halfLine.current
+          ? topUser.current
+          : bottomUser.current;
       if (!targetMember) return;
 
       try {
@@ -327,7 +331,14 @@ export default function useSwapDragAndDrop({
         Logger.error("Error reassigning item:", error);
       }
     },
-    [draggingItem, swapContainerVisible, membership, halfLine, swapUser],
+    [
+      draggingItem,
+      swapContainerVisible,
+      membership,
+      halfLine,
+      topUser,
+      bottomUser,
+    ],
   );
 
   // --- GESTURE DEFINITION ---

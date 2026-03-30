@@ -20,21 +20,22 @@ import { Colors, Spacing } from "../../styles/global";
 */
 export default function CurrMembersDropdown({
   setUser,
-  isCreate,
+  excludeSelf = false,
+  initialName = "Select Member",
 }: {
   setUser: (membership: OrgMembershipRecord | null) => void;
-  isCreate: boolean;
+  excludeSelf?: boolean;
+  initialName?: string;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const { ownerships } = useEquipment();
   const { membership } = useMembership();
-  const [selectedName, setSelectedName] = useState("Select Member");
+  const [selectedName, setSelectedName] = useState(initialName);
 
   // Filter members:
-  // If not isCreate, don't show current member
   const members = Array.from(ownerships.values())
     .map((o) => o.membership)
-    .filter((m) => isCreate || m.id !== membership?.id);
+    .filter((m) => !excludeSelf || m.id !== membership?.id);
 
   const handleSelect = (membership: OrgMembership) => {
     setSelectedName(membership.name);

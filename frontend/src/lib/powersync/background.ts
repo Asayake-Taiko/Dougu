@@ -1,13 +1,16 @@
-import * as BackgroundTask from "expo-background-task";
-import * as TaskManager from "expo-task-manager";
-import * as Notifications from "expo-notifications";
+import { registerTaskAsync, BackgroundTaskResult } from "expo-background-task";
+import { defineTask } from "expo-task-manager";
+import {
+  setNotificationHandler,
+  scheduleNotificationAsync,
+} from "expo-notifications";
 import { system } from "./System";
 import { Logger } from "../utils/Logger";
 
 export const POWERSYNC_BACKGROUND_TASK = "powersync-background-sync";
 
 // Allow notifications to show even when the app is foregrounded
-Notifications.setNotificationHandler({
+setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: false,
@@ -18,9 +21,9 @@ Notifications.setNotificationHandler({
 });
 
 // Define the background task
-TaskManager.defineTask(POWERSYNC_BACKGROUND_TASK, async () => {
+defineTask(POWERSYNC_BACKGROUND_TASK, async () => {
   const now = new Date();
-  Logger.info(`Background task executed at ${now.toISOString()}`);
+  Logger.info(`Background tbask executed at ${now.toISOString()}`);
 
   try {
     // 1. Ensure database is connected
@@ -37,31 +40,31 @@ TaskManager.defineTask(POWERSYNC_BACKGROUND_TASK, async () => {
     }
 
     Logger.info("Background sync completed successfully");
-    await Notifications.scheduleNotificationAsync({
+    await scheduleNotificationAsync({
       content: {
         title: "Sync Success",
         body: "Background sync completed successfully.",
       },
       trigger: null,
     });
-    return BackgroundTask.BackgroundTaskResult.Success;
+    return BackgroundTaskResult.Success;
   } catch (error) {
     Logger.error("Background sync failed:", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    await Notifications.scheduleNotificationAsync({
+    await scheduleNotificationAsync({
       content: {
         title: "Sync Failed",
         body: `Background sync failed: ${errorMessage}`,
       },
       trigger: null,
     });
-    return BackgroundTask.BackgroundTaskResult.Failed;
+    return BackgroundTaskResult.Failed;
   }
 });
 
 // Register the task globally
-BackgroundTask.registerTaskAsync(POWERSYNC_BACKGROUND_TASK, {
+registerTaskAsync(POWERSYNC_BACKGROUND_TASK, {
   minimumInterval: 30,
 })
   .then(() => {

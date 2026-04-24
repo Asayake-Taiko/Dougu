@@ -12,7 +12,6 @@ export const POWERSYNC_BACKGROUND_TASK = "powersync-background-sync";
 // Allow notifications to show even when the app is foregrounded
 setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: false,
     shouldSetBadge: false,
     shouldShowBanner: true,

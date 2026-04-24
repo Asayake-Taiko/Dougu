@@ -1,4 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Platform } from "react-native";
+import {
+  requestPermissionsAsync,
+  setNotificationChannelAsync,
+  AndroidImportance,
+} from "expo-notifications";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -13,6 +19,22 @@ import RootStackNavigator from "./screens/organization/RootStackNavigator";
 
 function AppContent() {
   const { session, isLoading } = useAuth();
+
+  useEffect(() => {
+    async function requestPermissions() {
+      await requestPermissionsAsync();
+
+      if (Platform.OS === "android") {
+        await setNotificationChannelAsync("default", {
+          name: "default",
+          importance: AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: "#FF231F7C",
+        });
+      }
+    }
+    requestPermissions();
+  }, []);
 
   if (isLoading) {
     return <SplashScreen />;

@@ -32,6 +32,10 @@ export default function JoinOrgScreen({
     }
     showSpinner();
     try {
+      if (code === "ASADEV") {
+        navigation.navigate("Bug");
+        return;
+      }
       const { id, name } = await organizationService.joinOrganization(
         code,
         session?.user.id,

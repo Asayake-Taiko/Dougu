@@ -4,6 +4,7 @@ import ProfileScreen from "./Profile";
 import CreateOrgScreen from "./CreateOrg";
 import JoinOrgScreen from "./JoinOrg";
 import MyOrgsScreen from "./MyOrgs";
+import BugScreen from "./Bug";
 import MemberTabs from "../member/TabNavigator";
 import { DrawerStackParamList } from "../../types/navigation";
 import { Colors } from "../../styles/global/colors";
@@ -44,6 +45,11 @@ export function ProfileDrawer() {
         options={{ drawerLabel: "Create Org", title: "Create Org" }}
       />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
+      <Drawer.Screen
+        name="Bug"
+        component={BugScreen}
+        options={{ drawerItemStyle: { display: "none" } }}
+      />
     </Drawer.Navigator>
   );
 }

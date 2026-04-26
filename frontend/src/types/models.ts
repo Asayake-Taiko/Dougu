@@ -171,8 +171,10 @@ export class Equipment {
     );
   }
 
-  async delete() {
-    await equipmentService.deleteEquipment(this);
+  async delete(indices?: Set<number>) {
+    const targetIndices = indices || this.selectedIndices;
+    const ids = Array.from(targetIndices).map((i) => this.records[i].id);
+    await equipmentService.deleteEquipment(this, ids);
   }
 }
 

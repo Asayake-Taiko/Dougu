@@ -4,7 +4,6 @@ import { useAuth } from "../../lib/context/AuthContext";
 import { useProfile } from "../../lib/context/ProfileContext";
 import { ProfileStyles } from "../../styles/ProfileStyles";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { scheduleNotificationAsync } from "expo-notifications";
 import ImageEditingOverlay from "../../components/ImageEditingOverlay";
 import NameOverlay from "../../components/drawer/NameOverlay";
 import EmailOverlay from "../../components/drawer/EmailOverlay";
@@ -83,21 +82,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleTestNotification = async () => {
-    try {
-      await scheduleNotificationAsync({
-        content: {
-          title: "Test Notification",
-          body: "This is a test notification from the Profile screen!",
-        },
-        trigger: null,
-      });
-      Logger.info("Test notification scheduled");
-    } catch (error) {
-      Logger.error("Failed to schedule test notification:", error);
-    }
-  };
-
   return (
     <View style={ProfileStyles.container}>
       <EditImage
@@ -148,17 +132,6 @@ export default function ProfileScreen() {
         <Text style={ProfileStyles.text}>Logout</Text>
         <View style={ProfileStyles.changeBtn}>
           <MaterialCommunityIcons name="chevron-right" size={30} />
-        </View>
-      </PressableOpacity>
-      <PressableOpacity
-        style={ProfileStyles.row}
-        onPress={handleTestNotification}
-      >
-        <Text style={[ProfileStyles.text, { color: "blue" }]}>
-          Test Notification
-        </Text>
-        <View style={ProfileStyles.changeBtn}>
-          <MaterialCommunityIcons name="bell-outline" size={30} color="blue" />
         </View>
       </PressableOpacity>
       <ImageEditingOverlay

@@ -121,7 +121,7 @@ export default function EditEquipmentScreen({
     try {
       if (!isManager) throw new Error("Only managers can delete items.");
 
-      await initialItem.delete();
+      await initialItem.delete(localSelectedIndices);
       navigation.goBack();
     } catch (e: any) {
       Logger.error(e);

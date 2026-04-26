@@ -35,11 +35,17 @@ export interface IEquipmentService {
 }
 
 export class EquipmentService implements IEquipmentService {
-  async deleteEquipment(equipment: Equipment): Promise<void> {
-    const ids = Array.from(equipment.selectedIndices).map(
-      (index) => equipment.records[index].id,
-    );
-    const { error } = await supabase.from("equipment").delete().in("id", ids);
+  async deleteEquipment(equipment: Equipment, ids?: string[]): Promise<void> {
+    const targetIds =
+      ids && ids.length > 0
+        ? ids
+        : Array.from(equipment.selectedIndices).map(
+            (index) => equipment.records[index].id,
+          );
+    const { error } = await supabase
+      .from("equipment")
+      .delete()
+      .in("id", targetIds);
     if (error) throw error;
   }
 

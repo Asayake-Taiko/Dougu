@@ -4,6 +4,9 @@ import {
   requestPermissionsAsync,
   setNotificationChannelAsync,
   AndroidImportance,
+  scheduleNotificationAsync,
+  cancelScheduledNotificationAsync,
+  SchedulableTriggerInputTypes,
 } from "expo-notifications";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
@@ -20,6 +23,7 @@ import RootStackNavigator from "./screens/organization/RootStackNavigator";
 function AppContent() {
   const { session, isLoading } = useAuth();
 
+  // make sure we have permission to send notifications
   useEffect(() => {
     async function requestPermissions() {
       await requestPermissionsAsync();
@@ -35,6 +39,32 @@ function AppContent() {
     }
     requestPermissions();
   }, []);
+
+  // schedule a weekly reminder to check in and sync equipment
+  useEffect(() => {
+    const REENGAGEMENT_REMINDER_ID = "reengagement-reminder";
+
+    async function refreshReminder() {
+      if (session) {
+        await scheduleNotificationAsync({
+          identifier: REENGAGEMENT_REMINDER_ID,
+          content: {
+            title: "Stay up to date!",
+            body: "It's been a week since you last checked your equipment! Please open the app to make sure everything is correct",
+            data: { type: "reengagement" },
+          },
+          trigger: {
+            type: SchedulableTriggerInputTypes.TIME_INTERVAL,
+            seconds: 7 * 24 * 60 * 60, // 7 days in seconds
+          },
+        });
+      } else {
+        await cancelScheduledNotificationAsync(REENGAGEMENT_REMINDER_ID);
+      }
+    }
+
+    refreshReminder();
+  }, [session]);
 
   if (isLoading) {
     return <SplashScreen />;

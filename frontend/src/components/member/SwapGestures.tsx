@@ -18,6 +18,7 @@ import useSwapDragAndDrop from "../../lib/hooks/useSwapDragAndDrop";
 import ContainerOverlay from "./ContainerOverlay";
 import EquipmentOverlay from "./EquipmentOverlay";
 import FloatingDraggingItem from "./FloatingDraggingItem";
+import { useMembership } from "../../lib/context/MembershipContext";
 
 export default function SwapGestures({
   listOne,
@@ -34,6 +35,7 @@ export default function SwapGestures({
   topUser: React.RefObject<OrgMembershipRecord | null>;
   bottomUser: React.RefObject<OrgMembershipRecord | null>;
 }) {
+  const { membership } = useMembership();
   // state
   const halfLine = useRef<number>(0);
 
@@ -94,6 +96,8 @@ export default function SwapGestures({
                 setUser={handleSetTop}
                 excludeSelf={false}
                 initialName="My Equipment"
+                initialProfile={membership?.profile}
+                initialColor={membership?.color}
               />
             </View>
             <ScrollRow

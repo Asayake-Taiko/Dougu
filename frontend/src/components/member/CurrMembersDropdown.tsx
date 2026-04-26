@@ -13,6 +13,7 @@ import { useEquipment } from "../../lib/context/EquipmentContext";
 import { useMembership } from "../../lib/context/MembershipContext";
 import { OrgMembership } from "../../types/models";
 import { Colors, Spacing } from "../../styles/global";
+import DisplayImage from "../../components/DisplayImage";
 
 /*
   Simple Dropdown replacement using Modal and FlatList
@@ -22,30 +23,43 @@ export default function CurrMembersDropdown({
   setUser,
   excludeSelf = false,
   initialName = "Select Member",
+  initialProfile = "default_profile",
+  initialColor = "#791111",
 }: {
   setUser: (membership: OrgMembershipRecord | null) => void;
   excludeSelf?: boolean;
   initialName?: string;
+  initialProfile?: string;
+  initialColor?: string;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const { ownerships } = useEquipment();
   const { membership } = useMembership();
   const [selectedName, setSelectedName] = useState(initialName);
+  const [selectedProfile, setSelectedProfile] = useState(initialProfile);
+  const [selectedColor, setSelectedColor] = useState(initialColor);
 
   // Filter members:
   const members = Array.from(ownerships.values())
     .map((o) => o.membership)
     .filter((m) => !excludeSelf || m.id !== membership?.id);
 
-  const handleSelect = (membership: OrgMembership) => {
-    setSelectedName(membership.name);
-    setUser(membership.membership); // Keep passing the record for the setter if it expects record
+  const handleSelect = (m: OrgMembership) => {
+    setSelectedName(m.name);
+    setSelectedProfile(m.profile);
+    setSelectedColor(m.color);
+    setUser(m.membership);
     setModalVisible(false);
   };
 
   return (
     <View style={styles.container}>
       <Pressable style={styles.dropdown} onPress={() => setModalVisible(true)}>
+        <DisplayImage
+          imageKey={selectedProfile}
+          style={styles.profileImageSmall}
+          color={selectedColor}
+        />
         <Text style={styles.textStyle}>{selectedName}</Text>
         <FontAwesome5 name="caret-down" size={25} color={Colors.black} />
       </Pressable>
@@ -71,7 +85,14 @@ export default function CurrMembersDropdown({
                     style={styles.memberItem}
                     onPress={() => handleSelect(item)}
                   >
-                    <Text style={styles.memberText}>{name}</Text>
+                    <View style={styles.memberRow}>
+                      <DisplayImage
+                        imageKey={item.profile}
+                        style={styles.profileImage}
+                        color={item.color}
+                      />
+                      <Text style={styles.memberText}>{name}</Text>
+                    </View>
                   </Pressable>
                 );
               }}
@@ -119,5 +140,20 @@ const styles = StyleSheet.create({
   },
   memberText: {
     fontSize: 18,
+  },
+  memberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  profileImage: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  profileImageSmall: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
   },
 });

@@ -4,6 +4,7 @@ import { useEquipment } from "../../lib/context/EquipmentContext";
 import ScrollRow from "../../components/member/ScrollRow";
 import EquipmentOverlay from "../../components/member/EquipmentOverlay";
 import ContainerOverlay from "../../components/member/ContainerOverlay";
+import DisplayImage from "../../components/DisplayImage";
 
 export default function TeamScreen() {
   const { ownerships } = useEquipment();
@@ -20,7 +21,14 @@ export default function TeamScreen() {
 
           return (
             <View style={styles.userContainer}>
-              <Text style={styles.scrollText}>{displayName}</Text>
+              <View style={styles.headerRow}>
+                <DisplayImage
+                  imageKey={membership.profile}
+                  style={styles.profileImage}
+                  color={membership.color}
+                />
+                <Text style={styles.scrollText}>{displayName}</Text>
+              </View>
               <ScrollRow listData={items} />
             </View>
           );
@@ -36,11 +44,21 @@ export default function TeamScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 20,
+    marginTop: 10,
+  },
+  profileImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
+  },
   scrollText: {
-    height: 40,
     fontSize: 20,
     fontWeight: "bold",
-    marginLeft: 20,
+    marginLeft: 10,
   },
   userContainer: {
     minHeight: 200,

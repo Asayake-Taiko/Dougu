@@ -20,11 +20,13 @@ export default function ScrollRow({
   scrollOffset,
   flatListRef,
   draggingItem,
+  dragTick,
 }: {
   listData: Item[];
   scrollOffset?: SharedValue<number>;
   flatListRef?: AnimatedRef<Animated.FlatList<Item>>;
   draggingItem?: Item | null;
+  dragTick?: number; // used to update state
 }) {
   // If we have a shared value, use the animated scroll handler
   const scrollHandler = useAnimatedScrollHandler({
@@ -47,6 +49,7 @@ export default function ScrollRow({
         </View>
       )}
       keyExtractor={(item) => item.id}
+      extraData={dragTick}
       onScroll={scrollOffset ? scrollHandler : undefined}
       scrollEventThrottle={16}
       contentContainerStyle={styles.contentContainer}

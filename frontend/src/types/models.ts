@@ -122,6 +122,18 @@ export class Equipment {
     this.selectedIndices.add(0); // Default to first
   }
 
+  incrementSelection() {
+    if (this.selectedIndices.size < this.records.length) {
+      for (let i = 0; i < this.records.length; i++) {
+        if (!this.selectedIndices.has(i)) {
+          this.selectedIndices.add(i);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   get count() {
     return this.records.length;
   }

@@ -57,6 +57,7 @@ export default function useSwapDragAndDrop({
   const { membership } = useMembership();
 
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
+  const [dragTick, setDragTick] = useState(0);
 
   const swapContainerVisible = !!containerItem;
   const isEquipmentOverlayVisible = !!selectedEquipment;
@@ -75,6 +76,7 @@ export default function useSwapDragAndDrop({
   const containerTimeout = useRef<NodeJS.Timeout | null>(null);
   const overlayTimeout = useRef<NodeJS.Timeout | null>(null);
   const hoverContainer = useRef<Container | null>(null);
+  const equipmentHoverInterval = useRef<NodeJS.Timeout | null>(null);
 
   // --- HELPER FUNCTIONS ---
 
@@ -86,6 +88,10 @@ export default function useSwapDragAndDrop({
     if (overlayTimeout.current) {
       clearTimeout(overlayTimeout.current);
       overlayTimeout.current = null;
+    }
+    if (equipmentHoverInterval.current) {
+      clearInterval(equipmentHoverInterval.current);
+      equipmentHoverInterval.current = null;
     }
   }, []);
 
@@ -177,11 +183,9 @@ export default function useSwapDragAndDrop({
     [containerItem, headerHeight, containerPage],
   );
 
-  // --- HOVER & SCROLL TRIGGER LOGIC (Previously useHover) ---
-
+  // if we hover over a container, minimize item to indicate it is going into the container
   const handleContainerHover = useCallback(
-    (index: number, list: Item[]) => {
-      const item = list[index];
+    (item: Item | undefined) => {
       if (item && item.type === "container") {
         if (containerTimeout.current) return;
         containerTimeout.current = setTimeout(() => {
@@ -192,6 +196,31 @@ export default function useSwapDragAndDrop({
       }
     },
     [dragValues.scale],
+  );
+
+  // if we hover over an equipment item, auto-increment selection
+  const handleEquipmentHover = useCallback(
+    (item: Item | undefined) => {
+      if (
+        item &&
+        item.type === "equipment" &&
+        draggingItem &&
+        draggingItem.type === "equipment" &&
+        item.id === draggingItem.id
+      ) {
+        if (equipmentHoverInterval.current) {
+          return;
+        }
+        equipmentHoverInterval.current = setInterval(() => {
+          if (draggingItem.incrementSelection()) {
+            setDragTick((t) => t + 1);
+          } else {
+            clearTimeouts();
+          }
+        }, 800);
+      }
+    },
+    [draggingItem, clearTimeouts],
   );
 
   const handleHover = useCallback(
@@ -237,9 +266,11 @@ export default function useSwapDragAndDrop({
         const offset = isTop ? topScrollOffset.value : bottomScrollOffset.value;
         const itemWidth = windowWidth / 3.5;
         const idx = Math.floor((x + offset) / itemWidth);
-        handleContainerHover(idx, list);
-      }
+        const item = list[idx];
 
+        handleEquipmentHover(item);
+        handleContainerHover(item);
+      }
       prevPosition.current = position;
     },
     [
@@ -255,6 +286,7 @@ export default function useSwapDragAndDrop({
       listOne,
       listTwo,
       handleContainerHover,
+      handleEquipmentHover,
     ],
   );
 
@@ -391,5 +423,6 @@ export default function useSwapDragAndDrop({
     dragValues,
     containerPage,
     setContainerPage,
+    dragTick,
   };
 }

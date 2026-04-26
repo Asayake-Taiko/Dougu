@@ -59,6 +59,7 @@ export default function SwapGestures({
     dragValues,
     containerPage,
     setContainerPage,
+    dragTick,
   } = useSwapDragAndDrop({
     listOne,
     listTwo,
@@ -100,6 +101,7 @@ export default function SwapGestures({
               scrollOffset={topScrollOffset}
               flatListRef={topListRef}
               draggingItem={draggingItem}
+              dragTick={dragTick}
             />
           </View>
 
@@ -117,6 +119,7 @@ export default function SwapGestures({
               scrollOffset={bottomScrollOffset}
               flatListRef={bottomListRef}
               draggingItem={draggingItem}
+              dragTick={dragTick}
             />
           </View>
           <ContainerOverlay

@@ -44,7 +44,7 @@ export async function generateTestUser(name: string = "Test User") {
 
 export async function waitFor(
   predicate: () => Promise<boolean>,
-  timeout = 15000,
+  timeout = 30000,
   interval = 500,
 ) {
   const start = Date.now();

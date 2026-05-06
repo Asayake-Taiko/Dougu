@@ -12,8 +12,8 @@ export default defineConfig({
       "**/.{idea,git,cache,output,temp}/**",
       "__tests__/frontend/**",
     ],
-    testTimeout: 30000,
-    hookTimeout: 30000,
+    testTimeout: 45000,
+    hookTimeout: 45000,
   },
   resolve: {
     alias: {

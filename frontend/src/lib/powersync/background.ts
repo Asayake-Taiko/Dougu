@@ -39,13 +39,6 @@ defineTask(POWERSYNC_BACKGROUND_TASK, async () => {
     }
 
     Logger.info("Background sync completed successfully");
-    await scheduleNotificationAsync({
-      content: {
-        title: "Sync Success",
-        body: "Background sync completed successfully.",
-      },
-      trigger: null,
-    });
     return BackgroundTaskResult.Success;
   } catch (error) {
     Logger.error("Background sync failed:", error);

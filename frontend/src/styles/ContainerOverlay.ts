@@ -1,7 +1,7 @@
 import { StyleSheet, Dimensions } from "react-native";
 import { Colors, Spacing } from "./global";
 
-const { width: windowWidth } = Dimensions.get("window");
+const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
 export const ContainerOverlayStyles = StyleSheet.create({
   backDrop: {
@@ -17,16 +17,16 @@ export const ContainerOverlayStyles = StyleSheet.create({
     justifyContent: "flex-start",
     width: "100%",
     alignItems: "center",
-    height: 130, // Fixed height to keep rows at the top
+    height: 120, // Fixed height to keep rows at the top
   },
   equipmentItemContainer: {
     width: "33.33%",
     alignItems: "center",
   },
   itemContainer: {
-    marginTop: Spacing.xs,
+    marginTop: 0,
     width: "85%",
-    height: 500,
+    height: windowHeight * 0.55,
     borderRadius: Spacing.lg,
   },
   itemPage: {
@@ -35,8 +35,8 @@ export const ContainerOverlayStyles = StyleSheet.create({
     width: windowWidth * 0.85,
     height: "100%",
     paddingHorizontal: Spacing.sm,
-    paddingTop: 45, // (500 - 410) / 2
-    paddingBottom: 45,
+    paddingTop: 30,
+    paddingBottom: 30,
     justifyContent: "flex-start",
     gap: Spacing.sm,
   },
@@ -47,8 +47,8 @@ export const ContainerOverlayStyles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: "center",
-    height: 80, // Static height instead of dynamic
-    marginTop: 40,
+    marginTop: 20,
+    marginBottom: 20,
   },
   pagesContainer: {
     display: "flex",

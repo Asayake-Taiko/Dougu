@@ -13,12 +13,8 @@ import { Colors } from "../styles/global";
 import { PressableOpacity } from "./PressableOpacity";
 import ColorSelect from "./organization/ColorSelect";
 import { Hex } from "../types/other";
-import {
-  baseProfileMapping,
-  baseOrgMapping,
-  iconMapping,
-} from "../lib/utils/ImageMapping";
 import DisplayImage from "./DisplayImage";
+import { allMappings } from "../lib/utils/ImageMapping";
 import {
   launchImageLibraryAsync,
   launchCameraAsync,
@@ -28,6 +24,7 @@ import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import { Logger } from "../lib/utils/Logger";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { supabase } from "../lib/supabase/supabase";
+
 interface ImageEditingOverlayProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
@@ -37,6 +34,12 @@ interface ImageEditingOverlayProps {
   hideImagePicker?: boolean;
   organizationId?: string;
 }
+
+const defaultsMapping = {
+  default_profile: allMappings.default_profile,
+  default_org: allMappings.default_org,
+  default_equipment: allMappings.default_equipment,
+};
 
 export default function ImageEditingOverlay({
   visible,
@@ -335,9 +338,7 @@ export default function ImageEditingOverlay({
                   </View>
                 </View>
 
-                {renderImageGroup("Profiles", baseProfileMapping)}
-                {renderImageGroup("Organizations", baseOrgMapping)}
-                {renderImageGroup("Items", iconMapping)}
+                {renderImageGroup("Default Images", defaultsMapping)}
               </ScrollView>
             ) : (
               <View style={styles.colorPickerContainer}>

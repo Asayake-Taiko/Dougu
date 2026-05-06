@@ -43,9 +43,9 @@ describe("DisplayImage", () => {
   });
 
   it("renders local asset when valid key is provided", () => {
-    render(<DisplayImage imageKey="miku" />);
+    render(<DisplayImage imageKey="default_profile" />);
     const image = screen.getByTestId("display-image");
-    expect(image.props.source).toEqual(allMappings["miku"]);
+    expect(image.props.source).toEqual(allMappings["default_profile"]);
   });
 
   it("renders remote URI directly when key is a full URL", async () => {

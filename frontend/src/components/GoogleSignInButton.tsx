@@ -6,6 +6,9 @@ import { PressableOpacity } from "./PressableOpacity";
 import GoogleIcon from "../assets/google.png";
 import { Logger } from "../lib/utils/Logger";
 import { useModal } from "../lib/context/ModalContext";
+import { File, Paths } from "expo-file-system";
+import { uploadImage } from "../lib/supabase/storage";
+import { authService } from "../lib/services/auth";
 
 export default function GoogleSignInButton() {
   const { setMessage } = useModal();
@@ -21,11 +24,47 @@ export default function GoogleSignInButton() {
       const userInfo = await GoogleSignin.signIn();
       const idToken = userInfo.data?.idToken;
       if (!idToken) return;
-      const { error } = await supabase.auth.signInWithIdToken({
+      const { data, error } = await supabase.auth.signInWithIdToken({
         provider: "google",
         token: idToken,
       });
       if (error) throw error;
+
+      // Handle first-time Google signup profile picture upload
+      const googlePhotoUrl = userInfo.data?.user.photo;
+
+      // Determine if this is a brand new user by comparing creation and last sign-in timestamps
+      const isNewUser =
+        data.user &&
+        data.user.last_sign_in_at &&
+        new Date(data.user.last_sign_in_at).getTime() -
+          new Date(data.user.created_at).getTime() <
+          5000;
+
+      if (isNewUser && googlePhotoUrl) {
+        // Upload the Google photo if it's their very first time signing up.
+        try {
+          const file = new File(
+            Paths.cache,
+            `google_profile_${data.user.id}.png`,
+          );
+          const downloadedFile = await File.downloadFileAsync(
+            googlePhotoUrl,
+            file,
+          );
+
+          const finalImageKey = await uploadImage(
+            downloadedFile.uri,
+            `profiles/${data.user.id}/profile.png`,
+          );
+
+          await authService.updateProfile(finalImageKey, Colors.primary);
+        } catch (uploadError: any) {
+          Logger.error(
+            "Failed to upload Google profile photo: " + uploadError.message,
+          );
+        }
+      }
     } catch (error: any) {
       setMessage(error.message || "An error occurred");
       Logger.error(error.message);

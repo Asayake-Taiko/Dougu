@@ -24,7 +24,7 @@ import { system } from "../powersync/System";
 import useAnimateOverlay from "./useAnimateOverlay";
 import { Logger } from "../utils/Logger";
 
-const { width: windowWidth } = Dimensions.get("window");
+const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
 interface UseSwapDragAndDropProps {
   listOne: Item[];
@@ -144,18 +144,16 @@ export default function useSwapDragAndDrop({
       const x = e.absoluteX;
       const y = e.absoluteY;
 
-      const containerTop = 125 + headerHeight;
-      const overlayHeight = 500;
-      const gridHeight = 410; // 3 * 130 + 2 * 10 (gap)
-      const verticalAdjustment = (overlayHeight - gridHeight) / 2;
-      const gridStartY = containerTop + verticalAdjustment;
+      const containerTop = 78 + headerHeight;
+      const gridStartY = containerTop + 30; // paddingTop in itemPage style is 30
+      const gridHeight = 380; // 3 * 120 + 2 * 10 (gap)
 
       const containerWidth = 0.85 * windowWidth;
       const containerStartX = (windowWidth - containerWidth) / 2;
       const padding = 10;
       const gridStartX = containerStartX + padding;
 
-      const rowHeight = 130;
+      const rowHeight = 120;
       const rowGap = 10;
       const colWidth = (containerWidth - 2 * padding) / 3;
 
@@ -299,8 +297,8 @@ export default function useSwapDragAndDrop({
       const x = e.absoluteX;
       const y = e.absoluteY;
 
-      const containerTop = 125 + headerHeight;
-      const overlayHeight = 500;
+      const containerTop = 78 + headerHeight;
+      const overlayHeight = windowHeight * 0.55;
 
       const startX = 0.075 * windowWidth;
       const endX = 0.925 * windowWidth;

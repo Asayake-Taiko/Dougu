@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, Platform } from "react-native";
 import { AuthStyles } from "../../styles/AuthStyles";
 import { PressableOpacity } from "../../components/PressableOpacity";
 import { LandingScreenNavigationProp } from "../../types/navigation";
 import { useModal } from "../../lib/context/ModalContext";
 import { Colors } from "../../styles/global";
 import GoogleSignInButton from "../../components/GoogleSignInButton";
+import AppleSignInButton from "../../components/AppleSignInButton";
 
 export default function LandingScreen({
   navigation,
@@ -48,6 +49,7 @@ export default function LandingScreen({
       </View>
 
       <GoogleSignInButton />
+      {Platform.OS === "ios" && <AppleSignInButton />}
 
       <View style={AuthStyles.signInContainer}>
         <Text style={AuthStyles.footerText}>Already have an account?</Text>

@@ -14,6 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dougu.app",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
@@ -22,7 +23,9 @@
         ],
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
-        }
+        },
+        "NSCameraUsageDescription": "This app requires access to your camera to capture and upload photos of your equipment to your inventory.",
+        "NSPhotoLibraryUsageDescription": "This app requires access to your photo library to select and upload photos of your equipment to your inventory."
       }
     },
     "android": {
